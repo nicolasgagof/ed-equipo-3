@@ -6,6 +6,9 @@
 <title>RecoRun · Recompensas por correr</title>
 <meta name="description" content="Prototipo clicable de RecoRun: gana recompensas por cada kilómetro que corres.">
 <link rel="icon" type="image/svg+xml" href="icono.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0E1508">
 <style>
   :root {
     --lima: #C6F432;
@@ -512,6 +515,23 @@
     gracias.hidden = false;
     gracias.focus();
   });
+
+  // App instalable: el service worker («red primero») mantiene la app al día.
+  if ('serviceWorker' in navigator) {
+    var habiaVersion = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      // Si había una versión anterior, recargamos una vez para mostrar la nueva.
+      if (habiaVersion) window.location.reload();
+      habiaVersion = true;
+    });
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').then(function (registro) {
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible') registro.update();
+        });
+      });
+    });
+  }
 </script>
 </body>
 </html>
