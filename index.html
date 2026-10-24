@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RecoRun · Recompensas por correr</title>
 <meta name="description" content="Prototipo clicable de RecoRun: gana recompensas por cada kilómetro que corres.">
+<link rel="icon" type="image/svg+xml" href="icono.svg">
 <style>
   :root {
     --lima: #C6F432;
@@ -68,10 +69,12 @@
     background: var(--noche); color: #fff;
   }
   .marca {
+    display: flex; align-items: center; gap: 8px;
     margin: 0; font-size: 1.25rem; font-weight: 900; font-style: italic;
     text-transform: uppercase; letter-spacing: .02em;
   }
-  .marca span { color: var(--lima); }
+  .marca .run { color: var(--lima); }
+  .marca img { width: 36px; height: 36px; border-radius: 9px; box-shadow: 0 0 0 1px #2D3A1F; }
   .saldo {
     margin: 0; font-size: .8rem; text-align: right; color: #E8EEDD;
   }
@@ -264,7 +267,7 @@
 
 <div class="movil">
   <header class="cabecera">
-    <h1 class="marca">Reco<span>Run</span></h1>
+    <h1 class="marca"><img src="icono.svg" alt="" width="36" height="36"><span>Reco<span class="run">Run</span></span></h1>
     <p class="saldo">Tus tokens <strong>[DATO PENDIENTE]</strong></p>
   </header>
 
