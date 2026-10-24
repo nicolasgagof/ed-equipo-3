@@ -40,6 +40,10 @@
     background: var(--lima); color: var(--tinta-lima); padding: 8px 12px; z-index: 100;
   }
   .salto:focus { left: 8px; top: 8px; }
+  .solo-lector {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
   :focus-visible { outline: 3px solid var(--verde); outline-offset: 2px; }
   .hero :focus-visible, .barra :focus-visible { outline-color: var(--lima); }
 
@@ -85,7 +89,6 @@
 
   main { flex: 1; overflow-y: auto; }
   .pantalla { padding-bottom: 24px; }
-  .pantalla[hidden] { display: none; }
 
   .hero {
     background: var(--noche); color: #fff;
@@ -99,8 +102,7 @@
   }
   .hero h2:focus { outline: none; }
   .hero p { margin: 0 0 16px; font-size: 1.1rem; color: #F1F5EA; }
-  .hero ul { margin: 0 0 16px; padding: 0; list-style: none; color: #F1F5EA; }
-  .hero li { padding: 2px 0; }
+  .hero .volver { margin-bottom: 8px; }
 
   .boton {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -113,8 +115,16 @@
   }
   .boton:hover { background: #D4FA55; }
   .boton:active { transform: scale(.98); }
-  .boton-secundario { background: transparent; color: var(--verde); border: 2px solid var(--verde); }
-  .boton-secundario:hover { background: var(--lima-suave); }
+  .boton-pequeno {
+    width: auto; min-height: 40px; padding: 8px 16px; font-size: .85rem;
+  }
+  .volver {
+    display: inline-flex; align-items: center; gap: 6px;
+    min-height: 40px; padding: 6px 12px 6px 6px;
+    background: transparent; border: 0; border-radius: 999px;
+    color: var(--lima); font: inherit; font-weight: 700; cursor: pointer;
+  }
+  .volver:hover { background: #1F2A14; }
 
   .bloque { padding: 20px 16px 0; }
   .bloque > h3 {
@@ -153,6 +163,7 @@
     padding: 0 6px;
   }
   .hero .pendiente, .hero .revisar { font-size: .75rem; }
+  .nota { margin: 8px 0 0; font-size: .85rem; color: var(--gris); }
 
   .pasos { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
   .pasos li {
@@ -166,34 +177,111 @@
     background: var(--lima); color: var(--tinta-lima); font-weight: 900; font-style: italic;
   }
 
+  /* Canjes: categorías, comercios y productos */
   .comercios { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .comercios li {
+  .comercios li:last-child { grid-column: 1 / -1; }
+  .categoria {
+    width: 100%; height: 100%;
     display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
     background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio);
-    padding: 14px 8px; font-weight: 700;
+    padding: 14px 8px; font: inherit; font-weight: 700; color: var(--tinta); cursor: pointer;
+    transition: border-color .15s ease, transform .1s ease;
   }
-  .comercios li:last-child { grid-column: 1 / -1; }
+  .categoria:hover { border-color: var(--verde); }
+  .categoria:active { transform: scale(.98); }
   .icono {
     width: 52px; height: 52px; border-radius: 50%;
     display: grid; place-items: center; background: var(--lima-suave); color: var(--verde);
   }
   .icono svg { width: 26px; height: 26px; }
 
-  .aviso {
-    margin-top: 16px; padding: 16px;
-    background: #fff; color: var(--tinta); border-radius: var(--radio);
-    display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: center;
+  .lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .fila {
+    width: 100%;
+    display: grid; grid-template-columns: 44px 1fr 20px; gap: 12px; align-items: center;
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 12px; text-align: left; font: inherit; color: var(--tinta); cursor: pointer;
   }
-  .aviso[hidden] { display: none; }
-  .hero .aviso p { margin: 0; font-size: .95rem; color: var(--tinta); }
+  .fila:hover { border-color: var(--verde); }
+  .fila strong { display: block; }
+  .fila small { color: var(--gris); }
+  .fila .icono { width: 44px; height: 44px; }
+  .fila .icono svg { width: 22px; height: 22px; }
+  .fila .flecha { width: 20px; height: 20px; color: var(--verde); }
+
+  .producto { display: grid; gap: 10px; }
+  .producto-cabeza { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; }
+  .producto-foto {
+    width: 56px; height: 56px; border-radius: 12px;
+    display: grid; place-items: center;
+    background: repeating-linear-gradient(45deg, var(--lima-suave) 0 8px, #F3FCD6 8px 16px);
+    border: 2px dashed var(--verde); color: var(--verde);
+  }
+  .producto-foto svg { width: 24px; height: 24px; }
+  .producto h4 { margin: 0; font-size: 1rem; }
+  .producto p { margin: 0; font-size: .9rem; color: var(--gris); }
+  .producto .boton { justify-self: start; }
+
+  .aviso {
+    padding: 12px; border-radius: 12px;
+    background: var(--noche); color: #fff;
+    display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center;
+  }
+  .hero .aviso { margin-top: 16px; background: #fff; color: var(--tinta); padding: 16px; border-radius: var(--radio); grid-template-columns: 72px 1fr; }
+  .aviso p { margin: 0; font-size: .9rem; color: inherit; }
+  .hero .aviso p { color: var(--tinta); font-size: .95rem; }
   .qr {
-    width: 72px; height: 72px; border-radius: 8px;
+    width: 64px; height: 64px; border-radius: 8px;
     background:
-      conic-gradient(var(--tinta) 25%, transparent 0 50%, var(--tinta) 0 75%, transparent 0) 0 0 / 18px 18px,
+      conic-gradient(var(--tinta) 25%, transparent 0 50%, var(--tinta) 0 75%, transparent 0) 0 0 / 16px 16px,
       #fff;
-    border: 4px solid var(--tinta);
+    border: 4px solid #fff; outline: 2px solid var(--tinta);
+  }
+  .hero .qr { width: 72px; height: 72px; background-size: 18px 18px; border: 4px solid var(--tinta); outline: 0; }
+
+  /* Mapa ilustrado */
+  .mapa {
+    position: relative; margin: 0;
+    aspect-ratio: 1 / 1.05;
+    border-radius: var(--radio); overflow: hidden;
+    border: 1px solid var(--borde);
+    background: #EEF2E4;
+  }
+  .mapa > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .pin {
+    position: absolute; transform: translate(-50%, -100%);
+    width: 34px; height: 42px; padding: 0; border: 0; background: none; cursor: pointer;
+  }
+  .pin svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
+  .pin span {
+    position: absolute; top: 6px; left: 0; right: 0;
+    text-align: center; font-weight: 900; font-size: .8rem; color: var(--tinta-lima);
+  }
+  .pin.destacado svg { transform: scale(1.2); transform-origin: 50% 100%; }
+  .yo {
+    position: absolute; left: 50%; top: 52%;
+    width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%;
+    background: #1F6FEB; border: 3px solid #fff; box-shadow: 0 0 0 0 rgba(31,111,235,.5);
+    animation: latido 2s infinite;
+  }
+  .yo-etiqueta {
+    position: absolute; left: 50%; top: 52%; transform: translate(-50%, 12px);
+    background: #fff; border-radius: 999px; padding: 0 8px; font-size: .75rem; font-weight: 800;
+  }
+  @keyframes latido {
+    0% { box-shadow: 0 0 0 0 rgba(31,111,235,.5); }
+    70% { box-shadow: 0 0 0 16px rgba(31,111,235,0); }
+    100% { box-shadow: 0 0 0 0 rgba(31,111,235,0); }
+  }
+  .estado-ubicacion { margin: 10px 0 0; font-size: .9rem; color: var(--gris); }
+  .lista-mapa .fila { grid-template-columns: 32px 1fr 20px; }
+  .numero {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--lima); color: var(--tinta-lima); font-weight: 900;
   }
 
+  /* Rankings */
   .rankings { display: grid; gap: 12px; }
   .rankings h4 { margin: 0 0 8px; font-size: 1.05rem; }
   table { width: 100%; border-collapse: collapse; font-size: .95rem; }
@@ -205,47 +293,28 @@
   .categorias { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; padding: 0; list-style: none; }
   .categorias li { padding: 4px 10px; border-radius: 999px; background: var(--lima-suave); font-weight: 700; font-size: .9rem; }
 
-  .grafico {
-    display: flex; align-items: flex-end; justify-content: space-between; gap: 10px;
-    height: 180px; padding: 8px 4px 0;
-    border-bottom: 2px solid var(--tinta);
+  /* Evolución */
+  .periodos {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+    padding: 4px; margin-bottom: 12px;
+    background: var(--fondo); border: 1px solid var(--borde); border-radius: 999px;
   }
-  .grafico span {
-    flex: 1; border-radius: 10px 10px 0 0;
-    background: linear-gradient(180deg, var(--lima), #9BCB1A);
-    border: 2px solid var(--tinta); border-bottom: 0;
+  .periodos button {
+    min-height: 36px; border: 0; border-radius: 999px;
+    background: transparent; color: var(--gris);
+    font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer;
   }
-  .nota { margin: 8px 0 0; font-size: .85rem; color: var(--gris); }
+  .periodos button[aria-pressed="true"] { background: var(--noche); color: var(--lima); }
+  .grafico { width: 100%; height: auto; display: block; }
+  .grafico text { font-family: inherit; font-size: 11px; fill: var(--gris); }
+  .grafico .eje-titulo { font-weight: 700; fill: var(--tinta); }
+  .grafico .barra-dato { fill: var(--lima); stroke: var(--tinta); stroke-width: 1.5; }
+  .grafico .rejilla { stroke: var(--borde); stroke-width: 1; }
+  .grafico .base { stroke: var(--tinta); stroke-width: 1.5; }
 
-  .cierre { margin-top: 24px; }
-  .cierre .tarjeta { background: var(--noche); color: #fff; border: 0; }
-  .cierre h3 { color: var(--lima); }
-  .cierre p { margin: 0 0 16px; color: #F1F5EA; }
-  form { display: grid; gap: 14px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #2D3A1F; }
-  form h4 { margin: 0; font-size: 1.05rem; color: #fff; }
-  fieldset { margin: 0; padding: 0; border: 0; }
-  legend { font-weight: 700; margin-bottom: 6px; color: #fff; }
-  .opciones { display: flex; gap: 10px; }
-  .opciones label {
-    flex: 1; display: flex; align-items: center; gap: 8px;
-    padding: 10px 12px; border: 2px solid #3E4E2B; border-radius: 12px; cursor: pointer;
-  }
-  .opciones input { accent-color: var(--lima); width: 20px; height: 20px; }
-  .campo label { display: block; font-weight: 700; margin-bottom: 6px; }
-  .campo input {
-    width: 100%; min-height: 48px; padding: 10px 12px;
-    border: 2px solid #3E4E2B; border-radius: 12px; font: inherit;
-    background: #fff; color: var(--tinta);
-  }
-  .ayuda { font-size: .85rem; color: #C9D3B8; margin: 4px 0 0; }
-  .cierre .gracias {
-    margin: 20px 0 0; padding: 16px; border-radius: 12px;
-    background: var(--lima); color: var(--tinta-lima); font-weight: 700;
-  }
-  .gracias:focus { outline: 3px solid #fff; outline-offset: 2px; }
-
+  /* Barra de navegación inferior */
   .barra {
-    display: grid; grid-template-columns: repeat(4, 1fr);
+    display: grid; grid-template-columns: repeat(5, 1fr);
     background: var(--noche);
     border-top: 1px solid #2D3A1F;
     position: sticky; bottom: 0;
@@ -254,14 +323,14 @@
     display: flex; flex-direction: column; align-items: center; gap: 2px;
     min-height: 60px; padding: 8px 2px;
     background: transparent; border: 0; color: #C9D3B8;
-    font: inherit; font-size: .75rem; font-weight: 700; cursor: pointer;
+    font: inherit; font-size: .7rem; font-weight: 700; cursor: pointer;
   }
   .barra svg { width: 24px; height: 24px; }
   .barra button[aria-current="page"] { color: var(--lima); }
   .barra button[aria-current="page"] svg { filter: drop-shadow(0 0 6px rgba(198, 244, 50, .5)); }
 
   @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; scroll-behavior: auto !important; }
+    * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
   }
 </style>
 </head>
@@ -277,7 +346,7 @@
   <main id="contenido">
 
     <!-- ============ Pantalla 1 — Inicio ============ -->
-    <section class="pantalla" id="inicio" aria-labelledby="t-inicio">
+    <section class="pantalla" id="inicio" data-pestana="inicio" aria-labelledby="t-inicio">
       <!-- 1. Hero -->
       <div class="hero">
         <h2 id="t-inicio" tabindex="-1">Recompensas por correr</h2>
@@ -304,37 +373,10 @@
           <li><span class="num" aria-hidden="true">4</span><span>Mostrar QR en tienda</span></li>
         </ol>
       </div>
-
-      <!-- Cierre: CTA repetido + lista de espera -->
-      <div class="bloque cierre">
-        <div class="tarjeta">
-          <h3>Cada kilómetro cuenta <span class="revisar">[REVISAR]</span></h3>
-          <p>Sal a correr y conviértelo en premios. <span class="revisar">[REVISAR]</span></p>
-          <button class="boton" type="button" data-medir="cta-principal-final" data-ir="tienda">Accede a tus recompensas</button>
-
-          <form id="lista-espera" novalidate>
-            <h4>Apúntate a la lista de espera <span class="revisar">[REVISAR]</span></h4>
-            <fieldset>
-              <legend>¿Corres de forma habitual?</legend>
-              <div class="opciones">
-                <label><input type="radio" name="habitual" value="si" required> Sí</label>
-                <label><input type="radio" name="habitual" value="no"> No</label>
-              </div>
-            </fieldset>
-            <div class="campo">
-              <label for="email">Tu correo electrónico</label>
-              <input id="email" name="email" type="email" autocomplete="email" required aria-describedby="email-ayuda">
-              <p class="ayuda" id="email-ayuda">Solo para avisarte cuando la app esté disponible.</p>
-            </div>
-            <button class="boton" type="submit">Quiero la app <span class="revisar">[REVISAR]</span></button>
-          </form>
-          <p class="gracias" id="gracias" tabindex="-1" hidden>¡Gracias! Te avisaremos cuando RecoRun esté lista para salir a correr. <span class="revisar">[REVISAR]</span></p>
-        </div>
-      </div>
     </section>
 
     <!-- ============ Pantalla 2 — Tienda de canjes ============ -->
-    <section class="pantalla" id="tienda" aria-labelledby="t-tienda" hidden>
+    <section class="pantalla" id="tienda" data-pestana="tienda" aria-labelledby="t-tienda" hidden>
       <!-- 1. Hero -->
       <div class="hero">
         <h2 id="t-tienda" tabindex="-1">Canjea tus Tokens</h2>
@@ -350,11 +392,11 @@
       <div class="bloque">
         <h3>Comercios asociados a Recorun</h3>
         <ol class="comercios">
-          <li><span class="icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-1 3-5 4 2 3 4h3v2H3z"/><path d="M8 16l-1-4"/></svg></span>1. Tiendas deportivas</li>
-          <li><span class="icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h2a2 2 0 0 1 0 4h-2"/><path d="M8 2v3M12 2v3"/></svg></span>2. Cafeterías</li>
-          <li><span class="icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v7M8 10h8M9 21l3-7 3 7"/></svg></span>3. Locales fisioterapia</li>
-          <li><span class="icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v20M4 2v6a3 3 0 0 0 6 0V2"/><path d="M17 2c-2 2-3 5-3 8h3v12"/></svg></span>4. Restaurantes</li>
-          <li><span class="icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l6-10 4 6 3-4 5 8z"/><circle cx="17" cy="5" r="2"/></svg></span>5. Experiencias deportivas</li>
+          <li><button class="categoria" type="button" data-categoria="deporte"><span class="icono" aria-hidden="true" data-icono="deporte"></span>1. Tiendas deportivas</button></li>
+          <li><button class="categoria" type="button" data-categoria="cafe"><span class="icono" aria-hidden="true" data-icono="cafe"></span>2. Cafeterías</button></li>
+          <li><button class="categoria" type="button" data-categoria="fisio"><span class="icono" aria-hidden="true" data-icono="fisio"></span>3. Locales fisioterapia</button></li>
+          <li><button class="categoria" type="button" data-categoria="resto"><span class="icono" aria-hidden="true" data-icono="resto"></span>4. Restaurantes</button></li>
+          <li><button class="categoria" type="button" data-categoria="exper"><span class="icono" aria-hidden="true" data-icono="exper"></span>5. Experiencias deportivas</button></li>
         </ol>
       </div>
 
@@ -368,15 +410,106 @@
       </div>
     </section>
 
+    <!-- Canjes › categoría: comercios de ejemplo -->
+    <section class="pantalla" id="categoria" data-pestana="tienda" aria-labelledby="t-categoria" hidden>
+      <div class="hero">
+        <button class="volver" type="button" data-ir="tienda">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Canjes
+        </button>
+        <h2 id="t-categoria" tabindex="-1"></h2>
+        <p>Elige un comercio para ver sus productos <span class="revisar">[REVISAR]</span></p>
+      </div>
+      <div class="bloque">
+        <ul class="lista" id="lista-comercios"></ul>
+        <p class="nota">Comercios de ejemplo para el prototipo <span class="revisar">[REVISAR]</span></p>
+      </div>
+    </section>
+
+    <!-- Canjes › categoría › comercio: productos de ejemplo -->
+    <section class="pantalla" id="comercio" data-pestana="tienda" aria-labelledby="t-comercio" hidden>
+      <div class="hero">
+        <button class="volver" type="button" id="volver-categoria">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span id="volver-categoria-texto"></span>
+        </button>
+        <h2 id="t-comercio" tabindex="-1"></h2>
+        <p>Productos que puedes conseguir con tus tokens <span class="revisar">[REVISAR]</span></p>
+        <button class="boton boton-pequeno" type="button" id="ver-en-mapa">Ver en el mapa</button>
+      </div>
+      <div class="bloque">
+        <ul class="lista" id="lista-productos"></ul>
+        <p class="nota">Productos de ejemplo · Precio en tokens: <span class="pendiente">[DATO PENDIENTE]</span></p>
+      </div>
+    </section>
+
+    <!-- ============ Mapa ============ -->
+    <section class="pantalla" id="mapa" data-pestana="mapa" aria-labelledby="t-mapa" hidden>
+      <div class="hero">
+        <h2 id="t-mapa" tabindex="-1">Mapa <span class="revisar">[REVISAR]</span></h2>
+        <p>Encuentra comercios cerca de ti para canjear tus tokens <span class="revisar">[REVISAR]</span></p>
+        <button class="boton" type="button" id="boton-ubicacion" data-medir="ver-ubicacion">Mostrar mi ubicación</button>
+        <p class="estado-ubicacion" id="estado-ubicacion" role="status" style="color:#E8EEDD"></p>
+      </div>
+      <div class="bloque">
+        <figure class="mapa" aria-labelledby="mapa-pie">
+          <svg viewBox="0 0 100 105" preserveAspectRatio="none" aria-hidden="true">
+            <rect width="100" height="105" fill="#EEF2E4"/>
+            <path d="M58 8 h28 v26 h-28z" fill="#CFE8A8"/>
+            <path d="M6 66 h22 v18 h-22z" fill="#CFE8A8"/>
+            <path d="M0 92 C20 84 40 100 60 92 S90 86 100 90 V105 H0z" fill="#BFDDF2"/>
+            <g stroke="#FFFFFF" stroke-linecap="round">
+              <path d="M0 22 H100 M0 50 H100 M0 76 H100" stroke-width="5"/>
+              <path d="M18 0 V105 M46 0 V105 M74 0 V105" stroke-width="5"/>
+              <path d="M0 98 L100 4" stroke-width="7"/>
+              <path d="M32 0 V50 M60 50 V105 M88 22 V76 M0 36 H46 M74 64 H100" stroke-width="2.5"/>
+            </g>
+          </svg>
+          <div id="pines"></div>
+          <div class="yo" aria-hidden="true"></div>
+          <div class="yo-etiqueta" aria-hidden="true">Tú</div>
+          <figcaption id="mapa-pie" class="solo-lector">Mapa ilustrativo con tu posición en el centro y comercios de ejemplo alrededor.</figcaption>
+        </figure>
+        <p class="nota">Mapa ilustrativo, no real <span class="revisar">[REVISAR]</span></p>
+      </div>
+      <div class="bloque">
+        <h3>Comercios cerca de ti</h3>
+        <ol class="lista lista-mapa" id="lista-mapa"></ol>
+      </div>
+    </section>
+
+    <!-- ============ Pantalla 4 — Evolución personal ============ -->
+    <section class="pantalla" id="evolucion" data-pestana="evolucion" aria-labelledby="t-evolucion" hidden>
+      <!-- 1. Hero -->
+      <div class="hero">
+        <h2 id="t-evolucion" tabindex="-1">Evolución Personal</h2>
+        <p>Mira tu evolución en el tiempo</p>
+        <button class="boton" type="button" data-medir="ver-historial" data-bajar="t-grafico">Ver historial</button>
+      </div>
+
+      <!-- 2. Tarjetas / listado -->
+      <div class="bloque">
+        <h3 id="t-grafico" tabindex="-1">EVOLUCIÓN</h3>
+        <div class="tarjeta">
+          <div class="periodos" role="group" aria-label="Agrupar kilómetros por">
+            <button type="button" data-periodo="dias" aria-pressed="true">Días</button>
+            <button type="button" data-periodo="semanas" aria-pressed="false">Semanas</button>
+            <button type="button" data-periodo="meses" aria-pressed="false">Meses</button>
+            <button type="button" data-periodo="anios" aria-pressed="false">Años</button>
+          </div>
+          <svg class="grafico" id="grafico" viewBox="0 0 320 220" role="img" aria-labelledby="grafico-titulo">
+            <title id="grafico-titulo">Kilómetros corridos</title>
+          </svg>
+          <table class="solo-lector" id="grafico-tabla"></table>
+          <p class="nota">Datos de ejemplo, no reales · <span class="pendiente">[DATO PENDIENTE]</span></p>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ Pantalla 3 — Rankings ============ -->
-    <section class="pantalla" id="rankings" aria-labelledby="t-rankings" hidden>
+    <section class="pantalla" id="rankings" data-pestana="rankings" aria-labelledby="t-rankings" hidden>
       <!-- 1. Hero -->
       <div class="hero">
         <h2 id="t-rankings" tabindex="-1">Rankings</h2>
-        <ul>
-          <li>- Ranking - Madrid</li>
-          <li>- Ranking - Grupo de amigos</li>
-        </ul>
+        <p>Mira el progreso de los demás</p>
         <button class="boton" type="button" data-medir="ver-rankings" data-bajar="t-listado">Ver rankings</button>
       </div>
 
@@ -420,30 +553,6 @@
         </div>
       </div>
     </section>
-
-    <!-- ============ Pantalla 4 — Evolución personal ============ -->
-    <section class="pantalla" id="evolucion" aria-labelledby="t-evolucion" hidden>
-      <!-- 1. Hero -->
-      <div class="hero">
-        <h2 id="t-evolucion" tabindex="-1">Evolución Personal</h2>
-        <p>Mira tu evolución en el tiempo</p>
-        <button class="boton" type="button" data-medir="ver-historial" data-bajar="t-grafico">Ver historial</button>
-      </div>
-
-      <!-- 2. Tarjetas / listado -->
-      <div class="bloque">
-        <h3 id="t-grafico" tabindex="-1">EVOLUCIÓN</h3>
-        <div class="tarjeta">
-          <div class="grafico" role="img" aria-label="Gráfico de barras de ejemplo con la evolución de tus salidas. Sin datos reales todavía.">
-            <span style="height:45%"></span>
-            <span style="height:90%"></span>
-            <span style="height:40%"></span>
-            <span style="height:75%"></span>
-          </div>
-          <p class="nota">Datos de ejemplo · <span class="pendiente">[DATO PENDIENTE]</span></p>
-        </div>
-      </div>
-    </section>
   </main>
 
   <nav class="barra" aria-label="Pantallas de la app">
@@ -453,11 +562,14 @@
     <button type="button" data-ir="tienda">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/></svg>Canjes
     </button>
-    <button type="button" data-ir="rankings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21V11H3v10zM15 21V4h-5v17zM21 21v-7h-5v7z"/></svg>Rankings
+    <button type="button" data-ir="mapa">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3L3 6v15l6-3 6 3 6-3V3l-6 3z"/><path d="M9 3v15M15 6v15"/></svg>Mapa
     </button>
     <button type="button" data-ir="evolucion">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Evolución
+    </button>
+    <button type="button" data-ir="rankings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21V11H3v10zM15 21V4h-5v17zM21 21v-7h-5v7z"/></svg>Rankings
     </button>
   </nav>
 </div>
@@ -468,14 +580,54 @@
     console.info('[medir]', evento);
   }
 
+  // ---------- Datos de ejemplo (comercios y productos ficticios) ----------
+  var ICONOS = {
+    deporte: '<path d="M3 17l5-1 3-5 4 2 3 4h3v2H3z"/><path d="M8 16l-1-4"/>',
+    cafe: '<path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h2a2 2 0 0 1 0 4h-2"/><path d="M8 2v3M12 2v3"/>',
+    fisio: '<circle cx="12" cy="5" r="2"/><path d="M12 7v7M8 10h8M9 21l3-7 3 7"/>',
+    resto: '<path d="M7 2v20M4 2v6a3 3 0 0 0 6 0V2"/><path d="M17 2c-2 2-3 5-3 8h3v12"/>',
+    exper: '<path d="M3 20l6-10 4 6 3-4 5 8z"/><circle cx="17" cy="5" r="2"/>'
+  };
+  function icono(id) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICONOS[id] + '</svg>';
+  }
+  var FLECHA = '<svg class="flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
+
+  var CATEGORIAS = {
+    deporte: 'Tiendas deportivas',
+    cafe: 'Cafeterías',
+    fisio: 'Locales fisioterapia',
+    resto: 'Restaurantes',
+    exper: 'Experiencias deportivas'
+  };
+  // x / y: posición en el mapa ilustrativo (en %)
+  var COMERCIOS = [
+    { id: 'dep-a', cat: 'deporte', nombre: 'Tienda deportiva A', x: 24, y: 30, productos: ['Calcetines técnicos de running', 'Gorra transpirable', 'Botella de agua reutilizable'] },
+    { id: 'dep-b', cat: 'deporte', nombre: 'Tienda deportiva B', x: 70, y: 16, productos: ['Cinta para la cabeza', 'Cinturón portamóvil', 'Camiseta técnica'] },
+    { id: 'caf-a', cat: 'cafe', nombre: 'Cafetería A', x: 38, y: 64, productos: ['Café con leche', 'Zumo natural', 'Tostada con tomate'] },
+    { id: 'caf-b', cat: 'cafe', nombre: 'Cafetería B', x: 80, y: 70, productos: ['Batido de frutas', 'Café solo', 'Bebida isotónica'] },
+    { id: 'fis-a', cat: 'fisio', nombre: 'Centro de fisioterapia A', x: 12, y: 46, productos: ['Masaje de descarga', 'Sesión de estiramientos', 'Vendaje neuromuscular'] },
+    { id: 'res-a', cat: 'resto', nombre: 'Restaurante A', x: 60, y: 42, productos: ['Menú post-carrera', 'Ensalada completa', 'Plato de pasta'] },
+    { id: 'res-b', cat: 'resto', nombre: 'Restaurante B', x: 30, y: 86, productos: ['Bowl de arroz y pollo', 'Tortilla de patatas', 'Postre de yogur'] },
+    { id: 'exp-a', cat: 'exper', nombre: 'Club de carrera A', x: 88, y: 44, productos: ['Clase de técnica de carrera', 'Salida en grupo guiada', 'Inscripción a una carrera popular'] }
+  ];
+  function comercioPorId(id) {
+    return COMERCIOS.filter(function (c) { return c.id === id; })[0];
+  }
+
+  // ---------- Navegación entre pantallas ----------
   var pantallas = document.querySelectorAll('.pantalla');
   var pestanas = document.querySelectorAll('.barra button');
   var contenido = document.getElementById('contenido');
 
   function mostrar(id) {
-    pantallas.forEach(function (p) { p.hidden = p.id !== id; });
+    var pestana = 'inicio';
+    pantallas.forEach(function (p) {
+      p.hidden = p.id !== id;
+      if (p.id === id) pestana = p.dataset.pestana;
+    });
     pestanas.forEach(function (b) {
-      if (b.dataset.ir === id) b.setAttribute('aria-current', 'page');
+      if (b.dataset.ir === pestana) b.setAttribute('aria-current', 'page');
       else b.removeAttribute('aria-current');
     });
     contenido.scrollTop = 0;
@@ -490,11 +642,74 @@
     if (!b) return;
     if (b.dataset.medir) medir(b.dataset.medir);
     if (b.dataset.ir) mostrar(b.dataset.ir);
+    if (b.dataset.categoria) abrirCategoria(b.dataset.categoria);
+    if (b.dataset.comercio) abrirComercio(b.dataset.comercio);
     if (b.dataset.bajar) {
       var destino = document.getElementById(b.dataset.bajar);
       destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
       destino.focus({ preventScroll: true });
     }
+  });
+
+  document.querySelectorAll('[data-icono]').forEach(function (el) {
+    el.innerHTML = icono(el.dataset.icono);
+  });
+
+  // ---------- Canjes: categoría → comercios → productos ----------
+  var comercioActual = null;
+
+  function abrirCategoria(cat) {
+    document.getElementById('t-categoria').textContent = CATEGORIAS[cat];
+    var lista = document.getElementById('lista-comercios');
+    lista.innerHTML = '';
+    COMERCIOS.filter(function (c) { return c.cat === cat; }).forEach(function (c) {
+      var li = document.createElement('li');
+      li.innerHTML = '<button class="fila" type="button" data-comercio="' + c.id + '">' +
+        '<span class="icono" aria-hidden="true">' + icono(c.cat) + '</span>' +
+        '<span><strong>' + c.nombre + '</strong><small>' + c.productos.length + ' productos</small></span>' + FLECHA + '</button>';
+      lista.appendChild(li);
+    });
+    medir('categoria-' + cat);
+    mostrar('categoria');
+  }
+
+  function abrirComercio(id) {
+    var c = comercioPorId(id);
+    comercioActual = c;
+    document.getElementById('t-comercio').textContent = c.nombre;
+    document.getElementById('volver-categoria-texto').textContent = CATEGORIAS[c.cat];
+    var lista = document.getElementById('lista-productos');
+    lista.innerHTML = '';
+    c.productos.forEach(function (nombre, i) {
+      var idAviso = 'aviso-' + c.id + '-' + i;
+      var li = document.createElement('li');
+      li.className = 'tarjeta producto';
+      li.innerHTML =
+        '<div class="producto-cabeza">' +
+          '<span class="producto-foto" role="img" aria-label="Foto del producto pendiente">' + icono(c.cat) + '</span>' +
+          '<div><h4>' + nombre + '</h4><p>Tokens: —</p></div>' +
+        '</div>' +
+        '<button class="boton boton-pequeno" type="button" data-canje="' + idAviso + '" aria-controls="' + idAviso + '" aria-expanded="false">Canjear</button>' +
+        '<div class="aviso" id="' + idAviso + '" role="status" hidden>' +
+          '<div class="qr" role="img" aria-label="Código QR de ejemplo, no funcional"></div>' +
+          '<p>Canje simulado: muestra este QR en ' + c.nombre + '. <span class="revisar">[REVISAR]</span></p>' +
+        '</div>';
+      lista.appendChild(li);
+    });
+    medir('comercio-' + c.id);
+    mostrar('comercio');
+  }
+
+  document.getElementById('volver-categoria').addEventListener('click', function () {
+    if (comercioActual) abrirCategoria(comercioActual.cat);
+  });
+
+  document.getElementById('lista-productos').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-canje]');
+    if (!b) return;
+    medir('canjear-producto');
+    document.getElementById(b.dataset.canje).hidden = false;
+    b.setAttribute('aria-expanded', 'true');
   });
 
   var botonCanjear = document.getElementById('boton-canjear');
@@ -504,17 +719,113 @@
     botonCanjear.setAttribute('aria-expanded', 'true');
   });
 
-  var formulario = document.getElementById('lista-espera');
-  var gracias = document.getElementById('gracias');
-  formulario.addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (!formulario.reportValidity()) return;
-    // Sprint B: enviar la respuesta al medidor del curso.
-    medir('lista-espera-enviada');
-    formulario.hidden = true;
-    gracias.hidden = false;
-    gracias.focus();
+  // ---------- Mapa ilustrativo ----------
+  var PIN = '<svg viewBox="0 0 34 42" aria-hidden="true"><path d="M17 41C17 41 32 26 32 16A15 15 0 0 0 2 16C2 26 17 41 17 41Z" fill="#C6F432" stroke="#0E1508" stroke-width="2.5"/></svg>';
+  var pines = document.getElementById('pines');
+  var listaMapa = document.getElementById('lista-mapa');
+  COMERCIOS.forEach(function (c, i) {
+    var pin = document.createElement('button');
+    pin.type = 'button';
+    pin.className = 'pin';
+    pin.style.left = c.x + '%';
+    pin.style.top = c.y + '%';
+    pin.dataset.comercio = c.id;
+    pin.setAttribute('aria-label', (i + 1) + '. ' + c.nombre + ', ' + CATEGORIAS[c.cat]);
+    pin.innerHTML = PIN + '<span aria-hidden="true">' + (i + 1) + '</span>';
+    pines.appendChild(pin);
+
+    var li = document.createElement('li');
+    li.innerHTML = '<button class="fila" type="button" data-comercio="' + c.id + '">' +
+      '<span class="numero" aria-hidden="true">' + (i + 1) + '</span>' +
+      '<span><strong>' + c.nombre + '</strong><small>' + CATEGORIAS[c.cat] + '</small></span>' + FLECHA + '</button>';
+    listaMapa.appendChild(li);
   });
+
+  document.getElementById('ver-en-mapa').addEventListener('click', function () {
+    mostrar('mapa');
+    pines.querySelectorAll('.pin').forEach(function (p) {
+      p.classList.toggle('destacado', comercioActual && p.dataset.comercio === comercioActual.id);
+    });
+    var pin = pines.querySelector('.destacado');
+    if (pin) pin.focus();
+  });
+
+  // La ubicación se usa solo en el navegador: no se guarda ni se envía a ningún sitio.
+  var estadoUbicacion = document.getElementById('estado-ubicacion');
+  document.getElementById('boton-ubicacion').addEventListener('click', function () {
+    if (!('geolocation' in navigator)) {
+      estadoUbicacion.textContent = 'Tu navegador no permite mostrar la ubicación.';
+      return;
+    }
+    estadoUbicacion.textContent = 'Buscando tu ubicación…';
+    navigator.geolocation.getCurrentPosition(function () {
+      estadoUbicacion.textContent = 'Te hemos ubicado: eres el punto azul. Tu ubicación no sale de tu móvil.';
+    }, function () {
+      estadoUbicacion.textContent = 'No hemos podido ubicarte. Te mostramos un mapa de ejemplo.';
+    }, { timeout: 10000 });
+  });
+
+  // ---------- Gráfico de evolución (datos de ejemplo) ----------
+  var PERIODOS = {
+    dias: { eje: 'Días', etiquetas: ['L', 'M', 'X', 'J', 'V', 'S', 'D'], km: [5, 0, 7, 3, 0, 12, 6] },
+    semanas: { eje: 'Semanas', etiquetas: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'], km: [18, 25, 12, 30, 22, 28] },
+    meses: { eje: 'Meses', etiquetas: ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'], km: [60, 72, 85, 90, 64, 40, 35, 50, 88, 95, 80, 70] },
+    anios: { eje: 'Años', etiquetas: ['2023', '2024', '2025', '2026'], km: [310, 420, 510, 380] }
+  };
+  var NOMBRES_MES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  var NOMBRES_DIA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+
+  function escalaBonita(max) {
+    var paso = Math.pow(10, Math.floor(Math.log10(max / 4)));
+    [1, 2, 2.5, 5, 10].some(function (m) { if (max / (paso * m) <= 4) { paso = paso * m; return true; } });
+    return paso;
+  }
+
+  function dibujarGrafico(periodo) {
+    var d = PERIODOS[periodo];
+    var svg = document.getElementById('grafico');
+    var W = 320, H = 220, izq = 40, der = 8, arriba = 22, abajo = 40;
+    var ancho = W - izq - der, alto = H - arriba - abajo;
+    var paso = escalaBonita(Math.max.apply(null, d.km));
+    var tope = Math.ceil(Math.max.apply(null, d.km) / paso) * paso;
+    var html = '<title id="grafico-titulo">Kilómetros corridos por ' + d.eje.toLowerCase() + ' (datos de ejemplo)</title>';
+
+    for (var v = 0; v <= tope; v += paso) {
+      var y = arriba + alto - (v / tope) * alto;
+      html += '<line class="rejilla" x1="' + izq + '" x2="' + (W - der) + '" y1="' + y + '" y2="' + y + '"/>';
+      html += '<text x="' + (izq - 6) + '" y="' + (y + 4) + '" text-anchor="end">' + v + '</text>';
+    }
+    var hueco = ancho / d.km.length, anchoBarra = Math.min(28, hueco * 0.62);
+    d.km.forEach(function (km, i) {
+      var h = (km / tope) * alto;
+      var x = izq + hueco * i + (hueco - anchoBarra) / 2;
+      html += '<rect class="barra-dato" x="' + x + '" y="' + (arriba + alto - h) + '" width="' + anchoBarra + '" height="' + h + '" rx="3"/>';
+      html += '<text x="' + (x + anchoBarra / 2) + '" y="' + (arriba + alto + 16) + '" text-anchor="middle">' + d.etiquetas[i] + '</text>';
+    });
+    html += '<line class="base" x1="' + izq + '" x2="' + (W - der) + '" y1="' + (arriba + alto) + '" y2="' + (arriba + alto) + '"/>';
+    html += '<text class="eje-titulo" x="' + izq + '" y="12" text-anchor="end">km</text>';
+    html += '<text class="eje-titulo" x="' + (izq + ancho / 2) + '" y="' + (H - 4) + '" text-anchor="middle">' + d.eje + '</text>';
+    svg.innerHTML = html;
+
+    // Tabla equivalente para lectores de pantalla
+    var nombres = periodo === 'dias' ? NOMBRES_DIA : periodo === 'meses' ? NOMBRES_MES : d.etiquetas;
+    var filas = d.km.map(function (km, i) { return '<tr><th scope="row">' + nombres[i] + '</th><td>' + km + ' km</td></tr>'; }).join('');
+    document.getElementById('grafico-tabla').innerHTML =
+      '<caption>Kilómetros por ' + d.eje.toLowerCase() + ' (datos de ejemplo)</caption>' +
+      '<thead><tr><th scope="col">' + d.eje + '</th><th scope="col">Kilómetros</th></tr></thead><tbody>' + filas + '</tbody>';
+
+    document.querySelectorAll('[data-periodo]').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.periodo === periodo ? 'true' : 'false');
+    });
+  }
+
+  document.querySelectorAll('[data-periodo]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      medir('evolucion-' + b.dataset.periodo);
+      dibujarGrafico(b.dataset.periodo);
+    });
+  });
+  dibujarGrafico('dias');
 
   // App instalable: el service worker («red primero») mantiene la app al día.
   if ('serviceWorker' in navigator) {
