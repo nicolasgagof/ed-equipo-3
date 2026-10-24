@@ -9,6 +9,7 @@
   </defs>
   <rect width="64" height="64" rx="14" fill="#0E1508"/>
   <!-- La R inclinada hacia delante, como corriendo -->
+  <g transform="translate(2.6 4.7)">
   <g transform="rotate(14 32 32) translate(1 -1)">
     <g fill="none" stroke="#C6F432" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
       <!-- Pata de atrás: baja recta y se dobla hacia atrás -->
@@ -21,5 +22,6 @@
     <!-- Zapatillas encajadas al final de cada pata -->
     <use href="#zapatilla" transform="translate(16 45) rotate(38)"/>
     <use href="#zapatilla" transform="translate(41 40) rotate(-14)"/>
+  </g>
   </g>
 </svg>

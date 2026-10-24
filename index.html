@@ -221,6 +221,13 @@
   .producto h4 { margin: 0; font-size: 1rem; }
   .producto p { margin: 0; font-size: .9rem; color: var(--gris); }
   .producto .boton { justify-self: start; }
+  .producto .precio { margin-top: 2px; color: var(--tinta); font-size: .95rem; }
+  .producto .precio s { color: var(--gris); font-size: .85rem; }
+  .etiqueta-oferta {
+    display: inline-block; padding: 0 8px; border-radius: 999px;
+    background: var(--noche); color: var(--lima);
+    font-size: .8rem; font-weight: 800; text-transform: uppercase;
+  }
 
   .aviso {
     padding: 12px; border-radius: 12px;
@@ -437,7 +444,7 @@
       </div>
       <div class="bloque">
         <ul class="lista" id="lista-productos"></ul>
-        <p class="nota">Productos de ejemplo · Precio en tokens: <span class="pendiente">[DATO PENDIENTE]</span></p>
+        <p class="nota">Productos, precios y descuentos de ejemplo <span class="revisar">[REVISAR]</span></p>
       </div>
     </section>
 
@@ -601,16 +608,28 @@
     exper: 'Experiencias deportivas'
   };
   // x / y: posición en el mapa ilustrativo (en %)
+  // Productos: [nombre, precio en tokens, descuento en % (100 = gratis)]. Valores de ejemplo inventados.
   var COMERCIOS = [
-    { id: 'dep-a', cat: 'deporte', nombre: 'Tienda deportiva A', x: 24, y: 30, productos: ['Calcetines técnicos de running', 'Gorra transpirable', 'Botella de agua reutilizable'] },
-    { id: 'dep-b', cat: 'deporte', nombre: 'Tienda deportiva B', x: 70, y: 16, productos: ['Cinta para la cabeza', 'Cinturón portamóvil', 'Camiseta técnica'] },
-    { id: 'caf-a', cat: 'cafe', nombre: 'Cafetería A', x: 38, y: 64, productos: ['Café con leche', 'Zumo natural', 'Tostada con tomate'] },
-    { id: 'caf-b', cat: 'cafe', nombre: 'Cafetería B', x: 80, y: 70, productos: ['Batido de frutas', 'Café solo', 'Bebida isotónica'] },
-    { id: 'fis-a', cat: 'fisio', nombre: 'Centro de fisioterapia A', x: 12, y: 46, productos: ['Masaje de descarga', 'Sesión de estiramientos', 'Vendaje neuromuscular'] },
-    { id: 'res-a', cat: 'resto', nombre: 'Restaurante A', x: 60, y: 42, productos: ['Menú post-carrera', 'Ensalada completa', 'Plato de pasta'] },
-    { id: 'res-b', cat: 'resto', nombre: 'Restaurante B', x: 30, y: 86, productos: ['Bowl de arroz y pollo', 'Tortilla de patatas', 'Postre de yogur'] },
-    { id: 'exp-a', cat: 'exper', nombre: 'Club de carrera A', x: 88, y: 44, productos: ['Clase de técnica de carrera', 'Salida en grupo guiada', 'Inscripción a una carrera popular'] }
+    { id: 'dep-a', cat: 'deporte', nombre: 'Tienda deportiva A', x: 24, y: 30, productos: [['Calcetines técnicos de running', 120, 25], ['Gorra transpirable', 180, 0], ['Botella de agua reutilizable', 90, 50]] },
+    { id: 'dep-b', cat: 'deporte', nombre: 'Tienda deportiva B', x: 70, y: 16, productos: [['Cinta para la cabeza', 60, 0], ['Cinturón portamóvil', 150, 30], ['Camiseta técnica', 250, 25]] },
+    { id: 'caf-a', cat: 'cafe', nombre: 'Cafetería A', x: 38, y: 64, productos: [['Café con leche', 30, 100], ['Zumo natural', 45, 0], ['Tostada con tomate', 40, 50]] },
+    { id: 'caf-b', cat: 'cafe', nombre: 'Cafetería B', x: 80, y: 70, productos: [['Batido de frutas', 55, 20], ['Café solo', 25, 100], ['Bebida isotónica', 35, 0]] },
+    { id: 'fis-a', cat: 'fisio', nombre: 'Centro de fisioterapia A', x: 12, y: 46, productos: [['Masaje de descarga', 400, 25], ['Sesión de estiramientos', 250, 0], ['Vendaje neuromuscular', 150, 40]] },
+    { id: 'res-a', cat: 'resto', nombre: 'Restaurante A', x: 60, y: 42, productos: [['Menú post-carrera', 200, 15], ['Ensalada completa', 120, 0], ['Plato de pasta', 140, 30]] },
+    { id: 'res-b', cat: 'resto', nombre: 'Restaurante B', x: 30, y: 86, productos: [['Bowl de arroz y pollo', 150, 0], ['Tortilla de patatas', 90, 20], ['Postre de yogur', 50, 100]] },
+    { id: 'exp-a', cat: 'exper', nombre: 'Club de carrera A', x: 88, y: 44, productos: [['Clase de técnica de carrera', 300, 50], ['Salida en grupo guiada', 180, 25], ['Inscripción a una carrera popular', 500, 25]] }
   ];
+
+  function precioHtml(precio, descuento) {
+    if (descuento >= 100) {
+      return '<p class="precio"><span class="etiqueta-oferta">Gratis</span> <s>' + precio + ' tokens</s></p>';
+    }
+    if (descuento > 0) {
+      var final = Math.round(precio * (100 - descuento) / 100);
+      return '<p class="precio"><strong>' + final + ' tokens</strong> <s>' + precio + '</s> <span class="etiqueta-oferta">-' + descuento + '%</span></p>';
+    }
+    return '<p class="precio"><strong>' + precio + ' tokens</strong></p>';
+  }
   function comercioPorId(id) {
     return COMERCIOS.filter(function (c) { return c.id === id; })[0];
   }
@@ -680,14 +699,15 @@
     document.getElementById('volver-categoria-texto').textContent = CATEGORIAS[c.cat];
     var lista = document.getElementById('lista-productos');
     lista.innerHTML = '';
-    c.productos.forEach(function (nombre, i) {
+    c.productos.forEach(function (p, i) {
+      var nombre = p[0];
       var idAviso = 'aviso-' + c.id + '-' + i;
       var li = document.createElement('li');
       li.className = 'tarjeta producto';
       li.innerHTML =
         '<div class="producto-cabeza">' +
           '<span class="producto-foto" role="img" aria-label="Foto del producto pendiente">' + icono(c.cat) + '</span>' +
-          '<div><h4>' + nombre + '</h4><p>Tokens: —</p></div>' +
+          '<div><h4>' + nombre + '</h4>' + precioHtml(p[1], p[2]) + '</div>' +
         '</div>' +
         '<button class="boton boton-pequeno" type="button" data-canje="' + idAviso + '" aria-controls="' + idAviso + '" aria-expanded="false">Canjear</button>' +
         '<div class="aviso" id="' + idAviso + '" role="status" hidden>' +
