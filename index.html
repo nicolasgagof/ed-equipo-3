@@ -319,6 +319,34 @@
   .grafico .rejilla { stroke: var(--borde); stroke-width: 1; }
   .grafico .base { stroke: var(--tinta); stroke-width: 1.5; }
 
+  /* Lista de espera */
+  .espera > h3 { margin: 0 0 12px; font-size: 1.2rem; font-weight: 900; font-style: italic; text-transform: uppercase; }
+  .espera form { display: grid; gap: 14px; }
+  fieldset { margin: 0; padding: 0; border: 0; }
+  legend { font-weight: 700; margin-bottom: 6px; }
+  .opciones { display: flex; gap: 10px; }
+  .opciones label {
+    flex: 1; display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border: 2px solid var(--borde); border-radius: 12px; cursor: pointer;
+  }
+  .opciones input, .consentimiento input { accent-color: var(--verde); width: 20px; height: 20px; flex: none; }
+  .campo label { display: block; font-weight: 700; margin-bottom: 6px; }
+  .campo input {
+    width: 100%; min-height: 48px; padding: 10px 12px;
+    border: 2px solid var(--borde); border-radius: 12px; font: inherit; color: var(--tinta); background: #fff;
+  }
+  .campo input:focus { border-color: var(--verde); }
+  .consentimiento { display: flex; gap: 10px; align-items: flex-start; font-size: .95rem; cursor: pointer; }
+  .privacidad { margin: -4px 0 0; font-size: .8rem; color: var(--gris); }
+  .gracias {
+    margin: 0; padding: 16px; border-radius: 12px;
+    background: var(--noche); color: var(--lima); font-weight: 700;
+  }
+  .gracias:focus { outline: 3px solid var(--verde); outline-offset: 2px; }
+
+  .pie { padding: 24px 16px 8px; text-align: center; font-size: .8rem; }
+  .pie a { color: var(--gris); }
+
   /* Barra de navegación inferior */
   .barra {
     display: grid; grid-template-columns: repeat(5, 1fr);
@@ -340,6 +368,20 @@
     * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
   }
 </style>
+<!-- Medidor del curso (Ruta ED): cuenta visitas, clics y registros. Sin cookies. No lo modifiques. -->
+<script>
+(function(){
+  var URL_MEDIDOR = "https://script.google.com/macros/s/AKfycbyPAD6pdiuWpwpiuSMKTE3Vze-vOokFalj1_R_TRq3Ydb8WS7nG2eUll4J2ky0XAlG3/exec", EQUIPO = "EQUIPO3";
+  var q = new URLSearchParams(location.search);
+  window.medir = function(evento, extra){
+    if (q.get("prueba")) { console.log("Medidor (prueba, no cuenta):", evento, extra || ""); return; }
+    var b = { a: "ev", team: EQUIPO, ev: evento, v: window.VERSION_AB || "a", src: q.get("utm_source") || "directo", camp: q.get("utm_campaign") || "" };
+    for (var k in (extra || {})) b[k] = extra[k];
+    try { fetch(URL_MEDIDOR, { method: "POST", mode: "no-cors", keepalive: true, body: JSON.stringify(b) }); } catch (e) {}
+  };
+  document.addEventListener("DOMContentLoaded", function(){ medir("visita"); });
+})();
+</script>
 </head>
 <body>
 <a class="salto" href="#contenido">Saltar al contenido</a>
@@ -358,7 +400,7 @@
       <div class="hero">
         <h2 id="t-inicio" tabindex="-1">Recompensas por correr</h2>
         <p>¿Ya saliste a correr hoy?</p>
-        <button class="boton" type="button" data-medir="cta-principal-hero" data-ir="tienda">Accede a tus recompensas</button>
+        <button class="boton" type="button" data-medir="cta" data-ir="tienda">Accede a tus recompensas</button>
       </div>
 
       <!-- 2. Imagen -->
@@ -380,6 +422,33 @@
           <li><span class="num" aria-hidden="true">4</span><span>Mostrar QR en tienda</span></li>
         </ol>
       </div>
+
+      <!-- Lista de espera (medidor del curso) -->
+      <div class="bloque">
+        <div class="tarjeta espera">
+          <h3 id="t-espera">Apúntate a la lista de espera <span class="revisar">[REVISAR]</span></h3>
+          <form id="lista-espera" aria-labelledby="t-espera" novalidate>
+            <fieldset>
+              <legend>¿Corres de forma habitual?</legend>
+              <div class="opciones">
+                <label><input type="radio" name="habitual" value="si" required> Sí</label>
+                <label><input type="radio" name="habitual" value="no"> No</label>
+              </div>
+            </fieldset>
+            <div class="campo">
+              <label for="email">Tu correo electrónico</label>
+              <input id="email" name="email" type="email" autocomplete="email" required>
+            </div>
+            <label class="consentimiento">
+              <input type="checkbox" name="consentimiento" required>
+              <span>Acepto que se use mi email para este experimento de clase.</span>
+            </label>
+            <button class="boton" type="submit">Apuntarme</button>
+            <p class="privacidad">Tu email solo se usa para este experimento, solo lo ve el profesor y se borra al terminar el curso.</p>
+          </form>
+          <p class="gracias" id="gracias" tabindex="-1" hidden>¡Gracias! Esto es un prototipo de un proyecto de clase del Máster en Marketing Digital (CEU). Si sale adelante, te avisaremos.</p>
+        </div>
+      </div>
     </section>
 
     <!-- ============ Pantalla 2 — Tienda de canjes ============ -->
@@ -388,7 +457,7 @@
       <div class="hero">
         <h2 id="t-tienda" tabindex="-1">Canjea tus Tokens</h2>
         <p>¡Es hora de obtener tu recompensa!</p>
-        <button class="boton" type="button" data-medir="canjear" id="boton-canjear" aria-controls="aviso-canje" aria-expanded="false">Canjear</button>
+        <button class="boton" type="button" id="boton-canjear" aria-controls="aviso-canje" aria-expanded="false">Canjear</button>
         <div class="aviso" id="aviso-canje" role="status" hidden>
           <div class="qr" role="img" aria-label="Código QR de ejemplo, no funcional"></div>
           <p>Canje simulado: en la app verías aquí tu QR para mostrar en tienda. <span class="revisar">[REVISAR]</span></p>
@@ -453,7 +522,7 @@
       <div class="hero">
         <h2 id="t-mapa" tabindex="-1">Mapa <span class="revisar">[REVISAR]</span></h2>
         <p>Encuentra comercios cerca de ti para canjear tus tokens <span class="revisar">[REVISAR]</span></p>
-        <button class="boton" type="button" id="boton-ubicacion" data-medir="ver-ubicacion">Mostrar mi ubicación</button>
+        <button class="boton" type="button" id="boton-ubicacion">Mostrar mi ubicación</button>
         <p class="estado-ubicacion" id="estado-ubicacion" role="status" style="color:#E8EEDD"></p>
       </div>
       <div class="bloque">
@@ -489,7 +558,7 @@
       <div class="hero">
         <h2 id="t-evolucion" tabindex="-1">Evolución Personal</h2>
         <p>Mira tu evolución en el tiempo</p>
-        <button class="boton" type="button" data-medir="ver-historial" data-bajar="t-grafico">Ver historial</button>
+        <button class="boton" type="button" data-bajar="t-grafico">Ver historial</button>
       </div>
 
       <!-- 2. Tarjetas / listado -->
@@ -517,7 +586,7 @@
       <div class="hero">
         <h2 id="t-rankings" tabindex="-1">Rankings</h2>
         <p>Mira el progreso de los demás</p>
-        <button class="boton" type="button" data-medir="ver-rankings" data-bajar="t-listado">Ver rankings</button>
+        <button class="boton" type="button" data-bajar="t-listado">Ver rankings</button>
       </div>
 
       <!-- 2. Tarjetas / listado -->
@@ -560,6 +629,9 @@
         </div>
       </div>
     </section>
+    <footer class="pie">
+      <a href="panel.html">Panel del equipo</a>
+    </footer>
   </main>
 
   <nav class="barra" aria-label="Pantallas de la app">
@@ -582,11 +654,6 @@
 </div>
 
 <script>
-  // Medición: en el Sprint B se conectará al medidor del curso. De momento no envía nada.
-  function medir(evento) {
-    console.info('[medir]', evento);
-  }
-
   // ---------- Datos de ejemplo (comercios y productos ficticios) ----------
   var ICONOS = {
     deporte: '<path d="M3 17l5-1 3-5 4 2 3 4h3v2H3z"/><path d="M8 16l-1-4"/>',
@@ -653,12 +720,12 @@
     window.scrollTo(0, 0);
     var titulo = document.querySelector('#' + id + ' h2');
     if (titulo) titulo.focus();
-    medir('pantalla-' + id);
   }
 
   document.addEventListener('click', function (e) {
     var b = e.target.closest('button');
     if (!b) return;
+    // Medidor del curso: solo cuenta los botones de CTA (data-medir="cta")
     if (b.dataset.medir) medir(b.dataset.medir);
     if (b.dataset.ir) mostrar(b.dataset.ir);
     if (b.dataset.categoria) abrirCategoria(b.dataset.categoria);
@@ -688,7 +755,6 @@
         '<span><strong>' + c.nombre + '</strong><small>' + c.productos.length + ' productos</small></span>' + FLECHA + '</button>';
       lista.appendChild(li);
     });
-    medir('categoria-' + cat);
     mostrar('categoria');
   }
 
@@ -716,7 +782,6 @@
         '</div>';
       lista.appendChild(li);
     });
-    medir('comercio-' + c.id);
     mostrar('comercio');
   }
 
@@ -727,7 +792,6 @@
   document.getElementById('lista-productos').addEventListener('click', function (e) {
     var b = e.target.closest('[data-canje]');
     if (!b) return;
-    medir('canjear-producto');
     document.getElementById(b.dataset.canje).hidden = false;
     b.setAttribute('aria-expanded', 'true');
   });
@@ -841,11 +905,22 @@
 
   document.querySelectorAll('[data-periodo]').forEach(function (b) {
     b.addEventListener('click', function () {
-      medir('evolucion-' + b.dataset.periodo);
       dibujarGrafico(b.dataset.periodo);
     });
   });
   dibujarGrafico('dias');
+
+  // ---------- Lista de espera ----------
+  var formulario = document.getElementById('lista-espera');
+  var gracias = document.getElementById('gracias');
+  formulario.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!formulario.reportValidity()) return;
+    medir('registro', { email: formulario.email.value.trim(), habitual: formulario.habitual.value });
+    formulario.hidden = true;
+    gracias.hidden = false;
+    gracias.focus();
+  });
 
   // App instalable: el service worker («red primero») mantiene la app al día.
   if ('serviceWorker' in navigator) {

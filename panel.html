@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>RecoRun · Panel del equipo</title>
+<link rel="icon" type="image/svg+xml" href="icono.svg">
+<style>
+  :root {
+    --lima: #C6F432;
+    --lima-suave: #EAFBB8;
+    --tinta: #1A1F14;
+    --tinta-lima: #111A05;
+    --noche: #0E1508;
+    --verde: #2F5A0B;
+    --fondo: #F6F9EE;
+    --tarjeta: #FFFFFF;
+    --borde: #D9E3C4;
+    --gris: #4A5240;
+    --error: #9B1C1C;
+    --radio: 16px;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px; line-height: 1.5;
+    color: var(--tinta); background: var(--fondo);
+  }
+  :focus-visible { outline: 3px solid var(--verde); outline-offset: 2px; }
+
+  .cabecera {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; background: var(--noche); color: #fff;
+  }
+  .cabecera img { width: 36px; height: 36px; border-radius: 9px; }
+  .cabecera h1 {
+    margin: 0; font-size: 1.15rem; font-weight: 900; font-style: italic; text-transform: uppercase;
+  }
+  .cabecera h1 span { color: var(--lima); }
+
+  main { max-width: 720px; margin: 0 auto; padding: 16px 16px 40px; }
+  h2 { margin: 24px 0 12px; font-size: 1.1rem; font-weight: 900; font-style: italic; text-transform: uppercase; }
+  .tarjeta {
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); padding: 16px;
+  }
+
+  form { display: grid; gap: 14px; }
+  label { display: block; font-weight: 700; margin-bottom: 6px; }
+  input {
+    width: 100%; min-height: 48px; padding: 10px 12px;
+    border: 2px solid var(--borde); border-radius: 12px; font: inherit; color: var(--tinta); background: #fff;
+  }
+  input:focus { border-color: var(--verde); }
+  .boton {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 48px; padding: 10px 20px;
+    border: 0; border-radius: 999px;
+    background: var(--lima); color: var(--tinta-lima);
+    font: inherit; font-weight: 800; text-transform: uppercase; letter-spacing: .02em; cursor: pointer;
+  }
+  .boton:hover { background: #D4FA55; }
+  .boton:disabled { opacity: .6; cursor: progress; }
+  .boton-secundario { background: transparent; color: var(--verde); border: 2px solid var(--verde); }
+  .boton-secundario:hover { background: var(--lima-suave); }
+
+  .mensaje { margin: 0; font-weight: 700; }
+  .mensaje.error { color: var(--error); }
+
+  .barra-acciones { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+  .estado { margin: 0; font-size: .85rem; color: var(--gris); }
+
+  .cifras { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 560px) { .cifras { grid-template-columns: repeat(4, 1fr); } }
+  .cifra { background: var(--noche); color: #fff; border-radius: var(--radio); padding: 14px; }
+  .cifra strong {
+    display: block; font-size: 2.2rem; line-height: 1.1; font-weight: 900; font-style: italic; color: var(--lima);
+    font-variant-numeric: tabular-nums;
+  }
+  .cifra span { font-size: .85rem; color: #E8EEDD; }
+  .tasas .cifra { background: var(--tarjeta); color: var(--tinta); border: 1px solid var(--borde); }
+  .tasas .cifra strong { color: var(--verde); }
+  .tasas .cifra span { color: var(--gris); }
+  .tasas { grid-template-columns: repeat(3, 1fr); }
+  .tasas .cifra strong { font-size: 1.35rem; white-space: nowrap; }
+
+  .tabla-envoltorio { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 4px; text-align: right; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-size: .78rem; text-transform: uppercase; color: var(--gris); }
+  abbr { text-decoration: none; }
+
+  .fechas { display: grid; gap: 4px; margin: 0; }
+  .fechas div { display: flex; justify-content: space-between; gap: 12px; }
+  .fechas dt { color: var(--gris); }
+  .fechas dd { margin: 0; font-weight: 700; text-align: right; }
+
+  .nota { margin: 20px 0 0; font-size: .9rem; color: var(--gris); }
+</style>
+</head>
+<body>
+<header class="cabecera">
+  <img src="icono.svg" alt="" width="36" height="36">
+  <h1>Reco<span>Run</span> · Panel del equipo</h1>
+</header>
+
+<main>
+  <!-- Acceso: el PIN solo se guarda en sessionStorage mientras la pestaña esté abierta -->
+  <section id="acceso" aria-labelledby="t-acceso">
+    <h2 id="t-acceso">Acceso</h2>
+    <div class="tarjeta">
+      <form id="form-acceso" novalidate>
+        <div>
+          <label for="equipo">Código de equipo</label>
+          <input id="equipo" name="equipo" value="EQUIPO3" autocomplete="off" required>
+        </div>
+        <div>
+          <label for="pin">PIN</label>
+          <input id="pin" name="pin" type="password" inputmode="numeric" autocomplete="off" required>
+        </div>
+        <button class="boton" type="submit" id="boton-entrar">Ver datos</button>
+        <p class="mensaje error" id="error-acceso" role="alert" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Datos -->
+  <section id="datos" aria-labelledby="t-datos" hidden>
+    <div class="barra-acciones">
+      <h2 id="t-datos">Resultados</h2>
+      <div style="display:flex;gap:8px">
+        <button class="boton" type="button" id="boton-actualizar">Actualizar</button>
+        <button class="boton boton-secundario" type="button" id="boton-salir">Salir</button>
+      </div>
+    </div>
+    <p class="estado" id="estado" role="status"></p>
+    <p class="mensaje error" id="error-datos" role="alert" hidden></p>
+
+    <div class="cifras" style="margin-top:12px">
+      <div class="cifra"><strong id="n-visitas">–</strong><span>Visitas</span></div>
+      <div class="cifra"><strong id="n-cta">–</strong><span>Clics en el CTA</span></div>
+      <div class="cifra"><strong id="n-registros">–</strong><span>Registros</span></div>
+      <div class="cifra"><strong id="n-premium">–</strong><span>Clics en Premium</span></div>
+    </div>
+
+    <h2>Conversión</h2>
+    <div class="cifras tasas">
+      <div class="cifra"><strong id="t-conversion">–</strong><span>Registros ÷ visitas</span></div>
+      <div class="cifra"><strong id="t-cta">–</strong><span>Clic en el CTA</span></div>
+      <div class="cifra"><strong id="t-clic-registro">–</strong><span>Clic → registro</span></div>
+    </div>
+
+    <h2>Por canal</h2>
+    <div class="tarjeta tabla-envoltorio">
+      <table>
+        <caption class="estado" style="text-align:left;padding-bottom:6px">Canal = utm_source de la URL («directo» si no lleva)</caption>
+        <thead>
+          <tr><th scope="col">Canal</th><th scope="col">Visitas</th><th scope="col">CTA</th><th scope="col">Reg.</th><th scope="col"><abbr title="Conversión: registros ÷ visitas">Conv.</abbr></th></tr>
+        </thead>
+        <tbody id="tabla-canales"></tbody>
+      </table>
+    </div>
+
+    <h2>Actividad</h2>
+    <div class="tarjeta">
+      <dl class="fechas">
+        <div><dt>Primer evento</dt><dd id="primero">–</dd></div>
+        <div><dt>Último evento</dt><dd id="ultimo">–</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <p class="nota">Estos datos también se traen a la Ruta (estación 11).</p>
+</main>
+
+<script>
+  var URL_MEDIDOR = 'https://script.google.com/macros/s/AKfycbyPAD6pdiuWpwpiuSMKTE3Vze-vOokFalj1_R_TRq3Ydb8WS7nG2eUll4J2ky0XAlG3/exec';
+  var CLAVE_EQUIPO = 'panel-equipo';
+  var CLAVE_PIN = 'panel-pin';
+
+  var acceso = document.getElementById('acceso');
+  var datos = document.getElementById('datos');
+  var formAcceso = document.getElementById('form-acceso');
+  var errorAcceso = document.getElementById('error-acceso');
+  var errorDatos = document.getElementById('error-datos');
+  var estado = document.getElementById('estado');
+  var botonEntrar = document.getElementById('boton-entrar');
+  var botonActualizar = document.getElementById('boton-actualizar');
+  var temporizador = null;
+
+  function leer(clave) { try { return sessionStorage.getItem(clave); } catch (e) { return null; } }
+  function guardar(clave, valor) { try { sessionStorage.setItem(clave, valor); } catch (e) {} }
+  function borrar(clave) { try { sessionStorage.removeItem(clave); } catch (e) {} }
+
+  // El PIN vive solo en memoria y en sessionStorage de esta pestaña; nunca en la URL.
+  var credenciales = { team: leer(CLAVE_EQUIPO), pin: leer(CLAVE_PIN) };
+
+  function numero(v) { return Number(v) || 0; }
+  function formato(n) { return numero(n).toLocaleString('es-ES'); }
+  function porcentaje(a, b) {
+    if (!numero(b)) return '–';
+    return (numero(a) / numero(b) * 100).toLocaleString('es-ES', { maximumFractionDigits: 1 }) + '\u00a0%';
+  }
+  function fecha(v) {
+    if (!v) return '–';
+    var d = new Date(v);
+    return isNaN(d) ? String(v) : d.toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+  function texto(id, valor) { document.getElementById(id).textContent = valor; }
+
+  function pedirDatos() {
+    return fetch(URL_MEDIDOR, {
+      method: 'POST',
+      body: JSON.stringify({ a: 'stats', team: credenciales.team, pin: credenciales.pin })
+    }).then(function (r) { return r.json(); });
+  }
+
+  function pintar(r) {
+    var t = r.total || {};
+    texto('n-visitas', formato(t.visita));
+    texto('n-cta', formato(t.cta));
+    texto('n-registros', formato(t.registro));
+    texto('n-premium', formato(t.premium));
+    texto('t-conversion', porcentaje(t.registro, t.visita));
+    texto('t-cta', porcentaje(t.cta, t.visita));
+    texto('t-clic-registro', porcentaje(t.registro, t.cta));
+
+    var cuerpo = document.getElementById('tabla-canales');
+    cuerpo.innerHTML = '';
+    var canales = Object.keys(r.porCanal || {}).sort(function (a, b) {
+      return numero(r.porCanal[b].visita) - numero(r.porCanal[a].visita);
+    });
+    if (!canales.length) {
+      var vacio = document.createElement('tr');
+      var celda = document.createElement('td');
+      celda.colSpan = 5;
+      celda.textContent = 'Todavía no hay datos.';
+      vacio.appendChild(celda);
+      cuerpo.appendChild(vacio);
+    }
+    canales.forEach(function (canal) {
+      var c = r.porCanal[canal] || {};
+      var fila = document.createElement('tr');
+      [canal, formato(c.visita), formato(c.cta), formato(c.registro), porcentaje(c.registro, c.visita)].forEach(function (valor, i) {
+        var celda = document.createElement(i === 0 ? 'th' : 'td');
+        if (i === 0) celda.scope = 'row';
+        celda.textContent = valor;
+        fila.appendChild(celda);
+      });
+      cuerpo.appendChild(fila);
+    });
+
+    texto('primero', fecha(r.primero));
+    texto('ultimo', fecha(r.ultimo));
+    estado.textContent = 'Actualizado a las ' + new Date().toLocaleTimeString('es-ES') + ' · se actualiza solo cada 60 segundos';
+  }
+
+  function actualizar() {
+    botonActualizar.disabled = true;
+    errorDatos.hidden = true;
+    return pedirDatos().then(function (r) {
+      if (!r.ok) {
+        if (r.error === 'pin') { salir('El PIN no coincide'); return; }
+        throw new Error(r.error || 'respuesta no válida');
+      }
+      pintar(r);
+    }).catch(function (e) {
+      errorDatos.textContent = 'No se han podido cargar los datos (' + e.message + '). Inténtalo de nuevo.';
+      errorDatos.hidden = false;
+    }).then(function () {
+      botonActualizar.disabled = false;
+    });
+  }
+
+  function entrar() {
+    acceso.hidden = true;
+    datos.hidden = false;
+    estado.textContent = 'Cargando…';
+    actualizar();
+    clearInterval(temporizador);
+    temporizador = setInterval(actualizar, 60000);
+  }
+
+  function salir(mensaje) {
+    clearInterval(temporizador);
+    credenciales.pin = null;
+    borrar(CLAVE_PIN);
+    datos.hidden = true;
+    acceso.hidden = false;
+    document.getElementById('pin').value = '';
+    errorAcceso.textContent = mensaje || '';
+    errorAcceso.hidden = !mensaje;
+    document.getElementById('pin').focus();
+  }
+
+  formAcceso.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!formAcceso.reportValidity()) return;
+    errorAcceso.hidden = true;
+    credenciales.team = formAcceso.equipo.value.trim();
+    credenciales.pin = formAcceso.pin.value;
+    botonEntrar.disabled = true;
+    pedirDatos().then(function (r) {
+      if (!r.ok) {
+        errorAcceso.textContent = r.error === 'pin' ? 'El PIN no coincide' : 'No se han podido cargar los datos (' + (r.error || 'error') + ').';
+        errorAcceso.hidden = false;
+        return;
+      }
+      guardar(CLAVE_EQUIPO, credenciales.team);
+      guardar(CLAVE_PIN, credenciales.pin);
+      formAcceso.pin.value = '';
+      entrar();
+    }).catch(function () {
+      errorAcceso.textContent = 'No hay conexión con el medidor. Inténtalo de nuevo.';
+      errorAcceso.hidden = false;
+    }).then(function () {
+      botonEntrar.disabled = false;
+    });
+  });
+
+  botonActualizar.addEventListener('click', actualizar);
+  document.getElementById('boton-salir').addEventListener('click', function () { salir(); });
+
+  if (credenciales.team) formAcceso.equipo.value = credenciales.team;
+  if (credenciales.team && credenciales.pin) entrar();
+</script>
+</body>
+</html>
