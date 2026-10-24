@@ -1,0 +1,17 @@
+# Datos y archivos con información personal: nunca se suben
+datos/
+*.csv
+*.tsv
+*.xlsx
+*.xls
+transcripciones/
+*transcripcion*
+*transcripción*
+.env
+.env.*
+*.key
+*.pem
+
+# Configuración local y archivos del sistema
+.claude/
+.DS_Store
