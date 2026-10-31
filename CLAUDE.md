@@ -46,7 +46,7 @@ Bocetos elegidos por el equipo (7), todos en la imagen ed-bocetos.jpg, numerados
 
 ## Reglas de trabajo
 - Todo en castellano de España: los textos de la página y tus explicaciones.
-- Un único archivo HTML autocontenido: HTML, CSS y JavaScript en el mismo archivo, sin frameworks ni servicios externos (sin Google Analytics, Tally, Clarity, cookies ni fuentes de terceros). Para medir usamos solo el medidor del curso que te daremos.
+- Un único archivo HTML autocontenido: HTML, CSS y JavaScript en el mismo archivo, sin frameworks ni servicios externos (sin Google Analytics, Tally, Clarity, cookies ni fuentes de terceros). Para medir usamos solo el medidor del curso que te daremos. Única excepción aprobada por el equipo: el mapa de la pantalla Mapa usa Leaflet (unpkg, versión fija con integrity) y las teselas de OpenStreetMap, con su atribución visible.
 - Responsive y mobile-first: tiene que verse bien a 375 px de ancho sin scroll horizontal.
 - Accesible: HTML semántico, contraste suficiente, texto alternativo en imágenes, labels en los formularios y navegable con teclado.
 - Sin datos personales reales: nombres y fotos ficticios o marcadores. En formularios, pide solo los datos imprescindibles.
