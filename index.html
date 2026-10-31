@@ -140,21 +140,8 @@
 
   .nota { margin: 8px 0 0; font-size: .85rem; color: var(--gris); }
 
-  .pasos { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-  .pasos li {
-    display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center;
-    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio);
-    padding: 12px;
-  }
-  .pasos .num {
-    width: 40px; height: 40px; border-radius: 50%;
-    display: grid; place-items: center;
-    background: var(--lima); color: var(--tinta-lima); font-weight: 900; font-style: italic;
-  }
-
   /* Canjes: categorías, comercios y productos */
   .comercios { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .comercios li:last-child { grid-column: 1 / -1; }
   .categoria {
     width: 100%; height: 100%;
     display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
@@ -301,6 +288,51 @@
   .grafico .rejilla { stroke: var(--borde); stroke-width: 1; }
   .grafico .base { stroke: var(--tinta); stroke-width: 1.5; }
 
+  /* Botón de empezar a correr */
+  .empezar { display: grid; justify-items: center; gap: 10px; padding-top: 28px; text-align: center; }
+  .empezar p { margin: 0; color: var(--gris); font-weight: 600; }
+  .boton-correr {
+    width: 168px; height: 168px; border-radius: 50%;
+    display: grid; place-items: center; align-content: center; gap: 6px;
+    background: var(--noche); color: var(--lima);
+    border: 6px solid var(--lima); cursor: pointer;
+    font: inherit; font-size: 1rem; font-weight: 900; font-style: italic; text-transform: uppercase;
+    box-shadow: 0 0 0 0 rgba(198, 244, 50, .6);
+    animation: llamada 2.2s infinite;
+    transition: transform .1s ease;
+  }
+  .boton-correr svg { width: 56px; height: 56px; }
+  .boton-correr:active { transform: scale(.97); }
+  .boton-correr:focus-visible { outline: 4px solid var(--verde); outline-offset: 4px; }
+  @keyframes llamada {
+    0% { box-shadow: 0 0 0 0 rgba(198, 244, 50, .6); }
+    70% { box-shadow: 0 0 0 22px rgba(198, 244, 50, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(198, 244, 50, 0); }
+  }
+
+  /* Sesión de running */
+  .sesion-hero { text-align: center; padding-bottom: 28px; }
+  .sesion-hero .volver { float: left; }
+  .sesion-hero h2 { clear: both; }
+  .hero .estado-sesion {
+    display: inline-block; margin: 4px 0 0; padding: 2px 12px; border-radius: 999px;
+    background: #1F2A14; color: var(--lima); font-size: .85rem; font-weight: 800; text-transform: uppercase;
+  }
+  .hero .crono {
+    margin: 12px 0 8px; font-size: 3.6rem; line-height: 1; font-weight: 900; font-style: italic;
+    color: #fff; font-variant-numeric: tabular-nums;
+  }
+  .metricas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 20px; }
+  .metricas div { background: #1F2A14; border-radius: 14px; padding: 10px 4px; }
+  .metricas dt { font-size: .75rem; color: #C9D3B8; text-transform: uppercase; font-weight: 700; }
+  .metricas dd { margin: 0; font-size: 1.25rem; font-weight: 900; color: var(--lima); font-variant-numeric: tabular-nums; }
+  .controles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .boton-claro { background: transparent; color: var(--lima); border: 2px solid var(--lima); }
+  .boton-claro:hover { background: #1F2A14; }
+  .resumen h3 { margin: 0 0 8px; font-size: 1.2rem; font-weight: 900; font-style: italic; text-transform: uppercase; }
+  .resumen h3:focus { outline: none; }
+  .resumen p { margin: 0 0 14px; }
+
   /* Lista de espera */
   .espera > h3 { margin: 0 0 12px; font-size: 1.2rem; font-weight: 900; font-style: italic; text-transform: uppercase; }
   .espera form { display: grid; gap: 14px; }
@@ -400,19 +432,46 @@
         </figure>
       </div>
 
-      <!-- 3. Cómo funciona -->
-      <div class="bloque">
-        <h3>Pasos para obtener recompensa</h3>
-        <ol class="pasos">
-          <li><span class="num" aria-hidden="true">1</span><span>Elegir tienda</span></li>
-          <li><span class="num" aria-hidden="true">2</span><span>Ver productos disponibles de acuerdo a la cantidad de tokens recibidos</span></li>
-          <li><span class="num" aria-hidden="true">3</span><span>Canjear tokens</span></li>
-          <li><span class="num" aria-hidden="true">4</span><span>Mostrar QR en tienda</span></li>
-        </ol>
+      <!-- Empezar una sesión de running -->
+      <div class="bloque empezar">
+        <button class="boton-correr" type="button" id="boton-empezar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+          <span>Empezar a correr</span>
+        </button>
+        <p>Cada kilómetro que corras suma 1 token</p>
+      </div>
+    </section>
+
+    <!-- ============ Sesión de running ============ -->
+    <section class="pantalla" id="sesion" data-pestana="inicio" aria-labelledby="t-sesion" hidden>
+      <div class="hero sesion-hero">
+        <button class="volver" type="button" id="salir-sesion">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Inicio
+        </button>
+        <h2 id="t-sesion" tabindex="-1">Sesión de running</h2>
+        <p class="estado-sesion" id="estado-sesion">En marcha</p>
+        <p class="crono" id="crono" role="timer" aria-live="off">00:00:00</p>
+        <dl class="metricas">
+          <div><dt>Distancia</dt><dd><span id="m-distancia">0,00</span> km</dd></div>
+          <div><dt>Ritmo</dt><dd><span id="m-ritmo">–</span> /km</dd></div>
+          <div><dt>Tokens</dt><dd id="m-tokens">0,0</dd></div>
+        </dl>
+        <div class="controles" id="controles">
+          <button class="boton boton-claro" type="button" id="boton-pausa">Pausar</button>
+          <button class="boton" type="button" id="boton-terminar">Terminar</button>
+        </div>
       </div>
 
-      <!-- Lista de espera (medidor del curso) -->
-      <div class="bloque">
+      <div class="bloque" id="resumen" hidden>
+        <div class="tarjeta resumen">
+          <h3 id="t-resumen" tabindex="-1">¡Sesión completada! 🎉</h3>
+          <p id="resumen-texto"></p>
+          <button class="boton" type="button" data-ir="tienda">Ver mis recompensas</button>
+        </div>
+      </div>
+
+      <!-- Lista de espera (medidor del curso): tras terminar la sesión -->
+      <div class="bloque" id="bloque-espera" hidden>
         <div class="tarjeta espera">
           <h3 id="t-espera">Apúntate a la lista de espera</h3>
           <form id="lista-espera" aria-labelledby="t-espera" novalidate>
@@ -461,6 +520,7 @@
           <li><button class="categoria" type="button" data-categoria="fisio"><span class="icono" aria-hidden="true" data-icono="fisio"></span>3. Locales fisioterapia</button></li>
           <li><button class="categoria" type="button" data-categoria="resto"><span class="icono" aria-hidden="true" data-icono="resto"></span>4. Restaurantes</button></li>
           <li><button class="categoria" type="button" data-categoria="exper"><span class="icono" aria-hidden="true" data-icono="exper"></span>5. Experiencias deportivas</button></li>
+          <li><button class="categoria" type="button" data-categoria="supl"><span class="icono" aria-hidden="true" data-icono="supl"></span>6. Suplementos deportivos</button></li>
         </ol>
         <p class="nota">Las marcas y locales aparecen solo como ejemplo en este prototipo de clase: no colaboran con RecoRun ni ofrecen estas promociones.</p>
       </div>
@@ -637,7 +697,8 @@
     cafe: '<path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h2a2 2 0 0 1 0 4h-2"/><path d="M8 2v3M12 2v3"/>',
     fisio: '<circle cx="12" cy="5" r="2"/><path d="M12 7v7M8 10h8M9 21l3-7 3 7"/>',
     resto: '<path d="M7 2v20M4 2v6a3 3 0 0 0 6 0V2"/><path d="M17 2c-2 2-3 5-3 8h3v12"/>',
-    exper: '<path d="M3 20l6-10 4 6 3-4 5 8z"/><circle cx="17" cy="5" r="2"/>'
+    exper: '<path d="M3 20l6-10 4 6 3-4 5 8z"/><circle cx="17" cy="5" r="2"/>',
+    supl: '<rect x="7" y="7" width="10" height="15" rx="2"/><path d="M8 2h8v5H8z"/><path d="M7 12h10"/>'
   };
   function icono(id) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICONOS[id] + '</svg>';
@@ -649,22 +710,25 @@
     cafe: 'Cafeterías',
     fisio: 'Locales fisioterapia',
     resto: 'Restaurantes',
-    exper: 'Experiencias deportivas'
+    exper: 'Experiencias deportivas',
+    supl: 'Suplementos deportivos'
   };
   // lat / lng: ubicación real en Madrid (OpenStreetMap)
   // Productos: [nombre, emoji, tokens que se presentan, descuento en % que dan (100 = gratis)]
   var COMERCIOS = [
-    { id: 'nike', cat: 'deporte', nombre: 'Nike', direccion: 'Calle de Serrano, 19', lat: 40.42577, lng: -3.68800, productos: [['Zapatillas de running', '👟', 20, 25], ['Camiseta técnica', '🎽', 12, 30], ['Calcetines de running', '🧦', 5, 50]] },
-    { id: 'adidas', cat: 'deporte', nombre: 'adidas', direccion: 'Gran Vía, 21', lat: 40.41976, lng: -3.70136, productos: [['Zapatillas de running', '👟', 20, 20], ['Pantalón corto de running', '🩳', 10, 30], ['Gorra transpirable', '🧢', 8, 25]] },
-    { id: 'puma', cat: 'deporte', nombre: 'Puma', direccion: 'Calle de Fuencarral, 33', lat: 40.42228, lng: -3.70095, productos: [['Zapatillas de running', '👟', 18, 25], ['Sudadera técnica', '🧥', 12, 20], ['Mochila de deporte', '🎒', 10, 30]] },
-    { id: 'decathlon', cat: 'deporte', nombre: 'Decathlon', direccion: 'Calle de Fuencarral, 45', lat: 40.42339, lng: -3.70100, productos: [['Reloj GPS de running', '⌚', 25, 15], ['Botella de agua reutilizable', '💧', 5, 50], ['Cinturón portamóvil', '📱', 6, 30]] },
-    { id: 'toma', cat: 'cafe', nombre: 'Toma Café', direccion: 'Calle de la Palma, 49', lat: 40.42649, lng: -3.70596, productos: [['Café con leche', '☕', 10, 100], ['Flat white', '☕', 8, 50], ['Bizcocho casero', '🍰', 6, 25]] },
-    { id: 'bicicleta', cat: 'cafe', nombre: 'La Bicicleta', direccion: 'Plaza de San Ildefonso, 9', lat: 40.42378, lng: -3.70225, productos: [['Café solo', '☕', 8, 100], ['Tostada de aguacate', '🥑', 10, 30], ['Zumo natural', '🍊', 6, 50]] },
-    { id: 'federal', cat: 'cafe', nombre: 'Federal Café', direccion: 'Plaza de las Comendadoras, 9', lat: 40.42705, lng: -3.70924, productos: [['Brunch completo', '🍳', 15, 25], ['Batido de frutas', '🥤', 8, 30], ['Granola con yogur', '🥣', 8, 25]] },
-    { id: 'fisio', cat: 'fisio', nombre: 'Centro de fisioterapia', direccion: 'Chamberí', lat: 40.43186, lng: -3.70700, productos: [['Masaje de descarga', '💆', 15, 25], ['Sesión de estiramientos', '🧘', 10, 30], ['Vendaje neuromuscular', '🩹', 6, 50]] },
-    { id: 'honest', cat: 'resto', nombre: 'Honest Greens', direccion: 'Calle de Fuencarral, 95', lat: 40.42703, lng: -3.70170, productos: [['Bowl saludable', '🥗', 12, 25], ['Menú post-carrera', '🍽️', 15, 20], ['Limonada natural', '🍋', 5, 100]] },
-    { id: 'goiko', cat: 'resto', nombre: 'Goiko', direccion: 'Calle del Pez, 36', lat: 40.42428, lng: -3.70655, productos: [['Hamburguesa', '🍔', 15, 20], ['Patatas fritas', '🍟', 6, 50], ['Ensalada', '🥗', 10, 25]] },
-    { id: 'club', cat: 'exper', nombre: 'Club de running del Retiro', direccion: 'Parque del Retiro', lat: 40.41495, lng: -3.68328, productos: [['Clase de técnica de carrera', '🏃', 15, 50], ['Salida en grupo guiada', '🗺️', 10, 25], ['Inscripción a una carrera popular', '🏅', 25, 25]] }
+    { id: 'nike', cat: 'deporte', nombre: 'Nike', direccion: 'Calle de Serrano, 19', lat: 40.42577, lng: -3.68800, productos: [['Zapatillas Nike Pegasus', '👟', 20, 25], ['Camiseta Nike Dri-FIT Miler', '🎽', 12, 30], ['Calcetines Nike Spark', '🧦', 5, 50]] },
+    { id: 'adidas', cat: 'deporte', nombre: 'adidas', direccion: 'Gran Vía, 21', lat: 40.41976, lng: -3.70136, productos: [['Zapatillas adidas Adizero Boston', '👟', 20, 20], ['Pantalón corto adidas Own the Run', '🩳', 10, 30], ['Gorra adidas Running AEROREADY', '🧢', 8, 25]] },
+    { id: 'puma', cat: 'deporte', nombre: 'Puma', direccion: 'Calle de Fuencarral, 33', lat: 40.42228, lng: -3.70095, productos: [['Zapatillas Puma Velocity Nitro', '👟', 18, 25], ['Zapatillas Puma Deviate Nitro', '👟', 25, 15], ['Chaqueta Puma Run Favorite', '🧥', 12, 20]] },
+    { id: 'decathlon', cat: 'deporte', nombre: 'Decathlon', direccion: 'Calle de Fuencarral, 45', lat: 40.42339, lng: -3.70100, productos: [['Reloj GPS Kiprun GPS 500', '⌚', 25, 15], ['Zapatillas Kiprun KS900', '👟', 15, 25], ['Cinturón portamóvil Kiprun', '📱', 6, 30]] },
+    { id: 'toma', cat: 'cafe', nombre: 'Toma Café', direccion: 'Calle de la Palma, 49', lat: 40.42649, lng: -3.70596, productos: [['Café con leche', '☕', 10, 100], ['Flat white', '☕', 8, 50], ['Cold brew', '🧊', 8, 25]] },
+    { id: 'bicicleta', cat: 'cafe', nombre: 'La Bicicleta', direccion: 'Plaza de San Ildefonso, 9', lat: 40.42378, lng: -3.70225, productos: [['Café solo', '☕', 8, 100], ['Tostada de aguacate', '🥑', 10, 30], ['Zumo de naranja natural', '🍊', 6, 50]] },
+    { id: 'federal', cat: 'cafe', nombre: 'Federal Café', direccion: 'Plaza de las Comendadoras, 9', lat: 40.42705, lng: -3.70924, productos: [['Huevos benedictinos', '🍳', 15, 25], ['Smoothie de frutas', '🥤', 8, 30], ['Granola con yogur', '🥣', 8, 25]] },
+    { id: 'fisio', cat: 'fisio', nombre: 'Fisioterapia Argüelles', direccion: 'Calle de Rodríguez San Pedro, 46', lat: 40.43186, lng: -3.71306, productos: [['Masaje de descarga', '💆', 15, 25], ['Sesión de fisioterapia deportiva', '🦵', 20, 20], ['Vendaje neuromuscular', '🩹', 6, 50]] },
+    { id: 'honest', cat: 'resto', nombre: 'Honest Greens', direccion: 'Calle de Fuencarral, 95', lat: 40.42703, lng: -3.70170, productos: [['Plato de pollo con verduras de temporada', '🥗', 12, 25], ['Bowl de salmón', '🐟', 15, 20], ['Limonada natural', '🍋', 5, 100]] },
+    { id: 'goiko', cat: 'resto', nombre: 'Goiko', direccion: 'Calle del Pez, 36', lat: 40.42428, lng: -3.70655, productos: [['Hamburguesa Kevin Bacon', '🍔', 15, 20], ['Patatas fritas', '🍟', 6, 50], ['Ensalada César', '🥗', 10, 25]] },
+    { id: 'rnr', cat: 'exper', nombre: "Rock 'n' Roll Running Series Madrid", direccion: 'Meta en el Parque del Retiro', lat: 40.41495, lng: -3.68328, productos: [['Inscripción al maratón', '🏅', 30, 25], ['Inscripción al medio maratón', '🏃', 20, 25], ['Inscripción a la carrera de 10 km', '👟', 12, 30]] },
+    { id: 'nutrideon', cat: 'supl', nombre: 'Nutrideon', direccion: 'Avenida de Filipinas, 40', lat: 40.44094, lng: -3.70730, productos: [['Proteína Myprotein Impact Whey', '💪', 20, 25], ['Creatina Creapure', '⚡', 12, 30], ['Barritas de proteína Myprotein', '🍫', 6, 50]] },
+    { id: 'bronce', cat: 'supl', nombre: 'Nutrición Bronce', direccion: 'Madrid (Arganzuela)', lat: 40.40229, lng: -3.69827, productos: [['Geles energéticos 226ERS High Energy', '🧪', 6, 30], ['Bebida isotónica Isostar', '🥤', 5, 50], ['Sales minerales 226ERS', '🧂', 5, 25]] }
   ];
 
   // Presentando X tokens, el comercio aplica el descuento en ese producto.
@@ -696,6 +760,7 @@
     var titulo = document.querySelector('#' + id + ' h2');
     if (titulo) titulo.focus();
     if (id === 'mapa') prepararMapa();
+    if (id !== 'sesion' && sesion.activa) pausar();
   }
 
   document.addEventListener('click', function (e) {
@@ -923,6 +988,80 @@
     });
   });
   dibujarGrafico('dias');
+
+  // ---------- Sesión de running (distancia simulada a ritmo de carrera) ----------
+  var SEGUNDOS_POR_KM = 330; // 5:30 min/km
+  var sesion = { segundos: 0, km: 0, activa: false, temporizador: null };
+  var saldo = 14;
+
+  function dosCifras(n) { return (n < 10 ? '0' : '') + n; }
+  function formatoTiempo(seg) {
+    return dosCifras(Math.floor(seg / 3600)) + ':' + dosCifras(Math.floor(seg / 60) % 60) + ':' + dosCifras(seg % 60);
+  }
+  function formatoRitmo(seg, km) {
+    if (km < 0.01) return '–';
+    var r = Math.round(seg / km);
+    return Math.floor(r / 60) + ':' + dosCifras(r % 60);
+  }
+  function decimal(n, d) { return n.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+
+  function pintarSesion() {
+    document.getElementById('crono').textContent = formatoTiempo(sesion.segundos);
+    document.getElementById('m-distancia').textContent = decimal(sesion.km, 2);
+    document.getElementById('m-ritmo').textContent = formatoRitmo(sesion.segundos, sesion.km);
+    document.getElementById('m-tokens').textContent = decimal(sesion.km, 1);
+  }
+  function tic() {
+    sesion.segundos++;
+    sesion.km += 1 / SEGUNDOS_POR_KM * (0.95 + Math.random() * 0.1);
+    pintarSesion();
+  }
+  function reanudar() {
+    sesion.activa = true;
+    sesion.temporizador = setInterval(tic, 1000);
+    document.getElementById('boton-pausa').textContent = 'Pausar';
+    document.getElementById('estado-sesion').textContent = 'En marcha';
+  }
+  function pausar() {
+    sesion.activa = false;
+    clearInterval(sesion.temporizador);
+    document.getElementById('boton-pausa').textContent = 'Reanudar';
+    document.getElementById('estado-sesion').textContent = 'En pausa';
+  }
+
+  document.getElementById('boton-empezar').addEventListener('click', function () {
+    sesion.segundos = 0;
+    sesion.km = 0;
+    pintarSesion();
+    document.getElementById('controles').hidden = false;
+    document.getElementById('resumen').hidden = true;
+    document.getElementById('bloque-espera').hidden = true;
+    mostrar('sesion');
+    reanudar();
+  });
+  document.getElementById('boton-pausa').addEventListener('click', function () {
+    if (sesion.activa) pausar(); else reanudar();
+  });
+  document.getElementById('boton-terminar').addEventListener('click', function () {
+    pausar();
+    pintarSesion();
+    var ganados = Math.floor(sesion.km);
+    saldo += ganados;
+    document.querySelector('.saldo strong').textContent = saldo;
+    document.getElementById('estado-sesion').textContent = 'Terminada';
+    document.getElementById('controles').hidden = true;
+    document.getElementById('resumen-texto').textContent =
+      'Has corrido ' + decimal(sesion.km, 2) + ' km en ' + formatoTiempo(sesion.segundos) +
+      ' (ritmo ' + formatoRitmo(sesion.segundos, sesion.km) + ' /km) y has ganado ' + ganados +
+      (ganados === 1 ? ' token' : ' tokens') + '. Ahora tienes ' + saldo + ' tokens.';
+    document.getElementById('resumen').hidden = false;
+    document.getElementById('bloque-espera').hidden = false;
+    document.getElementById('t-resumen').focus();
+  });
+  document.getElementById('salir-sesion').addEventListener('click', function () {
+    pausar();
+    mostrar('inicio');
+  });
 
   // ---------- Lista de espera ----------
   var formulario = document.getElementById('lista-espera');
