@@ -483,7 +483,30 @@
     width: 100%; min-height: 48px; padding: 10px 16px;
     border: 0; border-radius: 999px; font: inherit; font-size: 1rem;
   }
-  .resultado { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; padding: 12px; }
+  .resultado { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 12px; }
+  .abrir-persona {
+    display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center;
+    padding: 0; border: 0; background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer;
+  }
+  .avatar-grande { width: 88px; height: 88px; }
+  #persona .perfil-cabeza { margin: 4px 0 12px; }
+  #persona h2 { font-size: 1.6rem; }
+  .persona-datos { margin: 0 !important; font-size: .95rem !important; color: #C9D3B8 !important; }
+  .botones-persona { display: flex; flex-wrap: wrap; gap: 8px; }
+  .post { display: grid; gap: 10px; }
+  .post p { margin: 0; }
+  .post-cabeza { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: center; }
+  .post-cabeza strong { display: block; }
+  .post-cabeza small { color: var(--gris); }
+  .post-datos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; padding: 10px; border-radius: 12px; background: var(--fondo); }
+  .post-datos dt { font-size: .75rem; color: var(--gris); text-transform: uppercase; }
+  .post-datos dd { margin: 0; font-weight: 800; }
+  .me-gusta {
+    justify-self: start; min-height: 36px; padding: 4px 12px; border-radius: 999px;
+    border: 1px solid var(--borde); background: var(--tarjeta); font: inherit; font-size: .9rem; cursor: pointer;
+  }
+  .me-gusta[aria-pressed="true"] { background: var(--lima-suave); border-color: var(--verde); font-weight: 700; }
+  .lista-canjes { margin: 0; padding: 12px 12px 12px 32px; }
   .resultado strong { display: block; }
   .resultado small { color: var(--gris); }
   .persona { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); }
@@ -875,6 +898,32 @@
       </div>
     </section>
 
+    <!-- Mi perfil › perfil de otra persona -->
+    <section class="pantalla" id="persona" data-pestana="perfil" aria-labelledby="t-persona" hidden>
+      <div class="hero">
+        <button class="volver" type="button" id="volver-persona">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Volver
+        </button>
+        <div class="perfil-cabeza">
+          <span id="persona-foto"></span>
+          <div>
+            <h2 id="t-persona" tabindex="-1"></h2>
+            <p class="persona-datos" id="persona-datos"></p>
+          </div>
+        </div>
+        <button class="boton boton-pequeno" type="button" id="persona-seguir" aria-pressed="false">Seguir</button>
+      </div>
+      <div class="bloque">
+        <h3>Últimas salidas</h3>
+        <ul class="lista" id="persona-posts"></ul>
+        <p class="nota">Fotos generadas con inteligencia artificial: son personas que no existen. Salidas de ejemplo.</p>
+      </div>
+      <div class="bloque">
+        <h3>Canjes</h3>
+        <ul class="tarjeta lista-canjes" id="persona-canjes"></ul>
+      </div>
+    </section>
+
     <!-- Mi perfil › Buscar perfiles -->
     <section class="pantalla" id="buscar" data-pestana="perfil" aria-labelledby="t-buscar" hidden>
       <div class="hero">
@@ -1245,9 +1294,9 @@
 
   function guardarEstado(id) {
     if (restaurando) return;
-    var estado = { pantalla: id, categoria: categoriaActual, comercio: comercioActual ? comercioActual.id : null, ranking: rankingActual, ruta: rutaActual };
+    var estado = { pantalla: id, categoria: categoriaActual, comercio: comercioActual ? comercioActual.id : null, ranking: rankingActual, ruta: rutaActual, persona: personaActual };
     var actual = visitadas[visitadas.length - 1];
-    if (actual.pantalla === estado.pantalla && actual.categoria === estado.categoria && actual.comercio === estado.comercio && actual.ranking === estado.ranking && actual.ruta === estado.ruta) return;
+    if (actual.pantalla === estado.pantalla && actual.categoria === estado.categoria && actual.comercio === estado.comercio && actual.ranking === estado.ranking && actual.ruta === estado.ruta && actual.persona === estado.persona) return;
     visitadas.push(estado);
     history.pushState({ recorun: visitadas.length }, '');
   }
@@ -1261,6 +1310,7 @@
     else if (estado.pantalla === 'comercio' && estado.comercio) abrirComercio(estado.comercio);
     else if (estado.pantalla === 'ranking' && estado.ranking) abrirRanking(estado.ranking);
     else if (estado.pantalla === 'ruta' && estado.ruta !== null) abrirRuta(estado.ruta);
+    else if (estado.pantalla === 'persona' && estado.persona) abrirPersona(estado.persona);
     else mostrar(estado.pantalla);
     restaurando = false;
   }
@@ -1302,6 +1352,7 @@
     if (b.dataset.categoria) abrirCategoria(b.dataset.categoria);
     if (b.dataset.comercio) abrirComercio(b.dataset.comercio);
     if (b.dataset.ranking) abrirRanking(b.dataset.ranking);
+    if (b.dataset.persona) abrirPersona(b.dataset.persona);
     if (b.dataset.bajar) {
       var destino = document.getElementById(b.dataset.bajar);
       destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1650,8 +1701,66 @@
     hugo: { nombre: 'Hugo F.', km: 45, canjes: [['Entrada al rocódromo', 'Rocódromo Roc 30']] },
     andrea: { nombre: 'Andrea L.', km: 18, canjes: [['Café con leche', 'Santagloria']] },
     diego: { nombre: 'Diego P.', km: 39, canjes: [['Zapatillas ASICS Novablast', 'ASICS']] },
-    sara: { nombre: 'Sara G.', km: 71, canjes: [['Zapatillas New Balance 1080', 'New Balance Gran Vía'], ['Sesión de fisioterapia deportiva', 'Fisiorosales']] }
+    sara: { nombre: 'Sara G.', km: 71, canjes: [['Zapatillas New Balance 1080', 'New Balance Gran Vía'], ['Sesión de fisioterapia deportiva', 'Fisiorosales']] },
+    irene: { nombre: 'Irene C.', km: 43, canjes: [['Flat white', 'Wolfox Coffee']] },
+    sergio: { nombre: 'Sergio B.', km: 41, canjes: [['Zapatillas Kiprun KD900', 'Decathlon Orense'], ['Hamburguesa Basic', 'Basics by Goiko']] },
+    paula: { nombre: 'Paula D.', km: 40, canjes: [] },
+    ruben: { nombre: 'Rubén V.', km: 38, canjes: [['Entrada de un día', 'Boulder Madrid']] },
+    elena: { nombre: 'Elena P.', km: 37, canjes: [['Bowl de açaí', 'Faborit Princesa']] },
+    marcos: { nombre: 'Marcos J.', km: 35, canjes: [['Camiseta Joma Elite', 'Joma']] },
+    claudia: { nombre: 'Claudia R.', km: 34, canjes: [['Clase de yoga', 'YogaOne Moncloa'], ['Matcha latte', 'Amae Café']] },
+    ivan: { nombre: 'Iván H.', km: 33, canjes: [] },
+    laura: { nombre: 'Laura N.', km: 31, canjes: [['Café con leche', 'Viena Capellanes']] },
+    tomas: { nombre: 'Tomás R.', km: 16, canjes: [] },
+    noelia: { nombre: 'Noelia S.', km: 15, canjes: [['Croissant', 'Maison Kayser']] },
+    oscar: { nombre: 'Óscar M.', km: 13, canjes: [['Refresco', 'Trujillo Burger']] },
+    alba: { nombre: 'Alba G.', km: 11, canjes: [] },
+    rocio: { nombre: 'Rocío F.', km: 36, canjes: [['Masaje de descarga', 'Fisioalmat']] },
+    adrian: { nombre: 'Adrián L.', km: 34, canjes: [['Pase de un día', 'Basic-Fit Atocha']] },
+    cristina: { nombre: 'Cristina V.', km: 31, canjes: [['Ensalada completa', 'FloraFina']] },
+    raul: { nombre: 'Raúl N.', km: 29, canjes: [] },
+    mario: { nombre: 'Mario E.', km: 68, canjes: [['Zapatillas ASICS Gel-Nimbus', 'ASICS'], ['Punción seca', 'Fised']] },
+    lorena: { nombre: 'Lorena T.', km: 64, canjes: [['Reloj GPS Kiprun 900', 'Decathlon Castellana']] },
+    pedro: { nombre: 'Pedro A.', km: 60, canjes: [['Inscripción a la carrera de 10 km', "Rock 'n' Roll Running Series Madrid"]] },
+    ines: { nombre: 'Inés B.', km: 57, canjes: [['Sesión de fisioterapia', 'eFISIO Chamberí'], ['Cold brew', 'Ambu Coffee']] }
   };
+  // Fotos de perfil: caras generadas con IA (StyleGAN, thispersondoesnotexist.com): son personas que no existen.
+  function fotoPersona(id, clase, tam) {
+    return '<img class="avatar avatar-foto ' + clase + '" src="fotos/caras/' + id + '.jpg" alt="" width="' + tam + '" height="' + tam + '" loading="lazy">';
+  }
+
+  // Posts de salidas recientes (de ejemplo), dos por persona
+  var LUGARES = ['Parque del Retiro', 'Madrid Río', 'Casa de Campo', 'Parque del Oeste', 'Dehesa de la Villa', 'Parque Juan Carlos I', 'Paseo de la Castellana', 'Parque de Valdebebas', 'Parque Lineal del Manzanares', 'Anillo Verde Ciclista'];
+  var TEXTOS = [
+    '¡Por fin he salido! Lo difícil era ponerse las zapatillas.',
+    'Rodaje suave antes del trabajo ☀️',
+    'Con calor, pero hecho 💪',
+    'Series cortas: las piernas lo notan.',
+    'Salida con amigos y café de recompensa ☕',
+    'Tirada larga del domingo 🏃',
+    'Había pereza, pero ha merecido la pena.',
+    'Nuevo récord personal 🔥'
+  ];
+  var CUANDO = ['Hace 1 día', 'Hace 2 días', 'Hace 3 días', 'Hace 4 días', 'Hace 5 días', 'Hace 1 semana'];
+  function postsDe(id) {
+    var g = GENTE[id];
+    var semilla = Object.keys(GENTE).indexOf(id);
+    // Quien corre más a la semana sale más lejos y más rápido
+    var ritmo = Math.round(390 - Math.min(g.km, 70) * 1.6); // segundos por km
+    return [0, 1].map(function (n) {
+      var km = Math.max(3, Math.round((g.km / 4 + ((semilla + n * 3) % 5) - 2) * 10) / 10);
+      var segundos = Math.round(km * ritmo);
+      return {
+        cuando: CUANDO[(semilla + n * 2) % 3 + n * 3],
+        lugar: LUGARES[(semilla * 3 + n * 7) % LUGARES.length],
+        texto: TEXTOS[(semilla + n * 5) % TEXTOS.length],
+        km: km,
+        tiempo: formatoTiempo(segundos).replace(/^00:/, ''),
+        ritmo: Math.floor(ritmo / 60) + ':' + dosCifras(ritmo % 60),
+        megusta: 3 + (semilla * 7 + n * 11) % 38
+      };
+    });
+  }
   var SEGUIDORES = ['marta', 'pablo', 'lucas', 'sofia', 'bea', 'lucia'];
   var SEGUIDOS = ['marta', 'pablo', 'dani', 'jorge', 'lucia'];
   var MIS_CANJES = [
@@ -1675,11 +1784,12 @@
       var sigo = SEGUIDOS.indexOf(id) !== -1;
       var li = document.createElement('li');
       li.innerHTML = '<details class="persona"><summary>' +
-        '<span class="avatar avatar-pequeno" aria-hidden="true">' + iniciales(g.nombre) + '</span>' +
+        fotoPersona(id, 'avatar-pequeno', 40) +
         '<span><strong>' + g.nombre + '</strong><small>' + g.km + ' km esta semana · ' + g.canjes.length + (g.canjes.length === 1 ? ' canje' : ' canjes') + '</small></span>' + FLECHA +
         '</summary><div class="persona-detalle">' +
         (g.canjes.length ? '<ul>' + g.canjes.map(function (c) { return '<li>' + c[0] + ' · ' + c[1] + '</li>'; }).join('') + '</ul>' : '<p class="nota">Aún no ha canjeado nada.</p>') +
-        '<button class="boton boton-pequeno" type="button" data-seguir="' + id + '" aria-pressed="' + sigo + '">' + (sigo ? 'Siguiendo' : 'Seguir') + '</button>' +
+        '<div class="botones-persona"><button class="boton boton-pequeno" type="button" data-persona="' + id + '">Ver perfil</button>' +
+        '<button class="boton boton-pequeno" type="button" data-seguir="' + id + '" aria-pressed="' + sigo + '">' + (sigo ? 'Siguiendo' : 'Seguir') + '</button></div>' +
         '</div></details>';
       lista.appendChild(li);
     });
@@ -1711,12 +1821,50 @@
     document.getElementById('resultados-buscar').innerHTML = ids.map(function (id) {
       var g = GENTE[id];
       var sigo = SEGUIDOS.indexOf(id) !== -1;
-      return '<li class="tarjeta resultado"><span class="avatar avatar-pequeno" aria-hidden="true">' + iniciales(g.nombre) + '</span>' +
-        '<span><strong>' + g.nombre + '</strong><small>' + g.km + ' km esta semana · ' + g.canjes.length + (g.canjes.length === 1 ? ' canje' : ' canjes') + '</small></span>' +
+      return '<li class="tarjeta resultado"><button class="abrir-persona" type="button" data-persona="' + id + '">' + fotoPersona(id, 'avatar-pequeno', 40) +
+        '<span><strong>' + g.nombre + '</strong><small>' + g.km + ' km esta semana · ' + g.canjes.length + (g.canjes.length === 1 ? ' canje' : ' canjes') + '</small></span></button>' +
         '<button class="boton boton-pequeno" type="button" data-seguir="' + id + '" aria-pressed="' + sigo + '">' + (sigo ? 'Siguiendo' : 'Seguir') + '</button></li>';
     }).join('');
   }
   document.getElementById('texto-buscar').addEventListener('input', buscarPerfiles);
+
+  // Perfil de otra persona: foto, kilómetros, canjes y posts de sus últimas salidas
+  var personaActual = null;
+  function abrirPersona(id) {
+    var g = GENTE[id];
+    personaActual = id;
+    var sigo = SEGUIDOS.indexOf(id) !== -1;
+    document.getElementById('t-persona').textContent = g.nombre;
+    document.getElementById('persona-foto').innerHTML = fotoPersona(id, 'avatar-grande', 88);
+    document.getElementById('persona-datos').textContent = g.km + ' km esta semana · ' + g.canjes.length + (g.canjes.length === 1 ? ' canje' : ' canjes');
+    var seguir = document.getElementById('persona-seguir');
+    seguir.dataset.seguir = id;
+    seguir.textContent = sigo ? 'Siguiendo' : 'Seguir';
+    seguir.setAttribute('aria-pressed', sigo);
+    document.getElementById('persona-posts').innerHTML = postsDe(id).map(function (post) {
+      return '<li class="tarjeta post">' +
+        '<div class="post-cabeza">' + fotoPersona(id, 'avatar-pequeno', 40) + '<span><strong>' + g.nombre + '</strong><small>' + post.cuando + ' · ' + post.lugar + '</small></span></div>' +
+        '<p>' + post.texto + '</p>' +
+        '<dl class="post-datos"><div><dt>Distancia</dt><dd>' + decimal(post.km, 1) + ' km</dd></div><div><dt>Tiempo</dt><dd>' + post.tiempo + '</dd></div><div><dt>Ritmo</dt><dd>' + post.ritmo + ' /km</dd></div></dl>' +
+        '<button class="me-gusta" type="button" aria-pressed="false" data-megusta="' + post.megusta + '">👍 <span>' + post.megusta + '</span> me gusta</button>' +
+        '</li>';
+    }).join('');
+    document.getElementById('persona-canjes').innerHTML = g.canjes.length
+      ? g.canjes.map(function (c) { return '<li>' + c[0] + ' · ' + c[1] + '</li>'; }).join('')
+      : '<li>Aún no ha canjeado nada.</li>';
+    mostrar('persona');
+  }
+  document.getElementById('persona-seguir').addEventListener('click', alternarSeguir);
+  document.getElementById('persona-posts').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-megusta]');
+    if (!b) return;
+    var activo = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', activo);
+    b.querySelector('span').textContent = Number(b.dataset.megusta) + (activo ? 1 : 0);
+  });
+  document.getElementById('volver-persona').addEventListener('click', function () {
+    if (visitadas.length > 1) history.back(); else mostrar('perfil');
+  });
   document.getElementById('mis-canjes').innerHTML = MIS_CANJES.map(function (c) {
     return '<li class="tarjeta canje"><span class="producto-foto" aria-hidden="true">' + c[1] + '</span>' +
       '<span><strong>' + c[0] + '</strong><small>' + c[2] + ' · ' + c[3] + ' tokens</small></span></li>';
