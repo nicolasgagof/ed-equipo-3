@@ -171,6 +171,15 @@
   .fila .icono svg { width: 22px; height: 22px; }
   .fila .flecha { width: 20px; height: 20px; color: var(--verde); }
 
+  .fila .miniatura { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; background: var(--lima-suave); }
+  .foto-comercio { margin: 0 0 12px; }
+  .foto-comercio img {
+    display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover;
+    border-radius: var(--radio); border: 1px solid var(--borde); background: var(--lima-suave);
+  }
+  .foto-comercio figcaption { margin-top: 6px; font-size: .75rem; color: var(--gris); }
+  .foto-comercio figcaption a { color: inherit; }
+
   .producto { display: grid; gap: 10px; }
   .producto-cabeza { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; }
   .producto-foto {
@@ -570,6 +579,10 @@
         <button class="boton boton-pequeno" type="button" id="ver-en-mapa">Ver en el mapa</button>
       </div>
       <div class="bloque">
+        <figure class="foto-comercio">
+          <img id="foto-comercio" src="" alt="" width="640" height="400">
+          <figcaption id="credito-foto"></figcaption>
+        </figure>
         <ul class="lista" id="lista-productos"></ul>
         <p class="nota">Las marcas y locales aparecen solo como ejemplo en este prototipo de clase: no colaboran con RecoRun ni ofrecen estas promociones.</p>
       </div>
@@ -723,66 +736,209 @@
   };
   // lat / lng: ubicación real en Madrid (OpenStreetMap)
   // Productos: [nombre, emoji, tokens que se presentan, descuento en % que dan (100 = gratis)]
+  var FOTOS = {
+    'adidas': ['Wowzamboangacity', 'CC BY 3.0', 'File:Adidas Performance Store Gateway.JPG', 'Tienda de adidas', 'marca'],
+    'anytime': ['Donald Trung Quoc Don', 'CC BY-SA 4.0', 'File:Anytime Fitness, Nesselande, Rotterdam (2021) 01.jpg', 'Entrada de un gimnasio Anytime Fitness', 'marca'],
+    'asics': ['Whoisjohngalt', 'CC BY-SA 3.0', 'File:ASICS Store Inside Boston.jpg', 'Interior de una tienda de ASICS', 'marca'],
+    'barista': ['Takeaway', 'CC BY-SA 4.0', 'File:2019 02 Rustic Barista Specialty Coffee Korat 01.jpg', 'Barra de una cafetería de especialidad', 'ilustrativa'],
+    'basicfit': ['Donald Trung Quoc Don', 'CC BY-SA 4.0', 'File:Basic-Fit Ladies, The Hague (2022) 01.jpg', 'Entrada de un gimnasio Basic-Fit', 'marca'],
+    'boulder': ['John Kane', 'CC0', 'File:Man climbing in bouldering gym.jpg', 'Escalador en un rocódromo de bloque', 'ilustrativa'],
+    'boulder2': ['Bondarev.gal', 'CC BY 4.0', 'File:Bouldering wall (Luch Climbing Gym) in Saint-Petersburg, Russia.jpg', 'Pared de escalada de bloque', 'ilustrativa'],
+    'burger': ['Kurt Kaiser', 'CC0', 'File:Cheeseburger and Fries 2.jpg', 'Hamburguesa con patatas fritas', 'ilustrativa'],
+    'burger2': ['Kurtkaiser', 'CC0', 'File:Cheeseburger and fries 4.jpg', 'Hamburguesa con queso y patatas', 'ilustrativa'],
+    'burger3': ['María de la Mata Renilla', 'CC BY-SA 4.0', 'File:Mini hamburguesas de buey.jpg', 'Hamburguesas pequeñas de buey', 'ilustrativa'],
+    'croissant': ['Kurt Kaiser', 'CC0', 'File:Coffee, breakfast, croissant.jpg', 'Café y cruasán', 'ilustrativa'],
+    'decathlon': ['Brbbl', 'CC BY-SA 4.0', 'File:Decathlon Utrecht Vredenburg St.Jacobsstraat 2020.jpg', 'Fachada de una tienda Decathlon', 'marca'],
+    'ensalada': ['JIP', 'CC BY-SA 4.0', 'File:Bowl of salad at restaurant Ajuri.jpg', 'Bol de ensalada', 'ilustrativa'],
+    'escalada': ['Dmitri Chubarov', 'CC BY-SA 2.0', 'File:Indoor Climbing Wall in Stuttgart.jpg', 'Rocódromo cubierto', 'ilustrativa'],
+    'fisio2': ['Gol Medal Physiotheraphy', 'CC BY-SA 4.0', 'File:Physiotheraphy.jpg', 'Fisioterapeuta tratando a un paciente', 'ilustrativa'],
+    'frutos': ["Q'orikenti", 'CC BY-SA 4.0', 'File:Frutos secos 1.jpg', 'Frutos secos variados', 'ilustrativa'],
+    'gijon': ['Roberto Garcia', 'CC BY 2.0', 'File:Café Gijón.jpg', 'Fachada del Café Gijón en el paseo de Recoletos', 'local'],
+    'gimnasio': ['Zarateman', 'CC0', 'File:Madrid - Centro Deportivo Municipal Gimnasio Moscardó 06.jpg', 'Centro deportivo municipal en Madrid', 'ilustrativa'],
+    'gimnasio2': ['IrishMalcolm', 'CC BY-SA 4.0', 'File:Interior of a Gym.jpg', 'Sala de un gimnasio', 'ilustrativa'],
+    'homeburger': ['vike (Flickr)', 'CC BY 2.0', 'File:Home Burger Bar Hamburger.jpg', 'Hamburguesa de Home Burger Bar', 'local'],
+    'kayser': ['FAIWOODAS Shaumi', 'CC BY-SA 4.0', "File:HK 中環 Central 太子大廈 Prince's Building mall shop Maison Kayser Bakery August 2022 Px3 01.jpg", 'Mostrador de pasteles de Maison Kayser', 'marca'],
+    'latte': ['Mortefot from Flickr', 'CC BY-SA 2.0', 'File:Latte art.jpg', 'Café con arte latte', 'ilustrativa'],
+    'latte2': ['Kgbo', 'CC BY-SA 4.0', 'File:Coppa Cafe Latte art, Brisbane, Queensland.jpg', 'Café con leche con dibujo de espuma', 'ilustrativa'],
+    'lepain': ['Edward Hands', 'CC BY-SA 4.0', 'File:Le Pain Quotidien, Fulham Road, Chelsea 01.jpg', 'Local de Le Pain Quotidien', 'marca'],
+    'maraton': ['Diario de Madrid', 'CC BY 4.0', 'File:Maratón de Madrid 2016.jpg', 'Corredores en el maratón de Madrid', 'local'],
+    'masaje': ['Threeohsix', 'CC BY-SA 4.0', 'File:Massage tables at Estádio da Luz.JPG', 'Camillas de masaje deportivo', 'ilustrativa'],
+    'masaje2': ['Willie Duffin', 'CC BY-SA 2.0', 'File:Monivea Massage and Sports Injury Clinic - geograph.org.uk - 2803913.jpg', 'Fachada de una clínica de masaje deportivo', 'ilustrativa'],
+    'matcha': ['Irvan Ary Maulana', 'CC BY-SA 4.0', 'File:Matcha tea latte with rosetta latte art.jpg', 'Matcha latte', 'ilustrativa'],
+    'newbalance': ['Mike Mozart', 'CC BY 2.0', 'File:New Balance (14566840827).jpg', 'Tienda de New Balance', 'marca'],
+    'nike': ['Zarateman', 'CC0', 'File:Madrid - Nike (Gran Vía 38).jpg', 'Tienda de Nike en la Gran Vía de Madrid', 'marca'],
+    'padel': ['Paconi', 'CC BY-SA 3.0', 'File:Torrelodones. Polideportivo. Pistas de pádel.jpg', 'Pistas de pádel', 'ilustrativa'],
+    'pilates': ['Maddi Bazzocco', 'CC0', 'File:Pilates reformer.jpg', 'Máquina de pilates reformer', 'ilustrativa'],
+    'piscina': ['Diario de Madrid', 'CC BY 4.0', 'File:Piscina municipal de Hortaleza.jpg', 'Piscina municipal en Madrid', 'ilustrativa'],
+    'pollo': ['tacowitte', 'CC BY 2.0', 'File:Pollo a la brasa - 29837174642.jpg', 'Pollo asado con patatas', 'ilustrativa'],
+    'proteina': ['Sandstein', 'CC BY 3.0', 'File:Protein shake.jpg', 'Batidos de proteína', 'ilustrativa'],
+    'proteina2': ['Zeyus Media', 'CC BY 2.0', 'File:Scitec Nutrition Wall of Protein at FIBO 2013.jpg', 'Estantería de botes de proteína', 'ilustrativa'],
+    'sangines': ['Museo8bits', 'CC BY-SA 3.0', 'File:Chocolateria San Gines.jpg', 'Fachada de la Chocolatería San Ginés', 'local'],
+    'sansilvestre': ['JuanJaén', 'CC BY-SA 2.0', 'File:San Silvestre Vallecana 2007.jpg', 'Corredores en la San Silvestre Vallecana', 'local'],
+    'skate': ['Wil540', 'CC BY-SA 4.0', 'File:Labor Skateshop October 2020.jpg', 'Interior de una tienda de skate', 'ilustrativa'],
+    'starbucks': ['FDV', 'CC BY 3.0', 'File:Starbucks-madrid-alcala.jpg', 'Cafetería Starbucks en Madrid', 'marca'],
+    'tienda-running': ['Connor', 'CC BY 4.0', 'File:On The Run Shoes Store.jpg', 'Interior de una tienda de running', 'ilustrativa'],
+    'timhortons': ['Jon Kolbert', 'CC BY-SA 4.0', 'File:Tim Hortons shop in Madrid, Spain.jpg', 'Cafetería Tim Hortons en Madrid', 'marca'],
+    'vegano': ['Mx. Granger', 'CC0', 'File:Food at Vantra Vegan.jpg', 'Plato de comida vegana', 'ilustrativa'],
+    'viena': ['Tamorlan', 'CC BY 3.0', 'File:Viena Capellanes- Fuencarral.jpg', 'Tienda de Viena Capellanes en Madrid', 'marca'],
+    'yoga': ['SurfGidget', 'CC BY-SA 4.0', 'File:Yoga Studio in Canoa.jpg', 'Clase de yoga', 'ilustrativa'],
+    'zapatillas': ['MarkBuckawicki', 'CC0', 'File:Running shoes display.JPG', 'Expositor de zapatillas de running', 'ilustrativa'],
+    'zapatillas2': ['IceCreamForEveryone', 'CC BY-SA 4.0', 'File:Various brands of waterproof running shoes made with Gore-Tex, exhibited at local shoe store.jpg', 'Zapatillas de running en una tienda', 'ilustrativa'],
+  };
+
   var COMERCIOS = [
     // Tiendas deportivas
-    { id: 'nike', cat: 'deporte', nombre: 'Nike', direccion: 'Calle de Serrano, 19', lat: 40.42577, lng: -3.68800, productos: [['Zapatillas Nike Pegasus', '👟', 20, 25], ['Camiseta Nike Dri-FIT Miler', '🎽', 12, 30], ['Calcetines Nike Spark', '🧦', 5, 50]] },
-    { id: 'adidas', cat: 'deporte', nombre: 'adidas', direccion: 'Gran Vía, 21', lat: 40.41976, lng: -3.70136, productos: [['Zapatillas adidas Adizero Boston', '👟', 20, 20], ['Pantalón corto adidas Own the Run', '🩳', 10, 30], ['Gorra adidas Running AEROREADY', '🧢', 8, 25]] },
-    { id: 'puma', cat: 'deporte', nombre: 'Puma', direccion: 'Calle de Fuencarral, 33', lat: 40.42228, lng: -3.70095, productos: [['Zapatillas Puma Velocity Nitro', '👟', 18, 25], ['Zapatillas Puma Deviate Nitro', '👟', 25, 15], ['Chaqueta Puma Run Favorite', '🧥', 12, 20]] },
-    { id: 'decathlon', cat: 'deporte', nombre: 'Decathlon', direccion: 'Calle de Fuencarral, 45', lat: 40.42339, lng: -3.70100, productos: [['Reloj GPS Kiprun GPS 500', '⌚', 25, 15], ['Zapatillas Kiprun KS900', '👟', 15, 25], ['Cinturón portamóvil Kiprun', '📱', 6, 30]] },
-    { id: 'asics', cat: 'deporte', nombre: 'ASICS', direccion: 'Calle de Alcalá, 44', lat: 40.41858, lng: -3.69593, productos: [['Zapatillas ASICS Gel-Nimbus', '👟', 25, 20], ['Zapatillas ASICS Novablast', '👟', 18, 25], ['Zapatillas ASICS Gel-Kayano', '👟', 25, 15]] },
-    { id: 'newbalance', cat: 'deporte', nombre: 'New Balance', direccion: 'Calle de Augusto Figueroa, 2', lat: 40.42294, lng: -3.70042, productos: [['Zapatillas New Balance Fresh Foam X 1080', '👟', 25, 20], ['Zapatillas New Balance FuelCell Rebel', '👟', 18, 25], ['Camiseta New Balance Athletics', '🎽', 8, 30]] },
-    { id: 'bikila', cat: 'deporte', nombre: 'Bikila Running Store', direccion: 'Calle de Martín de los Heros', lat: 40.42931, lng: -3.71792, productos: [['Zapatillas HOKA Clifton', '👟', 22, 20], ['Zapatillas Saucony Endorphin Speed', '👟', 25, 15], ['Zapatillas Brooks Ghost', '👟', 20, 20]] },
-    { id: 'intersport', cat: 'deporte', nombre: 'Intersport', direccion: 'Calle de Abtao (Retiro)', lat: 40.40686, lng: -3.67373, productos: [['Mallas de running', '🩳', 10, 25], ['Cortavientos de running', '🧥', 12, 20], ['Mochila de hidratación', '🎒', 15, 25]] },
-    { id: 'stance', cat: 'deporte', nombre: 'Stance', direccion: 'Calle de los Jardines, 9', lat: 40.41897, lng: -3.70112, productos: [['Calcetines Stance Run', '🧦', 5, 50], ['Pack de 3 calcetines Stance', '🧦', 10, 30], ['Calcetines de compresión Stance', '🧦', 8, 25]] },
+    { id: 'nike', cat: 'deporte', nombre: 'Nike', direccion: 'Calle de Serrano, 19', lat: 40.42577, lng: -3.68800, foto: 'nike', productos: [['Zapatillas Nike Pegasus', '👟', 20, 25], ['Camiseta Nike Dri-FIT Miler', '🎽', 12, 30], ['Calcetines Nike Spark', '🧦', 5, 50]] },
+    { id: 'adidas', cat: 'deporte', nombre: 'adidas', direccion: 'Gran Vía, 21', lat: 40.41976, lng: -3.70136, foto: 'adidas', productos: [['Zapatillas adidas Adizero Boston', '👟', 20, 20], ['Pantalón corto adidas Own the Run', '🩳', 10, 30], ['Gorra adidas Running AEROREADY', '🧢', 8, 25]] },
+    { id: 'puma', cat: 'deporte', nombre: 'Puma', direccion: 'Calle de Fuencarral, 33', lat: 40.42228, lng: -3.70095, foto: 'zapatillas2', productos: [['Zapatillas Puma Velocity Nitro', '👟', 18, 25], ['Zapatillas Puma Deviate Nitro', '👟', 25, 15], ['Chaqueta Puma Run Favorite', '🧥', 12, 20]] },
+    { id: 'decathlon', cat: 'deporte', nombre: 'Decathlon', direccion: 'Calle de Fuencarral, 45', lat: 40.42339, lng: -3.70100, foto: 'decathlon', productos: [['Reloj GPS Kiprun GPS 500', '⌚', 25, 15], ['Zapatillas Kiprun KS900', '👟', 15, 25], ['Cinturón portamóvil Kiprun', '📱', 6, 30]] },
+    { id: 'asics', cat: 'deporte', nombre: 'ASICS', direccion: 'Calle de Alcalá, 44', lat: 40.41858, lng: -3.69593, foto: 'asics', productos: [['Zapatillas ASICS Gel-Nimbus', '👟', 25, 20], ['Zapatillas ASICS Novablast', '👟', 18, 25], ['Zapatillas ASICS Gel-Kayano', '👟', 25, 15]] },
+    { id: 'newbalance', cat: 'deporte', nombre: 'New Balance', direccion: 'Calle de Augusto Figueroa, 2', lat: 40.42294, lng: -3.70042, foto: 'newbalance', productos: [['Zapatillas New Balance Fresh Foam X 1080', '👟', 25, 20], ['Zapatillas New Balance FuelCell Rebel', '👟', 18, 25], ['Camiseta New Balance Athletics', '🎽', 8, 30]] },
+    { id: 'bikila', cat: 'deporte', nombre: 'Bikila Running Store', direccion: 'Calle de Martín de los Heros', lat: 40.42931, lng: -3.71792, foto: 'tienda-running', productos: [['Zapatillas HOKA Clifton', '👟', 22, 20], ['Zapatillas Saucony Endorphin Speed', '👟', 25, 15], ['Zapatillas Brooks Ghost', '👟', 20, 20]] },
+    { id: 'intersport', cat: 'deporte', nombre: 'Intersport', direccion: 'Calle de Abtao (Retiro)', lat: 40.40686, lng: -3.67373, foto: 'zapatillas', productos: [['Mallas de running', '🩳', 10, 25], ['Cortavientos de running', '🧥', 12, 20], ['Mochila de hidratación', '🎒', 15, 25]] },
+    { id: 'stance', cat: 'deporte', nombre: 'Stance', direccion: 'Calle de los Jardines, 9', lat: 40.41897, lng: -3.70112, foto: 'tienda-running', productos: [['Calcetines Stance Run', '🧦', 5, 50], ['Pack de 3 calcetines Stance', '🧦', 10, 30], ['Calcetines de compresión Stance', '🧦', 8, 25]] },
     // Cafeterías
-    { id: 'toma', cat: 'cafe', nombre: 'Toma Café', direccion: 'Calle de la Palma, 49', lat: 40.42649, lng: -3.70596, productos: [['Café con leche', '☕', 10, 100], ['Flat white', '☕', 8, 50], ['Cold brew', '🧊', 8, 25]] },
-    { id: 'toma-olavide', cat: 'cafe', nombre: 'Toma Café Olavide', direccion: 'Calle de Santa Feliciana, 5', lat: 40.43305, lng: -3.70025, productos: [['Espresso', '☕', 6, 100], ['Cortado', '☕', 6, 50], ['Galleta casera', '🍪', 5, 25]] },
-    { id: 'bicicleta', cat: 'cafe', nombre: 'La Bicicleta', direccion: 'Plaza de San Ildefonso, 9', lat: 40.42378, lng: -3.70225, productos: [['Café solo', '☕', 8, 100], ['Tostada de aguacate', '🥑', 10, 30], ['Zumo de naranja natural', '🍊', 6, 50]] },
-    { id: 'federal', cat: 'cafe', nombre: 'Federal Café', direccion: 'Plaza de las Comendadoras, 9', lat: 40.42705, lng: -3.70924, productos: [['Huevos benedictinos', '🍳', 15, 25], ['Smoothie de frutas', '🥤', 8, 30], ['Granola con yogur', '🥣', 8, 25]] },
-    { id: 'syra', cat: 'cafe', nombre: 'Syra Coffee', direccion: 'Calle de Santa Isabel, 15', lat: 40.41080, lng: -3.69813, productos: [['Latte', '☕', 8, 50], ['Iced latte', '🧊', 8, 30], ['Croissant', '🥐', 5, 25]] },
-    { id: 'starbucks', cat: 'cafe', nombre: 'Starbucks', direccion: 'Calle de Fuencarral, 43', lat: 40.42317, lng: -3.70113, productos: [['Caramel Macchiato', '☕', 10, 25], ['Frappuccino', '🥤', 12, 20], ['Muffin de arándanos', '🧁', 6, 50]] },
-    { id: 'timhortons', cat: 'cafe', nombre: 'Tim Hortons', direccion: 'Calle de la Montera, 38', lat: 40.41921, lng: -3.70179, productos: [['Iced Capp', '🧊', 8, 30], ['Café Original Blend', '☕', 6, 100], ['Timbits (10 unidades)', '🍩', 8, 25]] },
-    { id: 'manolo', cat: 'cafe', nombre: 'Manolo Bakes', direccion: 'Plaza de Santa Bárbara, 4', lat: 40.42754, lng: -3.69635, productos: [['Caja de manolitos', '🥐', 10, 25], ['Café con leche', '☕', 8, 50], ['Manolitos de chocolate', '🍫', 8, 30]] },
-    { id: 'sangines', cat: 'cafe', nombre: 'Chocolatería San Ginés', direccion: 'Pasadizo de San Ginés, 5', lat: 40.41677, lng: -3.70680, productos: [['Chocolate con churros', '🍫', 10, 25], ['Ración de porras', '🥖', 8, 30], ['Café con leche', '☕', 6, 50]] },
+    { id: 'toma', cat: 'cafe', nombre: 'Toma Café', direccion: 'Calle de la Palma, 49', lat: 40.42649, lng: -3.70596, foto: 'latte', productos: [['Café con leche', '☕', 10, 100], ['Flat white', '☕', 8, 50], ['Cold brew', '🧊', 8, 25]] },
+    { id: 'toma-olavide', cat: 'cafe', nombre: 'Toma Café Olavide', direccion: 'Calle de Santa Feliciana, 5', lat: 40.43305, lng: -3.70025, foto: 'latte2', productos: [['Espresso', '☕', 6, 100], ['Cortado', '☕', 6, 50], ['Galleta casera', '🍪', 5, 25]] },
+    { id: 'bicicleta', cat: 'cafe', nombre: 'La Bicicleta', direccion: 'Plaza de San Ildefonso, 9', lat: 40.42378, lng: -3.70225, foto: 'barista', productos: [['Café solo', '☕', 8, 100], ['Tostada de aguacate', '🥑', 10, 30], ['Zumo de naranja natural', '🍊', 6, 50]] },
+    { id: 'federal', cat: 'cafe', nombre: 'Federal Café', direccion: 'Plaza de las Comendadoras, 9', lat: 40.42705, lng: -3.70924, foto: 'croissant', productos: [['Huevos benedictinos', '🍳', 15, 25], ['Smoothie de frutas', '🥤', 8, 30], ['Granola con yogur', '🥣', 8, 25]] },
+    { id: 'syra', cat: 'cafe', nombre: 'Syra Coffee', direccion: 'Calle de Santa Isabel, 15', lat: 40.41080, lng: -3.69813, foto: 'latte2', productos: [['Latte', '☕', 8, 50], ['Iced latte', '🧊', 8, 30], ['Croissant', '🥐', 5, 25]] },
+    { id: 'starbucks', cat: 'cafe', nombre: 'Starbucks', direccion: 'Calle de Fuencarral, 43', lat: 40.42317, lng: -3.70113, foto: 'starbucks', productos: [['Caramel Macchiato', '☕', 10, 25], ['Frappuccino', '🥤', 12, 20], ['Muffin de arándanos', '🧁', 6, 50]] },
+    { id: 'timhortons', cat: 'cafe', nombre: 'Tim Hortons', direccion: 'Calle de la Montera, 38', lat: 40.41921, lng: -3.70179, foto: 'timhortons', productos: [['Iced Capp', '🧊', 8, 30], ['Café Original Blend', '☕', 6, 100], ['Timbits (10 unidades)', '🍩', 8, 25]] },
+    { id: 'manolo', cat: 'cafe', nombre: 'Manolo Bakes', direccion: 'Plaza de Santa Bárbara, 4', lat: 40.42754, lng: -3.69635, foto: 'croissant', productos: [['Caja de manolitos', '🥐', 10, 25], ['Café con leche', '☕', 8, 50], ['Manolitos de chocolate', '🍫', 8, 30]] },
+    { id: 'sangines', cat: 'cafe', nombre: 'Chocolatería San Ginés', direccion: 'Pasadizo de San Ginés, 5', lat: 40.41677, lng: -3.70680, foto: 'sangines', productos: [['Chocolate con churros', '🍫', 10, 25], ['Ración de porras', '🥖', 8, 30], ['Café con leche', '☕', 6, 50]] },
     // Fisioterapia
-    { id: 'fisio', cat: 'fisio', nombre: 'Fisioterapia Argüelles', direccion: 'Calle de Rodríguez San Pedro, 46', lat: 40.43186, lng: -3.71306, productos: [['Masaje de descarga', '💆', 15, 25], ['Sesión de fisioterapia deportiva', '🦵', 20, 20], ['Vendaje neuromuscular', '🩹', 6, 50]] },
-    { id: 'debod', cat: 'fisio', nombre: 'Fisioterapia Debod', direccion: 'Calle de Evaristo San Miguel, 19', lat: 40.42578, lng: -3.71647, productos: [['Masaje deportivo', '💆', 15, 25], ['Punción seca', '📍', 15, 20], ['Estiramientos asistidos', '🧘', 10, 30]] },
-    { id: 'gaztambide', cat: 'fisio', nombre: 'Fisioterapia Gaztambide', direccion: 'Calle de Gaztambide', lat: 40.43704, lng: -3.71527, productos: [['Sesión de fisioterapia', '🦵', 18, 20], ['Masaje de descarga', '💆', 15, 25], ['Vendaje neuromuscular', '🩹', 6, 50]] },
-    { id: 'fixus', cat: 'fisio', nombre: 'Fixus', direccion: 'Calle de Cea Bermúdez, 46', lat: 40.43924, lng: -3.71194, productos: [['Valoración de la pisada', '👣', 12, 30], ['Masaje deportivo', '💆', 15, 25], ['Readaptación de lesiones', '🦵', 20, 15]] },
-    { id: 'fisioavanza', cat: 'fisio', nombre: 'Fisioavanza Fisioterapia & Pilates', direccion: 'Calle de la Batalla del Salado, 21', lat: 40.40182, lng: -3.69593, productos: [['Clase de pilates', '🧘', 10, 30], ['Sesión de fisioterapia', '🦵', 18, 20], ['Masaje de descarga', '💆', 15, 25]] },
-    { id: 'kinect', cat: 'fisio', nombre: 'Kinect', direccion: 'Calle de Boix y Morer, 4', lat: 40.43926, lng: -3.70639, productos: [['Sesión de fisioterapia deportiva', '🦵', 20, 20], ['Estiramientos asistidos', '🧘', 10, 30], ['Vendaje neuromuscular', '🩹', 6, 50]] },
-    { id: 'tecnica', cat: 'fisio', nombre: 'Técnica Fisioterapia', direccion: 'Calle de Boix y Morer, 22', lat: 40.44120, lng: -3.70627, productos: [['Masaje de descarga', '💆', 15, 25], ['Punción seca', '📍', 15, 20], ['Valoración de la pisada', '👣', 12, 30]] },
-    { id: 'curarte', cat: 'fisio', nombre: 'Centro de fisioterapia Curarte', direccion: 'Paseo del Rey, 2', lat: 40.42060, lng: -3.71797, productos: [['Sesión de fisioterapia', '🦵', 18, 20], ['Masaje deportivo', '💆', 15, 25], ['Clase de estiramientos', '🧘', 8, 30]] },
+    { id: 'fisio', cat: 'fisio', nombre: 'Fisioterapia Argüelles', direccion: 'Calle de Rodríguez San Pedro, 46', lat: 40.43186, lng: -3.71306, foto: 'fisio2', productos: [['Masaje de descarga', '💆', 15, 25], ['Sesión de fisioterapia deportiva', '🦵', 20, 20], ['Vendaje neuromuscular', '🩹', 6, 50]] },
+    { id: 'debod', cat: 'fisio', nombre: 'Fisioterapia Debod', direccion: 'Calle de Evaristo San Miguel, 19', lat: 40.42578, lng: -3.71647, foto: 'masaje', productos: [['Masaje deportivo', '💆', 15, 25], ['Punción seca', '📍', 15, 20], ['Estiramientos asistidos', '🧘', 10, 30]] },
+    { id: 'gaztambide', cat: 'fisio', nombre: 'Fisioterapia Gaztambide', direccion: 'Calle de Gaztambide', lat: 40.43704, lng: -3.71527, foto: 'masaje2', productos: [['Sesión de fisioterapia', '🦵', 18, 20], ['Masaje de descarga', '💆', 15, 25], ['Vendaje neuromuscular', '🩹', 6, 50]] },
+    { id: 'fixus', cat: 'fisio', nombre: 'Fixus', direccion: 'Calle de Cea Bermúdez, 46', lat: 40.43924, lng: -3.71194, foto: 'fisio2', productos: [['Valoración de la pisada', '👣', 12, 30], ['Masaje deportivo', '💆', 15, 25], ['Readaptación de lesiones', '🦵', 20, 15]] },
+    { id: 'fisioavanza', cat: 'fisio', nombre: 'Fisioavanza Fisioterapia & Pilates', direccion: 'Calle de la Batalla del Salado, 21', lat: 40.40182, lng: -3.69593, foto: 'pilates', productos: [['Clase de pilates', '🧘', 10, 30], ['Sesión de fisioterapia', '🦵', 18, 20], ['Masaje de descarga', '💆', 15, 25]] },
+    { id: 'kinect', cat: 'fisio', nombre: 'Kinect', direccion: 'Calle de Boix y Morer, 4', lat: 40.43926, lng: -3.70639, foto: 'masaje', productos: [['Sesión de fisioterapia deportiva', '🦵', 20, 20], ['Estiramientos asistidos', '🧘', 10, 30], ['Vendaje neuromuscular', '🩹', 6, 50]] },
+    { id: 'tecnica', cat: 'fisio', nombre: 'Técnica Fisioterapia', direccion: 'Calle de Boix y Morer, 22', lat: 40.44120, lng: -3.70627, foto: 'masaje2', productos: [['Masaje de descarga', '💆', 15, 25], ['Punción seca', '📍', 15, 20], ['Valoración de la pisada', '👣', 12, 30]] },
+    { id: 'curarte', cat: 'fisio', nombre: 'Centro de fisioterapia Curarte', direccion: 'Paseo del Rey, 2', lat: 40.42060, lng: -3.71797, foto: 'fisio2', productos: [['Sesión de fisioterapia', '🦵', 18, 20], ['Masaje deportivo', '💆', 15, 25], ['Clase de estiramientos', '🧘', 8, 30]] },
     // Restaurantes
-    { id: 'honest', cat: 'resto', nombre: 'Honest Greens', direccion: 'Calle de Fuencarral, 95', lat: 40.42703, lng: -3.70170, productos: [['Plato de pollo con verduras de temporada', '🥗', 12, 25], ['Bowl de salmón', '🐟', 15, 20], ['Limonada natural', '🍋', 5, 100]] },
-    { id: 'goiko', cat: 'resto', nombre: 'Goiko', direccion: 'Calle del Pez, 36', lat: 40.42428, lng: -3.70655, productos: [['Hamburguesa Kevin Bacon', '🍔', 15, 20], ['Patatas fritas', '🍟', 6, 50], ['Ensalada César', '🥗', 10, 25]] },
-    { id: 'luxalad', cat: 'resto', nombre: 'Luxalad', direccion: 'Malasaña', lat: 40.42545, lng: -3.70725, productos: [['Ensalada a tu gusto', '🥗', 10, 25], ['Wrap de pollo', '🌯', 10, 20], ['Agua con gas', '💧', 4, 100]] },
-    { id: 'bacoa', cat: 'resto', nombre: 'Bacoa', direccion: 'Carrera de San Jerónimo, 3', lat: 40.41675, lng: -3.70168, productos: [['Hamburguesa clásica', '🍔', 14, 20], ['Patatas fritas', '🍟', 6, 50], ['Hamburguesa vegetal', '🌱', 14, 25]] },
-    { id: 'hundred', cat: 'resto', nombre: 'Hundred Burgers', direccion: 'Plaza de Pedro Zerolo, 1', lat: 40.42103, lng: -3.69983, productos: [['Hamburguesa con queso', '🍔', 14, 20], ['Ensalada de la casa', '🥗', 10, 25], ['Refresco', '🥤', 4, 100]] },
-    { id: 'madmad', cat: 'resto', nombre: 'Mad Mad Vegan', direccion: 'Calle de Lavapiés, 16', lat: 40.41112, lng: -3.70288, productos: [['Hamburguesa vegana', '🌱', 14, 20], ['Sándwich vegano', '🥪', 10, 25], ['Patatas especiadas', '🍟', 6, 50]] },
-    { id: 'ovejanegra', cat: 'resto', nombre: 'La Oveja Negra · Taberna Vegana', direccion: 'Calle de Buenavista, 42', lat: 40.40931, lng: -3.69988, productos: [['Menú del día vegano', '🍽️', 15, 20], ['Hamburguesa vegana', '🌱', 12, 25], ['Postre casero', '🍰', 6, 50]] },
-    { id: 'steakburger', cat: 'resto', nombre: 'Steak Burger', direccion: 'Calle de Fuencarral, 73', lat: 40.42487, lng: -3.70085, productos: [['Hamburguesa de ternera', '🍔', 14, 20], ['Ensalada', '🥗', 10, 25], ['Batido', '🥤', 6, 30]] },
+    { id: 'honest', cat: 'resto', nombre: 'Honest Greens', direccion: 'Calle de Fuencarral, 95', lat: 40.42703, lng: -3.70170, foto: 'ensalada', productos: [['Plato de pollo con verduras de temporada', '🥗', 12, 25], ['Bowl de salmón', '🐟', 15, 20], ['Limonada natural', '🍋', 5, 100]] },
+    { id: 'goiko', cat: 'resto', nombre: 'Goiko', direccion: 'Calle del Pez, 36', lat: 40.42428, lng: -3.70655, foto: 'burger', productos: [['Hamburguesa Kevin Bacon', '🍔', 15, 20], ['Patatas fritas', '🍟', 6, 50], ['Ensalada César', '🥗', 10, 25]] },
+    { id: 'luxalad', cat: 'resto', nombre: 'Luxalad', direccion: 'Malasaña', lat: 40.42545, lng: -3.70725, foto: 'ensalada', productos: [['Ensalada a tu gusto', '🥗', 10, 25], ['Wrap de pollo', '🌯', 10, 20], ['Agua con gas', '💧', 4, 100]] },
+    { id: 'bacoa', cat: 'resto', nombre: 'Bacoa', direccion: 'Carrera de San Jerónimo, 3', lat: 40.41675, lng: -3.70168, foto: 'burger2', productos: [['Hamburguesa clásica', '🍔', 14, 20], ['Patatas fritas', '🍟', 6, 50], ['Hamburguesa vegetal', '🌱', 14, 25]] },
+    { id: 'hundred', cat: 'resto', nombre: 'Hundred Burgers', direccion: 'Plaza de Pedro Zerolo, 1', lat: 40.42103, lng: -3.69983, foto: 'burger3', productos: [['Hamburguesa con queso', '🍔', 14, 20], ['Ensalada de la casa', '🥗', 10, 25], ['Refresco', '🥤', 4, 100]] },
+    { id: 'madmad', cat: 'resto', nombre: 'Mad Mad Vegan', direccion: 'Calle de Lavapiés, 16', lat: 40.41112, lng: -3.70288, foto: 'vegano', productos: [['Hamburguesa vegana', '🌱', 14, 20], ['Sándwich vegano', '🥪', 10, 25], ['Patatas especiadas', '🍟', 6, 50]] },
+    { id: 'ovejanegra', cat: 'resto', nombre: 'La Oveja Negra · Taberna Vegana', direccion: 'Calle de Buenavista, 42', lat: 40.40931, lng: -3.69988, foto: 'vegano', productos: [['Menú del día vegano', '🍽️', 15, 20], ['Hamburguesa vegana', '🌱', 12, 25], ['Postre casero', '🍰', 6, 50]] },
+    { id: 'steakburger', cat: 'resto', nombre: 'Steak Burger', direccion: 'Calle de Fuencarral, 73', lat: 40.42487, lng: -3.70085, foto: 'burger', productos: [['Hamburguesa de ternera', '🍔', 14, 20], ['Ensalada', '🥗', 10, 25], ['Batido', '🥤', 6, 30]] },
     // Experiencias deportivas
-    { id: 'rnr', cat: 'exper', nombre: "Rock 'n' Roll Running Series Madrid", direccion: 'Meta en el Parque del Retiro', lat: 40.41495, lng: -3.68328, productos: [['Inscripción al maratón', '🏅', 30, 25], ['Inscripción al medio maratón', '🏃', 20, 25], ['Inscripción a la carrera de 10 km', '👟', 12, 30]] },
-    { id: 'sansilvestre', cat: 'exper', nombre: 'San Silvestre Vallecana', direccion: 'Meta en el Estadio de Vallecas', lat: 40.39176, lng: -3.65874, productos: [['Inscripción a la carrera popular (10 km)', '🏃', 12, 30], ['Camiseta oficial', '🎽', 8, 25], ['Inscripción a la carrera infantil', '🧒', 6, 50]] },
-    { id: 'sputnik', cat: 'exper', nombre: 'Sputnik Climbing', direccion: 'Calle de Vallehermoso, 87', lat: 40.43949, lng: -3.70873, productos: [['Entrada de día', '🧗', 10, 30], ['Clase de iniciación a la escalada', '🧗', 15, 25], ['Bono de 10 entradas', '🎟️', 30, 15]] },
-    { id: 'sputnik-legazpi', cat: 'exper', nombre: 'Sputnik Legazpi', direccion: 'Calle del Hierro, 33', lat: 40.38898, lng: -3.68917, productos: [['Entrada de día', '🧗', 10, 30], ['Alquiler de pies de gato', '👟', 4, 100], ['Bono de 10 entradas', '🎟️', 30, 15]] },
-    { id: 'arkose', cat: 'exper', nombre: 'Arkose Cuatro Caminos', direccion: 'Calle Leñeros, 4', lat: 40.45267, lng: -3.70756, productos: [['Entrada de bloque', '🧗', 10, 30], ['Clase de yoga', '🧘', 10, 25], ['Brunch en el restaurante', '🍳', 12, 20]] },
-    { id: 'boulderzone', cat: 'exper', nombre: 'Boulder Zone Retiro', direccion: 'Calle Azcona, 44', lat: 40.43451, lng: -3.66874, productos: [['Entrada de día', '🧗', 10, 30], ['Curso de iniciación', '🧗', 20, 20], ['Alquiler de material', '🎒', 4, 100]] },
-    { id: 'uadibloc', cat: 'exper', nombre: 'Uadibloc', direccion: 'Calle de San Hermenegildo, 25', lat: 40.42823, lng: -3.70911, productos: [['Entrada de bloque', '🧗', 10, 30], ['Clase de técnica', '🧗', 15, 25], ['Bono de 5 entradas', '🎟️', 20, 20]] },
-    { id: 'urbanmonkey', cat: 'exper', nombre: 'Urban Monkey', direccion: 'Calle de Tarragona, 8', lat: 40.40162, lng: -3.69759, productos: [['Entrada de día', '🧗', 10, 30], ['Clase de iniciación', '🧗', 15, 25], ['Alquiler de pies de gato', '👟', 4, 100]] },
+    { id: 'rnr', cat: 'exper', nombre: "Rock 'n' Roll Running Series Madrid", direccion: 'Meta en el Parque del Retiro', lat: 40.41495, lng: -3.68328, foto: 'maraton', productos: [['Inscripción al maratón', '🏅', 30, 25], ['Inscripción al medio maratón', '🏃', 20, 25], ['Inscripción a la carrera de 10 km', '👟', 12, 30]] },
+    { id: 'sansilvestre', cat: 'exper', nombre: 'San Silvestre Vallecana', direccion: 'Meta en el Estadio de Vallecas', lat: 40.39176, lng: -3.65874, foto: 'sansilvestre', productos: [['Inscripción a la carrera popular (10 km)', '🏃', 12, 30], ['Camiseta oficial', '🎽', 8, 25], ['Inscripción a la carrera infantil', '🧒', 6, 50]] },
+    { id: 'sputnik', cat: 'exper', nombre: 'Sputnik Climbing', direccion: 'Calle de Vallehermoso, 87', lat: 40.43949, lng: -3.70873, foto: 'boulder', productos: [['Entrada de día', '🧗', 10, 30], ['Clase de iniciación a la escalada', '🧗', 15, 25], ['Bono de 10 entradas', '🎟️', 30, 15]] },
+    { id: 'sputnik-legazpi', cat: 'exper', nombre: 'Sputnik Legazpi', direccion: 'Calle del Hierro, 33', lat: 40.38898, lng: -3.68917, foto: 'escalada', productos: [['Entrada de día', '🧗', 10, 30], ['Alquiler de pies de gato', '👟', 4, 100], ['Bono de 10 entradas', '🎟️', 30, 15]] },
+    { id: 'arkose', cat: 'exper', nombre: 'Arkose Cuatro Caminos', direccion: 'Calle Leñeros, 4', lat: 40.45267, lng: -3.70756, foto: 'boulder2', productos: [['Entrada de bloque', '🧗', 10, 30], ['Clase de yoga', '🧘', 10, 25], ['Brunch en el restaurante', '🍳', 12, 20]] },
+    { id: 'boulderzone', cat: 'exper', nombre: 'Boulder Zone Retiro', direccion: 'Calle Azcona, 44', lat: 40.43451, lng: -3.66874, foto: 'boulder', productos: [['Entrada de día', '🧗', 10, 30], ['Curso de iniciación', '🧗', 20, 20], ['Alquiler de material', '🎒', 4, 100]] },
+    { id: 'uadibloc', cat: 'exper', nombre: 'Uadibloc', direccion: 'Calle de San Hermenegildo, 25', lat: 40.42823, lng: -3.70911, foto: 'boulder2', productos: [['Entrada de bloque', '🧗', 10, 30], ['Clase de técnica', '🧗', 15, 25], ['Bono de 5 entradas', '🎟️', 20, 20]] },
+    { id: 'urbanmonkey', cat: 'exper', nombre: 'Urban Monkey', direccion: 'Calle de Tarragona, 8', lat: 40.40162, lng: -3.69759, foto: 'escalada', productos: [['Entrada de día', '🧗', 10, 30], ['Clase de iniciación', '🧗', 15, 25], ['Alquiler de pies de gato', '👟', 4, 100]] },
     // Suplementos deportivos
-    { id: 'nutrideon', cat: 'supl', nombre: 'Nutrideon', direccion: 'Avenida de Filipinas, 40', lat: 40.44094, lng: -3.70730, productos: [['Proteína Myprotein Impact Whey', '💪', 20, 25], ['Creatina Creapure', '⚡', 12, 30], ['Barritas de proteína Myprotein', '🍫', 6, 50]] },
-    { id: 'bronce', cat: 'supl', nombre: 'Nutrición Bronce', direccion: 'Arganzuela', lat: 40.40229, lng: -3.69827, productos: [['Geles energéticos 226ERS High Energy', '🧪', 6, 30], ['Bebida isotónica Isostar', '🥤', 5, 50], ['Sales minerales 226ERS', '🧂', 5, 25]] },
-    { id: 'naturhouse', cat: 'supl', nombre: 'NaturHouse', direccion: 'Calle de Ferraz, 94', lat: 40.43072, lng: -3.72160, productos: [['Consulta de asesoramiento nutricional', '🥦', 15, 25], ['Barritas de proteína', '🍫', 6, 30], ['Infusión digestiva', '🍵', 5, 50]] },
-    { id: 'herbolario', cat: 'supl', nombre: 'El Herbolario', direccion: 'Calle de José del Hierro, 39', lat: 40.44030, lng: -3.64420, productos: [['Magnesio', '💊', 6, 30], ['Proteína vegetal', '🌱', 15, 20], ['Colágeno con magnesio', '💪', 10, 25]] },
-    { id: 'decathlon-nutri', cat: 'supl', nombre: 'Decathlon (nutrición)', direccion: 'Calle de la Princesa, 63', lat: 40.43122, lng: -3.71694, productos: [['Proteína Whey Domyos', '💪', 15, 25], ['Gel energético Kiprun', '🧪', 4, 50], ['Bebida isotónica Kiprun', '🥤', 5, 30]] }
+    { id: 'nutrideon', cat: 'supl', nombre: 'Nutrideon', direccion: 'Avenida de Filipinas, 40', lat: 40.44094, lng: -3.70730, foto: 'proteina', productos: [['Proteína Myprotein Impact Whey', '💪', 20, 25], ['Creatina Creapure', '⚡', 12, 30], ['Barritas de proteína Myprotein', '🍫', 6, 50]] },
+    { id: 'bronce', cat: 'supl', nombre: 'Nutrición Bronce', direccion: 'Arganzuela', lat: 40.40229, lng: -3.69827, foto: 'proteina2', productos: [['Geles energéticos 226ERS High Energy', '🧪', 6, 30], ['Bebida isotónica Isostar', '🥤', 5, 50], ['Sales minerales 226ERS', '🧂', 5, 25]] },
+    { id: 'naturhouse', cat: 'supl', nombre: 'NaturHouse', direccion: 'Calle de Ferraz, 94', lat: 40.43072, lng: -3.72160, foto: 'frutos', productos: [['Consulta de asesoramiento nutricional', '🥦', 15, 25], ['Barritas de proteína', '🍫', 6, 30], ['Infusión digestiva', '🍵', 5, 50]] },
+    { id: 'herbolario', cat: 'supl', nombre: 'El Herbolario', direccion: 'Calle de José del Hierro, 39', lat: 40.44030, lng: -3.64420, foto: 'frutos', productos: [['Magnesio', '💊', 6, 30], ['Proteína vegetal', '🌱', 15, 20], ['Colágeno con magnesio', '💪', 10, 25]] },
+    { id: 'decathlon-nutri', cat: 'supl', nombre: 'Decathlon (nutrición)', direccion: 'Calle de la Princesa, 63', lat: 40.43122, lng: -3.71694, foto: 'decathlon', productos: [['Proteína Whey Domyos', '💪', 15, 25], ['Gel energético Kiprun', '🧪', 4, 50], ['Bebida isotónica Kiprun', '🥤', 5, 30]] },
+    // Más comercios: tiendas deportivas
+    { id: 'decathlon-orense', cat: 'deporte', nombre: 'Decathlon Orense', direccion: 'Calle de Orense, 1', lat: 40.44664, lng: -3.69576, foto: 'decathlon', productos: [['Zapatillas Kiprun KD900', '👟', 18, 25], ['Camiseta Kiprun Run 500', '🎽', 6, 40], ['Botellín flexible Kiprun', '🧴', 4, 50]] },
+    { id: 'decathlon-castellana', cat: 'deporte', nombre: 'Decathlon Castellana', direccion: 'Paseo de la Castellana, 110', lat: 40.44588, lng: -3.69061, foto: 'decathlon', productos: [['Reloj GPS Kiprun 900', '⌚', 25, 15], ['Mallas largas Kiprun Warm', '🩳', 10, 30], ['Frontal de running Kiprun', '🔦', 8, 30]] },
+    { id: 'decathlon-salamanca', cat: 'deporte', nombre: 'Decathlon Salamanca', direccion: 'Calle de José Ortega y Gasset, 22', lat: 40.43012, lng: -3.68310, foto: 'decathlon', productos: [['Zapatillas Kiprun KS500', '👟', 15, 25], ['Chaqueta cortavientos Kiprun', '🧥', 10, 30], ['Calcetines Kiprun (pack de 2)', '🧦', 3, 100]] },
+    { id: 'atletico-de-madrid-store', cat: 'deporte', nombre: 'Atlético de Madrid Store', direccion: 'Gran Vía, 47', lat: 40.42104, lng: -3.70754, foto: 'zapatillas2', productos: [['Camiseta de entrenamiento del Atlético', '🎽', 15, 20], ['Bufanda del Atlético de Madrid', '🧣', 6, 30], ['Gorra del Atlético de Madrid', '🧢', 6, 25]] },
+    { id: 'real-madrid-official-store', cat: 'deporte', nombre: 'Real Madrid Official Store', direccion: 'Calle del Carmen, 3', lat: 40.41761, lng: -3.70377, foto: 'zapatillas', productos: [['Camiseta de entrenamiento del Real Madrid', '🎽', 15, 20], ['Bufanda del Real Madrid', '🧣', 6, 30], ['Balón del Real Madrid', '⚽', 10, 25]] },
+    { id: 'deportes-cerezo', cat: 'deporte', nombre: 'Deportes Cerezo', direccion: 'Calle de Juan Montalvo, 23', lat: 40.44706, lng: -3.71219, foto: 'tienda-running', productos: [['Zapatillas de running', '👟', 18, 20], ['Mallas cortas de running', '🩳', 8, 25], ['Gorra técnica', '🧢', 5, 30]] },
+    { id: 'deportes-ranger', cat: 'deporte', nombre: 'Deportes Ranger', direccion: 'Calle Ribera de Curtidores, 4', lat: 40.40903, lng: -3.70748, foto: 'zapatillas2', productos: [['Mochila de trail', '🎒', 12, 20], ['Chaqueta impermeable', '🧥', 15, 20], ['Calcetines técnicos', '🧦', 3, 50]] },
+    { id: 'basketspirit', cat: 'deporte', nombre: 'Basketspirit', direccion: 'Calle del Marqués de Santa Ana, 14', lat: 40.42442, lng: -3.70484, foto: 'zapatillas', productos: [['Zapatillas de baloncesto', '👟', 22, 15], ['Balón de baloncesto', '🏀', 8, 30], ['Camiseta de baloncesto', '🎽', 8, 25]] },
+    { id: 'padel-nuestro', cat: 'deporte', nombre: 'Padel Nuestro', direccion: 'Avenida del Manzanares, 106', lat: 40.39935, lng: -3.71955, foto: 'padel', productos: [['Pala de pádel', '🎾', 25, 15], ['Bote de pelotas de pádel', '🎾', 3, 100], ['Zapatillas de pádel', '👟', 20, 20]] },
+    { id: 'deportes-princesa', cat: 'deporte', nombre: 'Deportes Princesa', direccion: 'Calle de la Princesa, 72', lat: 40.43222, lng: -3.71719, foto: 'tienda-running', productos: [['Zapatillas de running', '👟', 18, 20], ['Camiseta técnica', '🎽', 6, 30], ['Brazalete portamóvil', '📱', 4, 50]] },
+    { id: 'joma', cat: 'deporte', nombre: 'Joma', direccion: 'Paseo de la Virgen del Puerto, 19', lat: 40.41245, lng: -3.72098, foto: 'zapatillas', productos: [['Zapatillas Joma R.Hispalis', '👟', 15, 25], ['Camiseta Joma Elite', '🎽', 6, 30], ['Chándal Joma', '🧥', 12, 25]] },
+    { id: 'calmera-fitness', cat: 'deporte', nombre: 'Calmera Fitness', direccion: 'Calle de Atocha, 119', lat: 40.41013, lng: -3.69418, foto: 'gimnasio2', productos: [['Esterilla de fitness', '🧘', 8, 25], ['Bandas elásticas', '🏋️', 5, 30], ['Rodillo de masaje', '🌀', 6, 30]] },
+    { id: 'futbol-emocion', cat: 'deporte', nombre: 'Futbol Emoción', direccion: 'Calle de Bravo Murillo, 30', lat: 40.43683, lng: -3.70407, foto: 'zapatillas2', productos: [['Botas de fútbol', '👟', 20, 20], ['Espinilleras', '🛡️', 5, 30], ['Balón de fútbol', '⚽', 8, 25]] },
+    { id: 'basketball-emotion', cat: 'deporte', nombre: 'Basketball Emotion', direccion: 'Avenida de Filipinas, 46', lat: 40.44122, lng: -3.70655, foto: 'zapatillas', productos: [['Zapatillas de baloncesto', '👟', 22, 15], ['Balón de baloncesto', '🏀', 8, 30], ['Calcetines de baloncesto', '🧦', 3, 50]] },
+    { id: 'welcome-skateboarding', cat: 'deporte', nombre: 'Welcome Skateboarding', direccion: 'Corredera Alta de San Pablo, 16', lat: 40.42535, lng: -3.70186, foto: 'skate', productos: [['Tabla de skate', '🛹', 18, 20], ['Ruedas de skate', '🛞', 8, 25], ['Gorra Welcome', '🧢', 5, 30]] },
+    { id: 'new-balance-gran-via', cat: 'deporte', nombre: 'New Balance Gran Vía', direccion: 'Gran Vía, 15', lat: 40.41973, lng: -3.70012, foto: 'newbalance', productos: [['Zapatillas New Balance 1080', '👟', 25, 20], ['Zapatillas New Balance Rebel', '👟', 18, 25], ['Gorra New Balance', '🧢', 5, 30]] },
+    // Más comercios: cafeterías
+    { id: 'starbucks-gran-via', cat: 'cafe', nombre: 'Starbucks Gran Vía', direccion: 'Gran Vía, 58', lat: 40.42186, lng: -3.70809, foto: 'starbucks', productos: [['Caffè latte', '☕', 8, 100], ['Frappuccino', '🥤', 10, 50], ['Muffin de arándanos', '🧁', 6, 100]] },
+    { id: 'tim-hortons-santo-domingo', cat: 'cafe', nombre: 'Tim Hortons Santo Domingo', direccion: 'Plaza de Santo Domingo', lat: 40.41967, lng: -3.70793, foto: 'timhortons', productos: [['Café de filtro', '☕', 5, 100], ['Timbits (caja de 10)', '🍩', 8, 100], ['Iced Capp', '🥤', 8, 50]] },
+    { id: 'santagloria', cat: 'cafe', nombre: 'Santagloria', direccion: 'Calle de San Bernardo, 58', lat: 40.42540, lng: -3.70726, foto: 'croissant', productos: [['Café con leche', '☕', 6, 100], ['Croissant', '🥐', 5, 100], ['Zumo de naranja natural', '🍊', 8, 50]] },
+    { id: 'viena-capellanes', cat: 'cafe', nombre: 'Viena Capellanes', direccion: 'Calle de Génova, 4', lat: 40.42723, lng: -3.69528, foto: 'viena', productos: [['Café con leche', '☕', 6, 100], ['Bocadillo de pan de Viena', '🥪', 10, 30], ['Napolitana de chocolate', '🥐', 5, 100]] },
+    { id: 'friends-coffee', cat: 'cafe', nombre: "Friend's Coffee", direccion: 'Calle de Rodríguez San Pedro, 7', lat: 40.43146, lng: -3.70814, foto: 'latte', productos: [['Flat white', '☕', 8, 100], ['Tostada de aguacate', '🥑', 12, 30], ['Banana bread', '🍌', 6, 100]] },
+    { id: 'amae-cafe', cat: 'cafe', nombre: 'Amae Café', direccion: 'Calle del Conde Duque, 42', lat: 40.42903, lng: -3.70924, foto: 'matcha', productos: [['Matcha latte', '🍵', 10, 50], ['Café de especialidad', '☕', 8, 100], ['Galleta casera', '🍪', 4, 100]] },
+    { id: 'ambu-coffee', cat: 'cafe', nombre: 'Ambu Coffee', direccion: 'Calle del Pez, 36', lat: 40.42417, lng: -3.70632, foto: 'barista', productos: [['Cappuccino', '☕', 8, 100], ['Cold brew', '🧊', 8, 50], ['Cookie', '🍪', 4, 100]] },
+    { id: 'unfiltrd', cat: 'cafe', nombre: 'Unfiltrd', direccion: 'Calle de Amaniel, 36', lat: 40.42806, lng: -3.70947, foto: 'latte2', productos: [['Espresso tonic', '☕', 8, 50], ['Flat white', '☕', 8, 100], ['Bizcocho del día', '🍰', 6, 100]] },
+    { id: 'wolfox-coffee', cat: 'cafe', nombre: 'Wolfox Coffee', direccion: 'Calle de Pérez Galdós, 2', lat: 40.42247, lng: -3.70059, foto: 'latte', productos: [['Flat white', '☕', 8, 100], ['Cold brew', '🧊', 8, 50], ['Cinnamon roll', '🥐', 6, 100]] },
+    { id: 'faborit-princesa', cat: 'cafe', nombre: 'Faborit Princesa', direccion: 'Calle de la Princesa, 2', lat: 40.42455, lng: -3.71165, foto: 'croissant', productos: [['Café con leche', '☕', 6, 100], ['Zumo natural', '🍊', 8, 50], ['Bowl de açaí', '🥣', 12, 30]] },
+    { id: 'le-pain-quotidien', cat: 'cafe', nombre: 'Le Pain Quotidien', direccion: 'Calle de Serrano', lat: 40.42693, lng: -3.68778, foto: 'lepain', productos: [['Café con leche', '☕', 6, 100], ['Tostada de aguacate', '🥑', 12, 30], ['Croissant de mantequilla', '🥐', 5, 100]] },
+    { id: 'gran-cafe-gijon', cat: 'cafe', nombre: 'Gran Café Gijón', direccion: 'Paseo de Recoletos, 21', lat: 40.42221, lng: -3.69237, foto: 'gijon', productos: [['Café con leche', '☕', 8, 100], ['Tostada con tomate', '🍅', 8, 50], ['Chocolate caliente', '🍫', 10, 50]] },
+    { id: 'cafe-de-la-luz', cat: 'cafe', nombre: 'Café de la Luz', direccion: 'Calle de la Puebla, 8', lat: 40.42214, lng: -3.70252, foto: 'barista', productos: [['Café con leche', '☕', 6, 100], ['Tarta de zanahoria', '🍰', 8, 50], ['Batido de frutas', '🥤', 10, 30]] },
+    { id: 'brown-bear-bakery', cat: 'cafe', nombre: 'Brown Bear Bakery', direccion: 'Calle del León, 10', lat: 40.41417, lng: -3.69884, foto: 'croissant', productos: [['Café de especialidad', '☕', 8, 100], ['Cinnamon roll', '🥐', 6, 100], ['Pan de masa madre', '🍞', 10, 30]] },
+    { id: 'oss-kaffe', cat: 'cafe', nombre: 'Öss Kaffe', direccion: 'Calle de Manuel Cortina, 1', lat: 40.43073, lng: -3.69918, foto: 'latte2', productos: [['Flat white', '☕', 8, 100], ['Kanelbulle', '🥐', 6, 100], ['Tostada de aguacate', '🥑', 12, 30]] },
+    { id: 'maison-kayser', cat: 'cafe', nombre: 'Maison Kayser', direccion: 'Calle de Salustiano Olózaga, 18', lat: 40.42031, lng: -3.68978, foto: 'kayser', productos: [['Café con leche', '☕', 6, 100], ['Croissant', '🥐', 5, 100], ['Baguette', '🥖', 4, 100]] },
+    { id: 'la-mexicana', cat: 'cafe', nombre: 'La Mexicana', direccion: 'Calle de Fuencarral, 115', lat: 40.42982, lng: -3.70291, foto: 'croissant', productos: [['Café con leche', '☕', 6, 100], ['Napolitana de chocolate', '🥐', 5, 100], ['Palmera de chocolate', '🍫', 6, 50]] },
+    { id: 'cafelito', cat: 'cafe', nombre: 'Cafelito', direccion: 'Calle de Sombrerete, 20', lat: 40.40835, lng: -3.70277, foto: 'latte', productos: [['Cappuccino', '☕', 8, 100], ['Tarta del día', '🍰', 8, 50], ['Tostada integral', '🍞', 6, 50]] },
+    // Más comercios: locales fisioterapia
+    { id: 'fisiorosales', cat: 'fisio', nombre: 'Fisiorosales', direccion: 'Calle del Marqués de Urquijo, 40', lat: 40.42926, lng: -3.72100, foto: 'masaje', productos: [['Sesión de fisioterapia deportiva', '💆', 25, 20], ['Masaje de descarga', '💆', 20, 25], ['Vendaje neuromuscular', '🩹', 8, 50]] },
+    { id: 'fised', cat: 'fisio', nombre: 'Fised', direccion: 'Calle del Duque de Liria, 3', lat: 40.42584, lng: -3.71212, foto: 'masaje2', productos: [['Sesión de fisioterapia', '💆', 25, 20], ['Punción seca', '📍', 20, 20], ['Masaje de descarga de piernas', '🦵', 18, 25]] },
+    { id: 'fisioterapia-logical-madrid', cat: 'fisio', nombre: 'Fisioterapia Logical Madrid', direccion: 'Calle Soria, 3', lat: 40.40500, lng: -3.70549, foto: 'fisio2', productos: [['Valoración de lesión', '📋', 15, 50], ['Masaje de descarga', '💆', 20, 25], ['Estiramientos guiados', '🤸', 10, 30]] },
+    { id: 'fisiojes', cat: 'fisio', nombre: 'Fisiojes', direccion: 'Paseo de Santa María de la Cabeza, 39', lat: 40.40310, lng: -3.69709, foto: 'masaje', productos: [['Sesión de fisioterapia', '💆', 25, 20], ['Masaje de descarga', '💆', 20, 25], ['Vendaje neuromuscular', '🩹', 8, 50]] },
+    { id: 'innofisio', cat: 'fisio', nombre: 'Innofisio', direccion: 'Calle de la Batalla del Salado, 8', lat: 40.40341, lng: -3.69598, foto: 'masaje2', productos: [['Fisioterapia deportiva', '💆', 25, 20], ['Ondas de choque', '⚡', 25, 15], ['Valoración inicial', '📋', 10, 100]] },
+    { id: 'quelter-fisioterapia', cat: 'fisio', nombre: 'Quelter Fisioterapia', direccion: 'Calle de Galileo, 93', lat: 40.43965, lng: -3.71002, foto: 'pilates', productos: [['Sesión de fisioterapia', '💆', 25, 20], ['Pilates terapéutico', '🧘', 15, 25], ['Masaje de descarga', '💆', 20, 25]] },
+    { id: 'clinica-garabal', cat: 'fisio', nombre: 'Clínica Garabal', direccion: 'Calle de García de Paredes, 9', lat: 40.43707, lng: -3.70230, foto: 'fisio2', productos: [['Sesión de fisioterapia', '💆', 25, 20], ['Osteopatía', '🦴', 25, 15], ['Valoración inicial', '📋', 10, 100]] },
+    { id: 'fisioalmat', cat: 'fisio', nombre: 'Fisioalmat', direccion: 'Calle de Málaga, 5', lat: 40.43889, lng: -3.69385, foto: 'masaje', productos: [['Masaje de descarga', '💆', 20, 25], ['Punción seca', '📍', 20, 20], ['Vendaje neuromuscular', '🩹', 8, 50]] },
+    { id: 'masvita-fisioterapia', cat: 'fisio', nombre: 'Masvita Fisioterapia', direccion: 'Av. de Menéndez Pelayo, 57', lat: 40.41604, lng: -3.67761, foto: 'masaje2', productos: [['Sesión de fisioterapia', '💆', 25, 20], ['Estudio de la pisada', '👣', 20, 25], ['Masaje de descarga', '💆', 20, 25]] },
+    { id: 'fisioterapia-alenza', cat: 'fisio', nombre: 'Fisioterapia Alenza', direccion: 'Calle de Alenza, 30', lat: 40.44597, lng: -3.70027, foto: 'fisio2', productos: [['Sesión de fisioterapia', '💆', 25, 20], ['Masaje de descarga', '💆', 20, 25], ['Clase de pilates', '🧘', 12, 30]] },
+    { id: 'cl-fisio-chamartin', cat: 'fisio', nombre: 'CL Fisio Chamartín', direccion: 'Paseo de La Habana, 18', lat: 40.44828, lng: -3.68959, foto: 'masaje', productos: [['Fisioterapia deportiva', '💆', 25, 20], ['Recuperación de lesiones', '🦵', 25, 15], ['Valoración inicial', '📋', 10, 100]] },
+    { id: 'efisio-chamberi', cat: 'fisio', nombre: 'eFISIO Chamberí', direccion: 'Calle de Carranza, 7', lat: 40.42902, lng: -3.70532, foto: 'masaje2', productos: [['Sesión de fisioterapia', '💆', 25, 20], ['Masaje de descarga', '💆', 20, 25], ['Vendaje neuromuscular', '🩹', 8, 50]] },
+    { id: 'dualfisio', cat: 'fisio', nombre: 'DualFisio', direccion: 'Calle de Antonio López, 24', lat: 40.39647, lng: -3.71330, foto: 'fisio2', productos: [['Sesión de fisioterapia', '💆', 25, 20], ['Masaje de descarga', '💆', 20, 25], ['Estiramientos guiados', '🤸', 10, 30]] },
+    { id: 'fisionarte', cat: 'fisio', nombre: 'Fisionarte', direccion: 'Calle Condes de Barcelona, 12', lat: 40.39534, lng: -3.71482, foto: 'masaje', productos: [['Sesión de fisioterapia', '💆', 25, 20], ['Punción seca', '📍', 20, 20], ['Valoración inicial', '📋', 10, 100]] },
+    { id: 'fisioterapia-estrella', cat: 'fisio', nombre: 'Fisioterapia Estrella', direccion: 'Calle de Antonio Casero, 12', lat: 40.41999, lng: -3.66784, foto: 'masaje2', productos: [['Sesión de fisioterapia', '💆', 25, 20], ['Masaje de descarga', '💆', 20, 25], ['Vendaje neuromuscular', '🩹', 8, 50]] },
+    // Más comercios: restaurantes
+    { id: 'basics-by-goiko', cat: 'resto', nombre: 'Basics by Goiko', direccion: 'Calle de Hortaleza, 60', lat: 40.42265, lng: -3.69928, foto: 'burger2', productos: [['Hamburguesa Basic', '🍔', 15, 25], ['Patatas fritas', '🍟', 5, 100], ['Refresco', '🥤', 4, 100]] },
+    { id: 'poyo-club', cat: 'resto', nombre: 'Poyo Club', direccion: 'Calle de San Andrés, 38', lat: 40.42824, lng: -3.70335, foto: 'pollo', productos: [['Pollo asado (medio)', '🍗', 15, 25], ['Ensalada de la casa', '🥗', 10, 30], ['Patatas', '🍟', 5, 100]] },
+    { id: 'goiko-princesa', cat: 'resto', nombre: 'Goiko Princesa', direccion: 'Calle de la Princesa, 26', lat: 40.42773, lng: -3.71396, foto: 'burger3', productos: [['Hamburguesa Kevin Bacon', '🍔', 18, 20], ['Patatas Bacon Cheese Fries', '🍟', 8, 50], ['Ensalada César', '🥗', 12, 25]] },
+    { id: 'alta-burgersia', cat: 'resto', nombre: 'Alta Burgersía', direccion: 'Plaza de Matute, 5', lat: 40.41337, lng: -3.69984, foto: 'burger', productos: [['Hamburguesa de la casa', '🍔', 16, 20], ['Patatas caseras', '🍟', 5, 100], ['Cerveza o refresco', '🍺', 4, 100]] },
+    { id: 'el-respiro', cat: 'resto', nombre: 'El Respiro', direccion: 'Calle de las Infantas, 34', lat: 40.42025, lng: -3.69828, foto: 'vegano', productos: [['Menú del día', '🍽️', 18, 20], ['Hamburguesa vegetal', '🍔', 14, 25], ['Postre casero', '🍰', 6, 50]] },
+    { id: 'santa-y-pura', cat: 'resto', nombre: 'Santa y Pura', direccion: 'Calle de Santa Isabel, 27', lat: 40.41020, lng: -3.69727, foto: 'burger2', productos: [['Hamburguesa', '🍔', 15, 25], ['Nachos', '🌮', 8, 30], ['Refresco', '🥤', 4, 100]] },
+    { id: 'frankie-burgers-ponzano', cat: 'resto', nombre: 'Frankie Burgers Ponzano', direccion: 'Calle de Ponzano, 46', lat: 40.44046, lng: -3.69905, foto: 'burger', productos: [['Hamburguesa Frankie', '🍔', 16, 20], ['Patatas fritas', '🍟', 5, 100], ['Batido', '🥤', 8, 50]] },
+    { id: 'florafina', cat: 'resto', nombre: 'FloraFina', direccion: 'Calle de Serrano, 46', lat: 40.42699, lng: -3.68727, foto: 'ensalada', productos: [['Ensalada completa', '🥗', 14, 25], ['Bowl vegetal', '🥙', 14, 25], ['Zumo detox', '🥤', 8, 50]] },
+    { id: 'hundred-burgers-chamberi', cat: 'resto', nombre: 'Hundred Burgers Chamberí', direccion: 'Calle de Eloy Gonzalo, 12', lat: 40.43387, lng: -3.70253, foto: 'burger3', productos: [['Hamburguesa Hundred', '🍔', 16, 20], ['Patatas fritas', '🍟', 5, 100], ['Hamburguesa vegana', '🌱', 15, 25]] },
+    { id: 'steak-burger-atocha', cat: 'resto', nombre: 'Steak Burger Atocha', direccion: 'Calle de Atocha, 110', lat: 40.40958, lng: -3.69376, foto: 'burger2', productos: [['Hamburguesa Steak Burger', '🍔', 15, 25], ['Patatas fritas', '🍟', 5, 100], ['Ensalada', '🥗', 10, 30]] },
+    { id: 'home-burger-bar', cat: 'resto', nombre: 'Home Burger Bar', direccion: 'Calle de Silva, 25', lat: 40.42194, lng: -3.70562, foto: 'homeburger', productos: [['Hamburguesa ecológica', '🍔', 18, 20], ['Patatas fritas', '🍟', 5, 100], ['Ensalada', '🥗', 10, 30]] },
+    { id: 'trujillo-burger', cat: 'resto', nombre: 'Trujillo Burger', direccion: 'Calle de Bustamante, 26', lat: 40.40037, lng: -3.68691, foto: 'burger', productos: [['Hamburguesa de la casa', '🍔', 15, 25], ['Patatas fritas', '🍟', 5, 100], ['Refresco', '🥤', 4, 100]] },
+    { id: 'el-lugar-de-martina', cat: 'resto', nombre: 'El Lugar de Martina', direccion: 'Plaza de Santa María Soledad Torres Acosta, 2', lat: 40.42146, lng: -3.70555, foto: 'ensalada', productos: [['Menú del día', '🍽️', 18, 20], ['Ensalada templada', '🥗', 12, 25], ['Postre casero', '🍰', 6, 50]] },
+    // Más comercios: experiencias deportivas
+    { id: 'basic-fit-atocha', cat: 'exper', nombre: 'Basic-Fit Atocha', direccion: 'Calle de Atocha, 24', lat: 40.41365, lng: -3.70233, foto: 'basicfit', productos: [['Pase de un día', '🏋️', 5, 100], ['Primer mes de cuota', '📅', 25, 30], ['Clase virtual de ciclo', '🚴', 6, 100]] },
+    { id: 'vivagym-plaza-mayor', cat: 'exper', nombre: 'VivaGym Plaza Mayor', direccion: 'Calle Conde de Miranda, 1', lat: 40.41494, lng: -3.70919, foto: 'gimnasio2', productos: [['Pase de un día', '🏋️', 5, 100], ['Primer mes de cuota', '📅', 25, 30], ['Clase colectiva', '🤸', 6, 100]] },
+    { id: 'anytime-fitness-bravo-murillo', cat: 'exper', nombre: 'Anytime Fitness Bravo Murillo', direccion: 'Calle de Bravo Murillo, 36', lat: 40.43753, lng: -3.70401, foto: 'anytime', productos: [['Pase de una semana', '🏋️', 12, 100], ['Sesión con entrenador', '💪', 20, 25], ['Primer mes de cuota', '📅', 25, 20]] },
+    { id: 'boulder-madrid', cat: 'exper', nombre: 'Boulder Madrid', direccion: 'Calle Hachero, 12', lat: 40.39123, lng: -3.66966, foto: 'boulder2', productos: [['Entrada de un día', '🧗', 8, 100], ['Alquiler de pies de gato', '👟', 3, 100], ['Clase de iniciación', '🧗', 15, 30]] },
+    { id: 'rocodromo-roc-30', cat: 'exper', nombre: 'Rocódromo Roc 30', direccion: 'Avenida del Manzanares, 108', lat: 40.39928, lng: -3.71866, foto: 'escalada', productos: [['Entrada al rocódromo', '🧗', 4, 100], ['Curso de iniciación', '🧗', 15, 25], ['Alquiler de material', '🪢', 3, 100]] },
+    { id: 'centro-deportivo-la-cebada', cat: 'exper', nombre: 'Centro Deportivo La Cebada', direccion: 'Plaza de la Cebada, 15', lat: 40.41102, lng: -3.70906, foto: 'piscina', productos: [['Entrada a la piscina', '🏊', 4, 100], ['Entrada a la sala de musculación', '🏋️', 4, 100], ['Clase de yoga', '🧘', 6, 50]] },
+    { id: 'centro-deportivo-marques-de-samaranch', cat: 'exper', nombre: 'Centro Deportivo Marqués de Samaranch', direccion: 'Paseo Imperial, 20', lat: 40.40709, lng: -3.71792, foto: 'gimnasio', productos: [['Entrada a la piscina', '🏊', 4, 100], ['Entrada al gimnasio', '🏋️', 4, 100], ['Clase colectiva', '🤸', 6, 50]] },
+    { id: 'brooklyn-fitboxing-arganzuela', cat: 'exper', nombre: 'Brooklyn Fitboxing Arganzuela', direccion: 'Calle de Fernando Poo, 4', lat: 40.39997, lng: -3.69942, foto: 'gimnasio2', productos: [['Clase de prueba de fitboxing', '🥊', 5, 100], ['Bono de 4 clases', '🥊', 18, 25], ['Guantes de fitboxing', '🥊', 12, 20]] },
+    { id: 'crossfit-gennox', cat: 'exper', nombre: 'CrossFit Gennox', direccion: 'Calle de Tomás Bretón, 50', lat: 40.39688, lng: -3.69148, foto: 'gimnasio2', productos: [['Clase de prueba de CrossFit', '🏋️', 5, 100], ['Bono de 4 clases', '🏋️', 18, 25], ['Sesión de movilidad', '🤸', 8, 50]] },
+    { id: 'barquillo-yoga', cat: 'exper', nombre: 'Barquillo Yoga', direccion: 'Calle del Barquillo, 12', lat: 40.42081, lng: -3.69559, foto: 'yoga', productos: [['Clase de yoga', '🧘', 8, 100], ['Bono de 5 clases', '🧘', 20, 25], ['Clase de yoga para corredores', '🏃', 8, 50]] },
+    { id: 'yogaone-moncloa', cat: 'exper', nombre: 'YogaOne Moncloa', direccion: 'Calle de Gaztambide, 53', lat: 40.43585, lng: -3.71554, foto: 'yoga', productos: [['Clase de yoga', '🧘', 8, 100], ['Bono de 5 clases', '🧘', 20, 25], ['Clase de meditación', '🕯️', 6, 50]] },
+    { id: 'club-pilates-pacifico', cat: 'exper', nombre: 'Club Pilates Pacífico', direccion: 'Calle de Téllez, 30', lat: 40.40206, lng: -3.67918, foto: 'pilates', productos: [['Clase de pilates máquina', '🧘', 10, 50], ['Clase de prueba', '🧘', 5, 100], ['Bono de 4 clases', '🧘', 20, 25]] },
+    { id: 'body-factory-chueca', cat: 'exper', nombre: 'Body Factory Chueca', direccion: 'Plaza de Santa María Soledad Torres Acosta, 1', lat: 40.42116, lng: -3.70522, foto: 'gimnasio2', productos: [['Pase de un día', '🏋️', 6, 100], ['Clase colectiva', '🤸', 6, 50], ['Primer mes de cuota', '📅', 25, 20]] },
+    { id: 'estrato-fitness', cat: 'exper', nombre: 'Estrato Fitness', direccion: 'Calle de Gutenberg, 11', lat: 40.40594, lng: -3.68111, foto: 'gimnasio2', productos: [['Clase de halterofilia', '🏋️', 8, 50], ['Sesión de fuerza para corredores', '💪', 12, 30], ['Clase de prueba', '🏋️', 5, 100]] },
+    { id: 'fitup-chamberi', cat: 'exper', nombre: 'Fitup Chamberí', direccion: 'Calle de Alonso Cano, 10', lat: 40.43613, lng: -3.69786, foto: 'gimnasio2', productos: [['Sesión de entrenamiento personal', '💪', 20, 25], ['Clase de prueba', '🏋️', 5, 100], ['Plan de fuerza para corredores', '📋', 15, 30]] },
+    { id: 'forus-embajadores', cat: 'exper', nombre: 'Forus Embajadores', direccion: 'Calle Soria, 2', lat: 40.40490, lng: -3.70590, foto: 'piscina', productos: [['Entrada a la piscina', '🏊', 5, 100], ['Pase de un día', '🏋️', 6, 100], ['Clase de spinning', '🚴', 6, 50]] },
+    // Más comercios: suplementos deportivos
+    { id: 'la-nodriza', cat: 'supl', nombre: 'La Nodriza', direccion: 'Calle de Caños del Peral, 5', lat: 40.41875, lng: -3.70889, foto: 'frutos', productos: [['Barritas energéticas (pack)', '🍫', 6, 30], ['Frutos secos ecológicos', '🥜', 5, 30], ['Bebida isotónica natural', '🥤', 4, 50]] },
+    { id: 'natural-ferraz', cat: 'supl', nombre: 'Natural Ferraz', direccion: 'Calle de Ferraz, 59', lat: 40.43028, lng: -3.72147, foto: 'proteina', productos: [['Proteína vegetal', '💪', 15, 20], ['Magnesio', '💊', 8, 25], ['Barritas de avena', '🍫', 5, 30]] },
+    { id: 'albahaca-ecotienda', cat: 'supl', nombre: 'Albahaca Ecotienda', direccion: 'Calle de Moratines, 16', lat: 40.40304, lng: -3.70326, foto: 'frutos', productos: [['Frutos secos ecológicos', '🥜', 5, 30], ['Dátiles Medjool', '🌴', 6, 25], ['Crema de cacahuete', '🥜', 6, 30]] },
+    { id: 'la-osa-herbolario', cat: 'supl', nombre: 'La Osa Herbolario', direccion: 'Calle de Noviciado, 9', lat: 40.42565, lng: -3.70890, foto: 'frutos', productos: [['Magnesio', '💊', 8, 25], ['Colágeno', '🦴', 12, 20], ['Infusión relajante', '🍵', 4, 50]] },
   ];
 
   // Presentando X tokens, el comercio aplica el descuento en ese producto.
   function ofertaHtml(tokens, descuento) {
     var premio = descuento >= 100 ? 'Gratis' : descuento + ' % de descuento';
     return '<p class="precio"><span class="etiqueta-oferta">' + premio + '</span> por&nbsp;<strong>' + tokens + '&nbsp;tokens</strong></p>';
+  }
+  // Fotos con licencia libre de Wikimedia Commons, guardadas en fotos/ (créditos en cada ficha).
+  function fotoDe(c) {
+    var f = FOTOS[c.foto];
+    return { archivo: 'fotos/' + c.foto + '.jpg', autor: f[0], licencia: f[1], enlace: 'https://commons.wikimedia.org/wiki/' + encodeURIComponent(f[2].replace(/ /g, '_')), alt: f[3], tipo: f[4] };
   }
   function comercioPorId(id) {
     return COMERCIOS.filter(function (c) { return c.id === id; })[0];
@@ -840,7 +996,7 @@
     COMERCIOS.filter(function (c) { return c.cat === cat; }).forEach(function (c) {
       var li = document.createElement('li');
       li.innerHTML = '<button class="fila" type="button" data-comercio="' + c.id + '">' +
-        '<span class="icono" aria-hidden="true">' + icono(c.cat) + '</span>' +
+        '<img class="miniatura" src="' + fotoDe(c).archivo + '" alt="" width="44" height="44" loading="lazy">' +
         '<span><strong>' + c.nombre + '</strong><small>' + c.direccion + ' · ' + c.productos.length + ' productos</small></span>' + FLECHA + '</button>';
       lista.appendChild(li);
     });
@@ -852,6 +1008,12 @@
     comercioActual = c;
     document.getElementById('t-comercio').textContent = c.nombre;
     document.getElementById('volver-categoria-texto').textContent = CATEGORIAS[c.cat];
+    var f = fotoDe(c);
+    var img = document.getElementById('foto-comercio');
+    img.src = f.archivo;
+    img.alt = f.alt;
+    document.getElementById('credito-foto').innerHTML = (f.tipo === 'marca' ? 'Foto de otro local de la marca. ' : f.tipo === 'ilustrativa' ? 'Foto ilustrativa, no es de este local. ' : '') +
+      'Foto: ' + f.autor + ' · <a href="' + f.enlace + '" target="_blank" rel="noopener">' + f.licencia + ', Wikimedia Commons</a>';
     var lista = document.getElementById('lista-productos');
     lista.innerHTML = '';
     c.productos.forEach(function (p, i) {
