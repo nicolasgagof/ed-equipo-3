@@ -445,6 +445,23 @@
   }
   .avatar-pequeno { width: 40px; height: 40px; font-size: .85rem; background: var(--lima-suave); color: var(--verde); }
   .periodos-dos { grid-template-columns: 1fr 1fr; }
+  .hero-perfil { position: relative; }
+  [data-seguir][aria-pressed="true"] { background: transparent; color: var(--verde); box-shadow: inset 0 0 0 2px var(--verde); }
+  .boton-buscar {
+    position: absolute; top: 14px; right: 14px;
+    width: 40px; height: 40px; border-radius: 50%; border: 0;
+    display: grid; place-items: center;
+    background: transparent; color: var(--lima); cursor: pointer;
+  }
+  .boton-buscar:hover { background: #1F2A14; }
+  .boton-buscar svg { width: 22px; height: 22px; }
+  .campo-buscar {
+    width: 100%; min-height: 48px; padding: 10px 16px;
+    border: 0; border-radius: 999px; font: inherit; font-size: 1rem;
+  }
+  .resultado { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; padding: 12px; }
+  .resultado strong { display: block; }
+  .resultado small { color: var(--gris); }
   .persona { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); }
   .persona summary {
     display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center;
@@ -805,7 +822,10 @@
 
     <!-- ============ Pantalla 5 — Mi perfil ============ -->
     <section class="pantalla" id="perfil" data-pestana="perfil" aria-labelledby="t-perfil" hidden>
-      <div class="hero">
+      <div class="hero hero-perfil">
+        <button class="boton-buscar" type="button" data-ir="buscar" aria-label="Buscar perfiles">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        </button>
         <h2 id="t-perfil" tabindex="-1">Mi perfil</h2>
         <div class="perfil-cabeza">
           <span class="avatar" aria-hidden="true">TÚ</span>
@@ -828,6 +848,23 @@
       <div class="bloque">
         <h3>Tus canjes</h3>
         <ul class="lista" id="mis-canjes"></ul>
+      </div>
+    </section>
+
+    <!-- Mi perfil › Buscar perfiles -->
+    <section class="pantalla" id="buscar" data-pestana="perfil" aria-labelledby="t-buscar" hidden>
+      <div class="hero">
+        <button class="volver" type="button" data-ir="perfil">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Mi perfil
+        </button>
+        <h2 id="t-buscar" tabindex="-1">Buscar perfiles</h2>
+        <p>Encuentra corredores y empieza a seguirlos</p>
+        <label class="solo-lector" for="texto-buscar">Nombre del corredor o corredora</label>
+        <input class="campo-buscar" id="texto-buscar" type="search" autocomplete="off" placeholder="Escribe un nombre">
+      </div>
+      <div class="bloque">
+        <p class="nota" id="resultados-texto" aria-live="polite"></p>
+        <ul class="lista" id="resultados-buscar"></ul>
       </div>
     </section>
 
@@ -1145,6 +1182,8 @@
     if (id === 'mapa') prepararMapa();
     if (id === 'grupales') pintarGrupales();
     if (id === 'rutas') prepararRutas();
+    if (id === 'buscar') buscarPerfiles();
+    if (id === 'perfil') pintarGente();
     document.getElementById('chat').hidden = id !== 'perfil';
     if (id !== 'sesion' && sesion.activa) pausar();
     guardarEstado(id);
@@ -1557,7 +1596,15 @@
     bea: { nombre: 'Bea', km: 9, canjes: [] },
     dani: { nombre: 'Dani', km: 12, canjes: [['Café de filtro', 'Tim Hortons Santo Domingo']] },
     jorge: { nombre: 'Jorge', km: 6, canjes: [] },
-    lucia: { nombre: 'Lucía M.', km: 62, canjes: [['Zapatillas Nike Pegasus', 'Nike'], ['Masaje de descarga', 'Fisiorosales'], ['Matcha latte', 'Amae Café']] }
+    lucia: { nombre: 'Lucía M.', km: 62, canjes: [['Zapatillas Nike Pegasus', 'Nike'], ['Masaje de descarga', 'Fisiorosales'], ['Matcha latte', 'Amae Café']] },
+    javier: { nombre: 'Javier R.', km: 58, canjes: [['Reloj GPS Kiprun 900', 'Decathlon Castellana']] },
+    carmen: { nombre: 'Carmen S.', km: 51, canjes: [['Cappuccino', 'Ambu Coffee'], ['Clase de pilates máquina', 'Club Pilates Pacífico']] },
+    alvaro: { nombre: 'Álvaro T.', km: 49, canjes: [] },
+    nerea: { nombre: 'Nerea G.', km: 47, canjes: [['Menú del día', 'El Respiro']] },
+    hugo: { nombre: 'Hugo F.', km: 45, canjes: [['Entrada al rocódromo', 'Rocódromo Roc 30']] },
+    andrea: { nombre: 'Andrea L.', km: 18, canjes: [['Café con leche', 'Santagloria']] },
+    diego: { nombre: 'Diego P.', km: 39, canjes: [['Zapatillas ASICS Novablast', 'ASICS']] },
+    sara: { nombre: 'Sara G.', km: 71, canjes: [['Zapatillas New Balance 1080', 'New Balance Gran Vía'], ['Sesión de fisioterapia deportiva', 'Fisiorosales']] }
   };
   var SEGUIDORES = ['marta', 'pablo', 'lucas', 'sofia', 'bea', 'lucia'];
   var SEGUIDOS = ['marta', 'pablo', 'dani', 'jorge', 'lucia'];
@@ -1597,7 +1644,7 @@
     verGente = b.dataset.gente;
     pintarGente();
   });
-  document.getElementById('lista-gente').addEventListener('click', function (e) {
+  function alternarSeguir(e) {
     var b = e.target.closest('[data-seguir]');
     if (!b) return;
     var i = SEGUIDOS.indexOf(b.dataset.seguir);
@@ -1606,7 +1653,24 @@
     b.textContent = sigo ? 'Siguiendo' : 'Seguir';
     b.setAttribute('aria-pressed', sigo);
     document.querySelector('[data-gente="seguidos"]').textContent = 'Seguidos (' + SEGUIDOS.length + ')';
-  });
+  }
+  document.getElementById('lista-gente').addEventListener('click', alternarSeguir);
+  document.getElementById('resultados-buscar').addEventListener('click', alternarSeguir);
+
+  // Buscador de perfiles (lupa de Mi perfil)
+  function buscarPerfiles() {
+    var texto = normalizar(document.getElementById('texto-buscar').value.trim());
+    var ids = Object.keys(GENTE).filter(function (id) { return normalizar(GENTE[id].nombre).indexOf(texto) !== -1; });
+    document.getElementById('resultados-texto').textContent = ids.length ? (texto ? ids.length + (ids.length === 1 ? ' perfil encontrado' : ' perfiles encontrados') : 'Corredores que quizá conozcas') : 'No hemos encontrado a nadie con ese nombre.';
+    document.getElementById('resultados-buscar').innerHTML = ids.map(function (id) {
+      var g = GENTE[id];
+      var sigo = SEGUIDOS.indexOf(id) !== -1;
+      return '<li class="tarjeta resultado"><span class="avatar avatar-pequeno" aria-hidden="true">' + iniciales(g.nombre) + '</span>' +
+        '<span><strong>' + g.nombre + '</strong><small>' + g.km + ' km esta semana · ' + g.canjes.length + (g.canjes.length === 1 ? ' canje' : ' canjes') + '</small></span>' +
+        '<button class="boton boton-pequeno" type="button" data-seguir="' + id + '" aria-pressed="' + sigo + '">' + (sigo ? 'Siguiendo' : 'Seguir') + '</button></li>';
+    }).join('');
+  }
+  document.getElementById('texto-buscar').addEventListener('input', buscarPerfiles);
   document.getElementById('mis-canjes').innerHTML = MIS_CANJES.map(function (c) {
     return '<li class="tarjeta canje"><span class="producto-foto" aria-hidden="true">' + c[1] + '</span>' +
       '<span><strong>' + c[0] + '</strong><small>' + c[2] + ' · ' + c[3] + ' tokens</small></span></li>';
