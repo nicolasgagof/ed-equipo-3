@@ -9,6 +9,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0E1508">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <style>
   :root {
     --lima: #C6F432;
@@ -239,35 +240,23 @@
   }
   .hero .qr { width: 72px; height: 72px; background-size: 18px 18px; border: 4px solid var(--tinta); outline: 0; }
 
-  /* Mapa ilustrado */
+  /* Mapa real (Leaflet + OpenStreetMap) */
   .mapa {
-    position: relative; margin: 0;
-    aspect-ratio: 1 / 1.05;
+    height: 360px; margin: 0;
     border-radius: var(--radio); overflow: hidden;
-    border: 1px solid var(--borde);
-    background: #EEF2E4;
+    border: 1px solid var(--borde); background: #EEF2E4;
+    isolation: isolate;
   }
-  .mapa > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .pin {
-    position: absolute; transform: translate(-50%, -100%);
-    width: 34px; height: 42px; padding: 0; border: 0; background: none; cursor: pointer;
-  }
-  .pin svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
-  .pin span {
-    position: absolute; top: 6px; left: 0; right: 0;
+  .mapa .leaflet-control-attribution { font-size: 10px; }
+  .pin-mapa { background: none; border: 0; }
+  .pin-mapa svg { width: 34px; height: 42px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
+  .pin-mapa span {
+    position: absolute; top: 6px; left: 0; width: 34px;
     text-align: center; font-weight: 900; font-size: .8rem; color: var(--tinta-lima);
   }
-  .pin.destacado svg { transform: scale(1.2); transform-origin: 50% 100%; }
-  .yo {
-    position: absolute; left: 50%; top: 52%;
-    width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%;
-    background: #1F6FEB; border: 3px solid #fff; box-shadow: 0 0 0 0 rgba(31,111,235,.5);
-    animation: latido 2s infinite;
-  }
-  .yo-etiqueta {
-    position: absolute; left: 50%; top: 52%; transform: translate(-50%, 12px);
-    background: #fff; border-radius: 999px; padding: 0 8px; font-size: .75rem; font-weight: 800;
-  }
+  .pin-mapa.destacado svg { transform: scale(1.25); transform-origin: 50% 100%; }
+  .pin-mapa.destacado path { fill: #fff; }
+  .mapa-error { display: grid; place-items: center; height: 100%; padding: 16px; text-align: center; color: var(--gris); }
   @keyframes latido {
     0% { box-shadow: 0 0 0 0 rgba(31,111,235,.5); }
     70% { box-shadow: 0 0 0 16px rgba(31,111,235,0); }
@@ -342,6 +331,7 @@
 
   /* Barra de navegación inferior */
   .barra {
+    z-index: 1100;
     display: grid; grid-template-columns: repeat(5, 1fr);
     background: var(--noche);
     border-top: 1px solid #2D3A1F;
@@ -403,7 +393,7 @@
           <figcaption>
             <small>Tu próxima recompensa</small>
             <strong>Zapatillas de running</strong>
-            <span>25 % de descuento por 20 tokens · Tienda deportiva B</span>
+            <span>25 % de descuento por 20 tokens · Nike</span>
             <span class="progreso" role="progressbar" aria-label="Tokens conseguidos" aria-valuemin="0" aria-valuemax="20" aria-valuenow="14"><span style="width:70%"></span></span>
             <span class="progreso-texto">Tienes 14 de 20 tokens: ¡te faltan 6!</span>
           </figcaption>
@@ -472,6 +462,7 @@
           <li><button class="categoria" type="button" data-categoria="resto"><span class="icono" aria-hidden="true" data-icono="resto"></span>4. Restaurantes</button></li>
           <li><button class="categoria" type="button" data-categoria="exper"><span class="icono" aria-hidden="true" data-icono="exper"></span>5. Experiencias deportivas</button></li>
         </ol>
+        <p class="nota">Las marcas y locales aparecen solo como ejemplo en este prototipo de clase: no colaboran con RecoRun ni ofrecen estas promociones.</p>
       </div>
 
       <!-- 3. Imagen -->
@@ -481,7 +472,7 @@
           <figcaption>
             <small>Producto más solicitado</small>
             <strong>Café con leche</strong>
-            <span>Gratis por 10 tokens · Cafetería A</span>
+            <span>Gratis por 10 tokens · Toma Café</span>
           </figcaption>
         </figure>
       </div>
@@ -513,6 +504,7 @@
       </div>
       <div class="bloque">
         <ul class="lista" id="lista-productos"></ul>
+        <p class="nota">Las marcas y locales aparecen solo como ejemplo en este prototipo de clase: no colaboran con RecoRun ni ofrecen estas promociones.</p>
       </div>
     </section>
 
@@ -525,24 +517,8 @@
         <p class="estado-ubicacion" id="estado-ubicacion" role="status" style="color:#E8EEDD"></p>
       </div>
       <div class="bloque">
-        <figure class="mapa" aria-labelledby="mapa-pie">
-          <svg viewBox="0 0 100 105" preserveAspectRatio="none" aria-hidden="true">
-            <rect width="100" height="105" fill="#EEF2E4"/>
-            <path d="M58 8 h28 v26 h-28z" fill="#CFE8A8"/>
-            <path d="M6 66 h22 v18 h-22z" fill="#CFE8A8"/>
-            <path d="M0 92 C20 84 40 100 60 92 S90 86 100 90 V105 H0z" fill="#BFDDF2"/>
-            <g stroke="#FFFFFF" stroke-linecap="round">
-              <path d="M0 22 H100 M0 50 H100 M0 76 H100" stroke-width="5"/>
-              <path d="M18 0 V105 M46 0 V105 M74 0 V105" stroke-width="5"/>
-              <path d="M0 98 L100 4" stroke-width="7"/>
-              <path d="M32 0 V50 M60 50 V105 M88 22 V76 M0 36 H46 M74 64 H100" stroke-width="2.5"/>
-            </g>
-          </svg>
-          <div id="pines"></div>
-          <div class="yo" aria-hidden="true"></div>
-          <div class="yo-etiqueta" aria-hidden="true">Tú</div>
-          <figcaption id="mapa-pie" class="solo-lector">Mapa ilustrativo con tu posición en el centro y comercios de ejemplo alrededor.</figcaption>
-        </figure>
+        <div class="mapa" id="mapa-real" role="region" aria-label="Mapa de Madrid con los comercios asociados"></div>
+        <p class="nota">Las marcas y locales aparecen solo como ejemplo en este prototipo de clase: no colaboran con RecoRun ni ofrecen estas promociones.</p>
       </div>
       <div class="bloque">
         <h3>Comercios cerca de ti</h3>
@@ -653,6 +629,7 @@
   </nav>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
   // ---------- Comercios y productos ----------
   var ICONOS = {
@@ -674,17 +651,20 @@
     resto: 'Restaurantes',
     exper: 'Experiencias deportivas'
   };
-  // x / y: posición en el mapa ilustrativo (en %)
+  // lat / lng: ubicación real en Madrid (OpenStreetMap)
   // Productos: [nombre, emoji, tokens que se presentan, descuento en % que dan (100 = gratis)]
   var COMERCIOS = [
-    { id: 'dep-a', cat: 'deporte', nombre: 'Tienda deportiva A', x: 24, y: 30, productos: [['Calcetines técnicos de running', '🧦', 5, 25], ['Gorra transpirable', '🧢', 10, 30], ['Botella de agua reutilizable', '💧', 8, 50]] },
-    { id: 'dep-b', cat: 'deporte', nombre: 'Tienda deportiva B', x: 70, y: 16, productos: [['Zapatillas de running', '👟', 20, 25], ['Cinturón portamóvil', '📱', 6, 30], ['Camiseta técnica', '🎽', 12, 25]] },
-    { id: 'caf-a', cat: 'cafe', nombre: 'Cafetería A', x: 38, y: 64, productos: [['Café con leche', '☕', 10, 100], ['Zumo natural', '🍊', 6, 50], ['Tostada con tomate', '🍞', 5, 25]] },
-    { id: 'caf-b', cat: 'cafe', nombre: 'Cafetería B', x: 80, y: 70, productos: [['Batido de frutas', '🥤', 8, 30], ['Café solo', '☕', 8, 100], ['Bebida isotónica', '🧃', 5, 50]] },
-    { id: 'fis-a', cat: 'fisio', nombre: 'Centro de fisioterapia A', x: 12, y: 46, productos: [['Masaje de descarga', '💆', 15, 25], ['Sesión de estiramientos', '🧘', 10, 30], ['Vendaje neuromuscular', '🩹', 6, 50]] },
-    { id: 'res-a', cat: 'resto', nombre: 'Restaurante A', x: 60, y: 42, productos: [['Menú post-carrera', '🍽️', 12, 20], ['Ensalada completa', '🥗', 8, 25], ['Plato de pasta', '🍝', 8, 30]] },
-    { id: 'res-b', cat: 'resto', nombre: 'Restaurante B', x: 30, y: 86, productos: [['Bowl de arroz y pollo', '🍚', 10, 25], ['Tortilla de patatas', '🥔', 6, 20], ['Postre de yogur', '🍨', 10, 100]] },
-    { id: 'exp-a', cat: 'exper', nombre: 'Club de carrera A', x: 88, y: 44, productos: [['Clase de técnica de carrera', '🏃', 15, 50], ['Salida en grupo guiada', '🗺️', 10, 25], ['Inscripción a una carrera popular', '🏅', 25, 25]] }
+    { id: 'nike', cat: 'deporte', nombre: 'Nike', direccion: 'Calle de Serrano, 19', lat: 40.42577, lng: -3.68800, productos: [['Zapatillas de running', '👟', 20, 25], ['Camiseta técnica', '🎽', 12, 30], ['Calcetines de running', '🧦', 5, 50]] },
+    { id: 'adidas', cat: 'deporte', nombre: 'adidas', direccion: 'Gran Vía, 21', lat: 40.41976, lng: -3.70136, productos: [['Zapatillas de running', '👟', 20, 20], ['Pantalón corto de running', '🩳', 10, 30], ['Gorra transpirable', '🧢', 8, 25]] },
+    { id: 'puma', cat: 'deporte', nombre: 'Puma', direccion: 'Calle de Fuencarral, 33', lat: 40.42228, lng: -3.70095, productos: [['Zapatillas de running', '👟', 18, 25], ['Sudadera técnica', '🧥', 12, 20], ['Mochila de deporte', '🎒', 10, 30]] },
+    { id: 'decathlon', cat: 'deporte', nombre: 'Decathlon', direccion: 'Calle de Fuencarral, 45', lat: 40.42339, lng: -3.70100, productos: [['Reloj GPS de running', '⌚', 25, 15], ['Botella de agua reutilizable', '💧', 5, 50], ['Cinturón portamóvil', '📱', 6, 30]] },
+    { id: 'toma', cat: 'cafe', nombre: 'Toma Café', direccion: 'Calle de la Palma, 49', lat: 40.42649, lng: -3.70596, productos: [['Café con leche', '☕', 10, 100], ['Flat white', '☕', 8, 50], ['Bizcocho casero', '🍰', 6, 25]] },
+    { id: 'bicicleta', cat: 'cafe', nombre: 'La Bicicleta', direccion: 'Plaza de San Ildefonso, 9', lat: 40.42378, lng: -3.70225, productos: [['Café solo', '☕', 8, 100], ['Tostada de aguacate', '🥑', 10, 30], ['Zumo natural', '🍊', 6, 50]] },
+    { id: 'federal', cat: 'cafe', nombre: 'Federal Café', direccion: 'Plaza de las Comendadoras, 9', lat: 40.42705, lng: -3.70924, productos: [['Brunch completo', '🍳', 15, 25], ['Batido de frutas', '🥤', 8, 30], ['Granola con yogur', '🥣', 8, 25]] },
+    { id: 'fisio', cat: 'fisio', nombre: 'Centro de fisioterapia', direccion: 'Chamberí', lat: 40.43186, lng: -3.70700, productos: [['Masaje de descarga', '💆', 15, 25], ['Sesión de estiramientos', '🧘', 10, 30], ['Vendaje neuromuscular', '🩹', 6, 50]] },
+    { id: 'honest', cat: 'resto', nombre: 'Honest Greens', direccion: 'Calle de Fuencarral, 95', lat: 40.42703, lng: -3.70170, productos: [['Bowl saludable', '🥗', 12, 25], ['Menú post-carrera', '🍽️', 15, 20], ['Limonada natural', '🍋', 5, 100]] },
+    { id: 'goiko', cat: 'resto', nombre: 'Goiko', direccion: 'Calle del Pez, 36', lat: 40.42428, lng: -3.70655, productos: [['Hamburguesa', '🍔', 15, 20], ['Patatas fritas', '🍟', 6, 50], ['Ensalada', '🥗', 10, 25]] },
+    { id: 'club', cat: 'exper', nombre: 'Club de running del Retiro', direccion: 'Parque del Retiro', lat: 40.41495, lng: -3.68328, productos: [['Clase de técnica de carrera', '🏃', 15, 50], ['Salida en grupo guiada', '🗺️', 10, 25], ['Inscripción a una carrera popular', '🏅', 25, 25]] }
   ];
 
   // Presentando X tokens, el comercio aplica el descuento en ese producto.
@@ -715,6 +695,7 @@
     window.scrollTo(0, 0);
     var titulo = document.querySelector('#' + id + ' h2');
     if (titulo) titulo.focus();
+    if (id === 'mapa') prepararMapa();
   }
 
   document.addEventListener('click', function (e) {
@@ -747,7 +728,7 @@
       var li = document.createElement('li');
       li.innerHTML = '<button class="fila" type="button" data-comercio="' + c.id + '">' +
         '<span class="icono" aria-hidden="true">' + icono(c.cat) + '</span>' +
-        '<span><strong>' + c.nombre + '</strong><small>' + c.productos.length + ' productos</small></span>' + FLECHA + '</button>';
+        '<span><strong>' + c.nombre + '</strong><small>' + c.direccion + ' · ' + c.productos.length + ' productos</small></span>' + FLECHA + '</button>';
       lista.appendChild(li);
     });
     mostrar('categoria');
@@ -798,38 +779,68 @@
     botonCanjear.setAttribute('aria-expanded', 'true');
   });
 
-  // ---------- Mapa ilustrativo ----------
+  // ---------- Mapa real de Madrid (Leaflet + OpenStreetMap) ----------
   var PIN = '<svg viewBox="0 0 34 42" aria-hidden="true"><path d="M17 41C17 41 32 26 32 16A15 15 0 0 0 2 16C2 26 17 41 17 41Z" fill="#C6F432" stroke="#0E1508" stroke-width="2.5"/></svg>';
-  var pines = document.getElementById('pines');
+  var CENTRO_MADRID = [40.4225, -3.6990];
+  var mapa = null;
+  var marcadores = {};
+  var marcadorYo = null;
   var listaMapa = document.getElementById('lista-mapa');
-  COMERCIOS.forEach(function (c, i) {
-    var pin = document.createElement('button');
-    pin.type = 'button';
-    pin.className = 'pin';
-    pin.style.left = c.x + '%';
-    pin.style.top = c.y + '%';
-    pin.dataset.comercio = c.id;
-    pin.setAttribute('aria-label', (i + 1) + '. ' + c.nombre + ', ' + CATEGORIAS[c.cat]);
-    pin.innerHTML = PIN + '<span aria-hidden="true">' + (i + 1) + '</span>';
-    pines.appendChild(pin);
 
+  function iconoPin(numero, destacado) {
+    return L.divIcon({
+      className: 'pin-mapa' + (destacado ? ' destacado' : ''),
+      html: PIN + '<span aria-hidden="true">' + numero + '</span>',
+      iconSize: [34, 42],
+      iconAnchor: [17, 42],
+      tooltipAnchor: [0, -38]
+    });
+  }
+
+  function prepararMapa() {
+    var caja = document.getElementById('mapa-real');
+    if (!window.L) {
+      caja.innerHTML = '<p class="mapa-error">No se ha podido cargar el mapa. Revisa tu conexión.</p>';
+      return;
+    }
+    if (!mapa) {
+      mapa = L.map(caja, { scrollWheelZoom: false }).setView(CENTRO_MADRID, 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(mapa);
+      COMERCIOS.forEach(function (c, i) {
+        var m = L.marker([c.lat, c.lng], { icon: iconoPin(i + 1), title: c.nombre, alt: c.nombre, riseOnHover: true })
+          .bindTooltip(c.nombre, { direction: 'top' })
+          .on('click', function () { abrirComercio(c.id); })
+          .addTo(mapa);
+        marcadores[c.id] = { marcador: m, numero: i + 1 };
+      });
+      mapa.fitBounds(COMERCIOS.map(function (c) { return [c.lat, c.lng]; }), { padding: [30, 40] });
+    }
+    setTimeout(function () { mapa.invalidateSize(); }, 0);
+  }
+
+  COMERCIOS.forEach(function (c, i) {
     var li = document.createElement('li');
     li.innerHTML = '<button class="fila" type="button" data-comercio="' + c.id + '">' +
       '<span class="numero" aria-hidden="true">' + (i + 1) + '</span>' +
-      '<span><strong>' + c.nombre + '</strong><small>' + CATEGORIAS[c.cat] + '</small></span>' + FLECHA + '</button>';
+      '<span><strong>' + c.nombre + '</strong><small>' + CATEGORIAS[c.cat] + ' · ' + c.direccion + '</small></span>' + FLECHA + '</button>';
     listaMapa.appendChild(li);
   });
 
   document.getElementById('ver-en-mapa').addEventListener('click', function () {
     mostrar('mapa');
-    pines.querySelectorAll('.pin').forEach(function (p) {
-      p.classList.toggle('destacado', comercioActual && p.dataset.comercio === comercioActual.id);
+    if (!mapa || !comercioActual) return;
+    Object.keys(marcadores).forEach(function (id) {
+      marcadores[id].marcador.setIcon(iconoPin(marcadores[id].numero, id === comercioActual.id));
     });
-    var pin = pines.querySelector('.destacado');
-    if (pin) pin.focus();
+    var elegido = marcadores[comercioActual.id].marcador;
+    mapa.setView(elegido.getLatLng(), 16);
+    elegido.openTooltip();
   });
 
-  // La ubicación se usa solo en el navegador: no se guarda ni se envía a ningún sitio.
+  // La ubicación se usa solo en el navegador: RecoRun no la guarda ni la envía.
   var estadoUbicacion = document.getElementById('estado-ubicacion');
   document.getElementById('boton-ubicacion').addEventListener('click', function () {
     if (!('geolocation' in navigator)) {
@@ -837,10 +848,18 @@
       return;
     }
     estadoUbicacion.textContent = 'Buscando tu ubicación…';
-    navigator.geolocation.getCurrentPosition(function () {
-      estadoUbicacion.textContent = 'Te hemos ubicado: eres el punto azul. Tu ubicación no sale de tu móvil.';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      prepararMapa();
+      if (!mapa) return;
+      var punto = [pos.coords.latitude, pos.coords.longitude];
+      if (marcadorYo) marcadorYo.setLatLng(punto);
+      else marcadorYo = L.circleMarker(punto, { radius: 9, color: '#FFFFFF', weight: 3, fillColor: '#1F6FEB', fillOpacity: 1 })
+        .bindTooltip('Tú', { permanent: true, direction: 'bottom', offset: [0, 10] })
+        .addTo(mapa);
+      mapa.setView(punto, 15);
+      estadoUbicacion.textContent = 'Te hemos ubicado: eres el punto azul. RecoRun no guarda ni envía tu ubicación.';
     }, function () {
-      estadoUbicacion.textContent = 'No hemos podido ubicarte. Te mostramos un mapa de ejemplo.';
+      estadoUbicacion.textContent = 'No hemos podido ubicarte. Te mostramos el centro de Madrid.';
     }, { timeout: 10000 });
   });
 
