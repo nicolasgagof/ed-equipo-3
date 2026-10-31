@@ -413,6 +413,7 @@
     background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio);
     box-shadow: 0 10px 30px rgba(14, 21, 8, .3); overflow: hidden; font-size: .9rem;
   }
+  .chat-panel:focus { outline: none; }
   .chat-cabeza { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--noche); color: var(--lima); }
   .chat-cabeza button { min-width: 36px; min-height: 36px; border: 0; background: transparent; color: #fff; font-size: 1rem; cursor: pointer; }
   .chat-mensajes { flex: 1; overflow-y: auto; padding: 10px; display: grid; gap: 8px; align-content: start; }
@@ -429,9 +430,18 @@
   .chat-form button { min-height: 36px; padding: 4px 12px; border: 0; border-radius: 8px; background: var(--lima); color: var(--tinta-lima); font: inherit; font-weight: 800; cursor: pointer; }
 
   /* Tus rutas */
-  .lista-rutas { margin-top: 12px; }
-  .lista-rutas .fila { grid-template-columns: 32px 1fr 20px; }
-  .color-ruta { width: 32px; height: 8px; border-radius: 999px; }
+  .rutas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ruta-tarjeta {
+    width: 100%; padding: 0; overflow: hidden; text-align: left; cursor: pointer;
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio);
+    font: inherit; color: var(--tinta);
+  }
+  .ruta-tarjeta:hover { border-color: var(--verde); }
+  .mini-mapa { height: 120px; background: #EEF2E4; pointer-events: none; }
+  .ruta-tarjeta span { display: block; padding: 8px 10px 10px; }
+  .ruta-tarjeta strong { display: block; font-size: .9rem; line-height: 1.2; }
+  .ruta-tarjeta small { color: var(--gris); font-size: .8rem; }
+  .mapa-grande { height: 460px; }
 
   /* Mi perfil */
   .perfil-cabeza { display: flex; align-items: center; gap: 12px; margin: 12px 0 16px; }
@@ -878,9 +888,22 @@
         <p>Lo que has corrido en tus últimas salidas</p>
       </div>
       <div class="bloque">
-        <div class="mapa" id="mapa-rutas" role="region" aria-label="Mapa con la línea de tus últimas carreras"></div>
-        <ul class="lista lista-rutas" id="lista-rutas"></ul>
-        <p class="nota">Rutas de ejemplo de este prototipo.</p>
+        <ul class="rutas" id="lista-rutas"></ul>
+        <p class="nota">Rutas de ejemplo de este prototipo. Mapas © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>.</p>
+      </div>
+    </section>
+
+    <!-- Mi perfil › Tus rutas › una ruta en grande -->
+    <section class="pantalla" id="ruta" data-pestana="perfil" aria-labelledby="t-ruta" hidden>
+      <div class="hero">
+        <button class="volver" type="button" data-ir="rutas">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Tus rutas
+        </button>
+        <h2 id="t-ruta" tabindex="-1"></h2>
+        <p id="ruta-datos"></p>
+      </div>
+      <div class="bloque">
+        <div class="mapa mapa-grande" id="mapa-ruta" role="region" aria-label="Mapa con la línea de esta carrera"></div>
       </div>
     </section>
 
@@ -891,7 +914,7 @@
 
   <!-- Ayuda (solo en Mi perfil): preguntas frecuentes con respuestas fijas, sin servicios externos -->
   <div class="chat" id="chat" hidden>
-    <div class="chat-panel" id="chat-panel" role="dialog" aria-labelledby="chat-titulo" hidden>
+    <div class="chat-panel" id="chat-panel" role="dialog" aria-labelledby="chat-titulo" tabindex="-1" hidden>
       <div class="chat-cabeza">
         <strong id="chat-titulo">Ayuda RecoRun</strong>
         <button type="button" id="chat-cerrar" aria-label="Cerrar la ayuda">✕</button>
@@ -1200,9 +1223,9 @@
 
   function guardarEstado(id) {
     if (restaurando) return;
-    var estado = { pantalla: id, categoria: categoriaActual, comercio: comercioActual ? comercioActual.id : null, ranking: rankingActual };
+    var estado = { pantalla: id, categoria: categoriaActual, comercio: comercioActual ? comercioActual.id : null, ranking: rankingActual, ruta: rutaActual };
     var actual = visitadas[visitadas.length - 1];
-    if (actual.pantalla === estado.pantalla && actual.categoria === estado.categoria && actual.comercio === estado.comercio && actual.ranking === estado.ranking) return;
+    if (actual.pantalla === estado.pantalla && actual.categoria === estado.categoria && actual.comercio === estado.comercio && actual.ranking === estado.ranking && actual.ruta === estado.ruta) return;
     visitadas.push(estado);
     history.pushState({ recorun: visitadas.length }, '');
   }
@@ -1215,6 +1238,7 @@
     if (estado.pantalla === 'categoria' && estado.categoria) abrirCategoria(estado.categoria);
     else if (estado.pantalla === 'comercio' && estado.comercio) abrirComercio(estado.comercio);
     else if (estado.pantalla === 'ranking' && estado.ranking) abrirRanking(estado.ranking);
+    else if (estado.pantalla === 'ruta' && estado.ruta !== null) abrirRuta(estado.ruta);
     else mostrar(estado.pantalla);
     restaurando = false;
   }
@@ -1230,7 +1254,7 @@
   document.addEventListener('touchstart', function (e) {
     toque = null;
     // El mapa y los filtros se arrastran en horizontal: ahí no se usa el gesto.
-    if (e.touches.length !== 1 || e.target.closest('#mapa-real, #mapa-rutas, #filtros-mapa, input, textarea, select')) return;
+    if (e.touches.length !== 1 || e.target.closest('#mapa-real, #mapa-ruta, #filtros-mapa, input, textarea, select')) return;
     var t = e.touches[0];
     // En el navegador, el borde izquierdo ya tiene su propio gesto de volver.
     var instalada = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
@@ -1678,14 +1702,20 @@
   document.getElementById('perfil-canjes').textContent = MIS_CANJES.length;
   pintarGente();
 
-  // ---------- Tus rutas: líneas de las últimas carreras en el mapa (rutas de ejemplo) ----------
+  // ---------- Tus rutas: un mapa pequeño por cada día que saliste a correr (rutas de ejemplo) ----------
   var RUTAS = [
-    { nombre: 'Vuelta al Retiro', cuando: 'Hace 2 días', color: '#2E7D32', puntos: [[40.4196, -3.6878], [40.4212, -3.6820], [40.4205, -3.6770], [40.4150, -3.6762], [40.4100, -3.6762], [40.4078, -3.6810], [40.4085, -3.6900], [40.4140, -3.6905], [40.4196, -3.6878]] },
-    { nombre: 'Madrid Río', cuando: 'Hace 5 días', color: '#E85D04', puntos: [[40.4176, -3.7226], [40.4146, -3.7213], [40.4085, -3.7193], [40.4027, -3.7166], [40.3990, -3.7130], [40.3955, -3.7060], [40.3922, -3.6975]] },
-    { nombre: 'Parque del Oeste', cuando: 'Hace 1 semana', color: '#1F6FEB', puntos: [[40.4240, -3.7178], [40.4281, -3.7210], [40.4325, -3.7225], [40.4340, -3.7190], [40.4295, -3.7160], [40.4250, -3.7160], [40.4240, -3.7178]] }
+    { nombre: 'Vuelta al Retiro', dia: 'Jueves 30 de octubre', puntos: [[40.4196, -3.6878], [40.4212, -3.6820], [40.4205, -3.6770], [40.4150, -3.6762], [40.4100, -3.6762], [40.4078, -3.6810], [40.4085, -3.6900], [40.4140, -3.6905], [40.4196, -3.6878]] },
+    { nombre: 'Madrid Río', dia: 'Martes 28 de octubre', puntos: [[40.4173, -3.7223], [40.4159, -3.7227], [40.4115, -3.7225], [40.4078, -3.7220], [40.4046, -3.7227], [40.4016, -3.7221], [40.4003, -3.7211], [40.3998, -3.7184], [40.3997, -3.7151], [40.3979, -3.7122], [40.3957, -3.7071], [40.3947, -3.7038]] },
+    { nombre: 'Parque del Oeste', dia: 'Domingo 26 de octubre', puntos: [[40.4240, -3.7178], [40.4281, -3.7210], [40.4325, -3.7225], [40.4340, -3.7190], [40.4295, -3.7160], [40.4250, -3.7160], [40.4240, -3.7178]] },
+    { nombre: 'Lago de la Casa de Campo', dia: 'Viernes 24 de octubre', puntos: [[40.4215, -3.7372], [40.4210, -3.7330], [40.4185, -3.7325], [40.4170, -3.7355], [40.4185, -3.7390], [40.4215, -3.7372]] },
+    { nombre: 'Paseo de la Castellana', dia: 'Miércoles 22 de octubre', puntos: [[40.4253, -3.6903], [40.4330, -3.6895], [40.4400, -3.6910], [40.4470, -3.6918]] },
+    { nombre: 'Debod y Palacio Real', dia: 'Domingo 19 de octubre', puntos: [[40.4240, -3.7178], [40.4232, -3.7123], [40.4210, -3.7130], [40.4180, -3.7140], [40.4165, -3.7135], [40.4180, -3.7160], [40.4240, -3.7178]] }
   ];
-  var mapaRutas = null;
-  var lineasRutas = [];
+  var COLOR_RUTA = '#2E7D32';
+  var minimapas = false;
+  var mapaRuta = null;
+  var lineaRuta = null;
+  var rutaActual = null;
 
   // Distancia real de cada línea (fórmula del haversine), en km
   function kmRuta(puntos) {
@@ -1698,39 +1728,58 @@
     }
     return total;
   }
+  function capaOSM() {
+    return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    });
+  }
 
   document.getElementById('lista-rutas').innerHTML = RUTAS.map(function (r, i) {
-    return '<li><button class="fila" type="button" data-ruta="' + i + '">' +
-      '<span class="color-ruta" style="background:' + r.color + '" aria-hidden="true"></span>' +
-      '<span><strong>' + r.nombre + '</strong><small>' + r.cuando + ' · ' + decimal(kmRuta(r.puntos), 1) + ' km</small></span>' + FLECHA + '</button></li>';
+    return '<li><button class="ruta-tarjeta" type="button" data-ruta="' + i + '" aria-label="' + r.nombre + ', ' + r.dia + ', ' + decimal(kmRuta(r.puntos), 1) + ' km. Ver el mapa en grande">' +
+      '<div class="mini-mapa" id="mini-ruta-' + i + '" aria-hidden="true"></div>' +
+      '<span><strong>' + r.dia + '</strong><small>' + r.nombre + ' · ' + decimal(kmRuta(r.puntos), 1) + ' km</small></span></button></li>';
   }).join('');
 
+  // Mapas pequeños, sin controles: solo enseñan la línea de cada carrera
   function prepararRutas() {
-    var caja = document.getElementById('mapa-rutas');
+    if (!window.L || minimapas) return;
+    minimapas = true;
+    setTimeout(function () {
+      RUTAS.forEach(function (r, i) {
+        var m = L.map('mini-ruta-' + i, { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false, touchZoom: false, tap: false });
+        capaOSM().addTo(m);
+        var linea = L.polyline(r.puntos, { color: COLOR_RUTA, weight: 4 }).addTo(m);
+        m.fitBounds(linea.getBounds(), { padding: [12, 12] });
+      });
+    }, 0);
+  }
+
+  function abrirRuta(i) {
+    var r = RUTAS[i];
+    rutaActual = i;
+    document.getElementById('t-ruta').textContent = r.nombre;
+    document.getElementById('ruta-datos').textContent = r.dia + ' · ' + decimal(kmRuta(r.puntos), 1) + ' km';
+    mostrar('ruta');
+    var caja = document.getElementById('mapa-ruta');
     if (!window.L) {
       caja.innerHTML = '<p class="mapa-error">No se ha podido cargar el mapa. Revisa tu conexión.</p>';
       return;
     }
-    if (!mapaRutas) {
-      mapaRutas = L.map(caja, { scrollWheelZoom: false });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      }).addTo(mapaRutas);
-      lineasRutas = RUTAS.map(function (r) {
-        return L.polyline(r.puntos, { color: r.color, weight: 5, opacity: .9 }).bindTooltip(r.nombre).addTo(mapaRutas);
-      });
-      mapaRutas.fitBounds(L.featureGroup(lineasRutas).getBounds(), { padding: [20, 20] });
+    if (!mapaRuta) {
+      mapaRuta = L.map(caja, { scrollWheelZoom: false });
+      capaOSM().addTo(mapaRuta);
     }
-    setTimeout(function () { mapaRutas.invalidateSize(); }, 0);
+    if (lineaRuta) lineaRuta.remove();
+    lineaRuta = L.polyline(r.puntos, { color: COLOR_RUTA, weight: 6 }).addTo(mapaRuta);
+    setTimeout(function () {
+      mapaRuta.invalidateSize();
+      mapaRuta.fitBounds(lineaRuta.getBounds(), { padding: [24, 24] });
+    }, 0);
   }
   document.getElementById('lista-rutas').addEventListener('click', function (e) {
     var b = e.target.closest('[data-ruta]');
-    if (!b || !mapaRutas) return;
-    var linea = lineasRutas[b.dataset.ruta];
-    linea.bringToFront();
-    mapaRutas.fitBounds(linea.getBounds(), { padding: [20, 20] });
-    linea.openTooltip();
+    if (b) abrirRuta(Number(b.dataset.ruta));
   });
 
   // ---------- Ayuda: preguntas frecuentes con respuestas fijas ----------
@@ -1784,7 +1833,7 @@
     chatPanel.hidden = !abrir;
     chatBoton.setAttribute('aria-expanded', abrir);
     if (abrir && !chatMensajes.children.length) mensaje('¡Hola! Soy la ayuda de RecoRun. Elige una pregunta o escríbela.', 'bot');
-    if (abrir) document.getElementById('chat-texto').focus();
+    if (abrir) chatPanel.focus();
   }
   chatBoton.addEventListener('click', function () { abrirChat(chatPanel.hidden); });
   document.getElementById('chat-cerrar').addEventListener('click', function () { abrirChat(false); chatBoton.focus(); });
