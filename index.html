@@ -280,8 +280,11 @@
   caption { text-align: left; font-size: .8rem; color: var(--gris); padding-bottom: 6px; }
   th, td { padding: 8px 4px; text-align: left; border-bottom: 1px solid var(--borde); }
   th { font-size: .8rem; text-transform: uppercase; color: var(--gris); }
-  td:first-child { width: 2.5rem; font-weight: 900; font-style: italic; color: var(--verde); }
+  td:first-child { width: 3.2rem; white-space: nowrap; font-weight: 900; font-style: italic; color: var(--verde); }
   td:last-child, th:last-child { text-align: right; }
+  .ver-ranking { margin-top: 12px; }
+  .fila-tu td { background: var(--lima-suave); }
+  #ranking-completo h3 { margin: 16px 0 8px; font-size: 1.05rem; }
   .categorias { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; padding: 0; list-style: none; }
   .categorias li { padding: 4px 10px; border-radius: 999px; background: var(--lima-suave); font-weight: 700; font-size: .9rem; }
 
@@ -345,6 +348,7 @@
   .controles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .boton-claro { background: transparent; color: var(--lima); border: 2px solid var(--lima); }
   .boton-claro:hover { background: #1F2A14; }
+  .boton-segundo { margin-top: 10px; }
   .resumen h3 { margin: 0 0 8px; font-size: 1.2rem; font-weight: 900; font-style: italic; text-transform: uppercase; }
   .resumen h3:focus { outline: none; }
   .resumen p { margin: 0 0 14px; }
@@ -374,6 +378,89 @@
   }
   .gracias:focus { outline: 3px solid var(--verde); outline-offset: 2px; }
 
+  /* Recompensas grupales */
+  .tira-grupal {
+    display: grid; grid-template-columns: 44px 1fr 22px; gap: 12px; align-items: center;
+    width: 100%; margin: 24px 0 0; padding: 18px 16px;
+    background: var(--noche); color: #fff; border: 0; border-radius: 0;
+    font: inherit; text-align: left; cursor: pointer;
+  }
+  .tira-grupal:hover { background: #1F2A14; }
+  .tira-grupal strong { display: block; color: var(--lima); font-size: 1.1rem; font-weight: 900; font-style: italic; text-transform: uppercase; }
+  .tira-grupal small { color: #E8EEDD; font-size: .9rem; }
+  .tira-emoji { font-size: 34px; line-height: 1; }
+  .tira-grupal .flecha { width: 22px; height: 22px; color: var(--lima); }
+  .reparto { margin: 2px 0 0; font-size: .85rem; color: var(--gris); }
+  .aviso-grupal { grid-template-columns: 64px 1fr; }
+  .aviso-grupal label { display: block; font-size: .85rem; margin-bottom: 4px; }
+  .aviso-grupal select { width: 100%; min-height: 40px; margin-bottom: 8px; border-radius: 8px; font: inherit; }
+
+  /* Ayuda (chatbot de preguntas frecuentes) */
+  .chat {
+    position: fixed; z-index: 1200;
+    right: max(12px, calc((100vw - 375px) / 2 + 12px)); bottom: 72px;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  }
+  @media (min-width: 480px) { .chat { position: absolute; right: 12px; } }
+  .chat[hidden], .chat-panel[hidden] { display: none !important; }
+  .chat-boton {
+    width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--lima);
+    background: var(--noche); font-size: 20px; line-height: 1; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(14, 21, 8, .3);
+  }
+  .chat-panel {
+    width: 290px; max-height: 420px; display: flex; flex-direction: column;
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio);
+    box-shadow: 0 10px 30px rgba(14, 21, 8, .3); overflow: hidden; font-size: .9rem;
+  }
+  .chat-cabeza { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--noche); color: var(--lima); }
+  .chat-cabeza button { min-width: 36px; min-height: 36px; border: 0; background: transparent; color: #fff; font-size: 1rem; cursor: pointer; }
+  .chat-mensajes { flex: 1; overflow-y: auto; padding: 10px; display: grid; gap: 8px; align-content: start; }
+  .chat-mensajes p { margin: 0; padding: 8px 10px; border-radius: 12px; max-width: 90%; }
+  .chat-mensajes .bot { background: var(--lima-suave); justify-self: start; }
+  .chat-mensajes .yo { background: var(--noche); color: #fff; justify-self: end; }
+  .chat-sugerencias { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 10px 8px; }
+  .chat-sugerencias button {
+    min-height: 32px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--borde);
+    background: var(--fondo); font: inherit; font-size: .8rem; cursor: pointer; text-align: left;
+  }
+  .chat-form { display: grid; grid-template-columns: 1fr auto; gap: 6px; padding: 8px; border-top: 1px solid var(--borde); }
+  .chat-form input { min-height: 36px; padding: 4px 8px; border: 1px solid var(--borde); border-radius: 8px; font: inherit; }
+  .chat-form button { min-height: 36px; padding: 4px 12px; border: 0; border-radius: 8px; background: var(--lima); color: var(--tinta-lima); font: inherit; font-weight: 800; cursor: pointer; }
+
+  /* Tus rutas */
+  .lista-rutas { margin-top: 12px; }
+  .lista-rutas .fila { grid-template-columns: 32px 1fr 20px; }
+  .color-ruta { width: 32px; height: 8px; border-radius: 999px; }
+
+  /* Mi perfil */
+  .perfil-cabeza { display: flex; align-items: center; gap: 12px; margin: 12px 0 16px; }
+  .perfil-cabeza p { margin: 0; display: grid; }
+  .perfil-cabeza strong { font-size: 1.2rem; }
+  .perfil-cabeza p span { font-size: .9rem; color: #C9D3B8; }
+  .avatar {
+    flex: none; width: 56px; height: 56px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--lima); color: var(--tinta-lima); font-weight: 900;
+  }
+  .avatar-pequeno { width: 40px; height: 40px; font-size: .85rem; background: var(--lima-suave); color: var(--verde); }
+  .periodos-dos { grid-template-columns: 1fr 1fr; }
+  .persona { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); }
+  .persona summary {
+    display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center;
+    padding: 12px; cursor: pointer; list-style: none;
+  }
+  .persona summary::-webkit-details-marker { display: none; }
+  .persona summary strong { display: block; }
+  .persona summary small { color: var(--gris); }
+  .persona summary .flecha { width: 20px; height: 20px; color: var(--verde); transition: transform .15s ease; }
+  .persona[open] summary .flecha { transform: rotate(90deg); }
+  .persona-detalle { padding: 0 12px 12px; display: grid; gap: 10px; }
+  .persona-detalle ul { margin: 0; padding-left: 18px; }
+  .canje { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; }
+  .canje .producto-foto { width: 44px; height: 44px; font-size: 24px; }
+  .canje small { display: block; color: var(--gris); }
+
   .pie { padding: 24px 16px 8px; text-align: center; font-size: .8rem; }
   .pie a { color: var(--gris); }
 
@@ -386,7 +473,7 @@
     position: sticky; bottom: 0;
   }
   .barra button {
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; line-height: 1.15;
     min-height: 60px; padding: 8px 2px;
     background: transparent; border: 0; color: #C9D3B8;
     font: inherit; font-size: .7rem; font-weight: 700; cursor: pointer;
@@ -465,14 +552,15 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Inicio
         </button>
         <h2 id="t-sesion" tabindex="-1">Sesión de running</h2>
-        <p class="estado-sesion" id="estado-sesion">En marcha</p>
+        <p class="estado-sesion" id="estado-sesion">Preparado/a para salir</p>
         <p class="crono" id="crono" role="timer" aria-live="off">00:00:00</p>
         <dl class="metricas">
           <div><dt>Distancia</dt><dd><span id="m-distancia">0,00</span> km</dd></div>
           <div><dt>Ritmo</dt><dd><span id="m-ritmo">–</span> /km</dd></div>
           <div><dt>Tokens</dt><dd id="m-tokens">0,0</dd></div>
         </dl>
-        <div class="controles" id="controles">
+        <button class="boton" type="button" id="boton-iniciar">Empezar</button>
+        <div class="controles" id="controles" hidden>
           <button class="boton boton-claro" type="button" id="boton-pausa">Pausar</button>
           <button class="boton" type="button" id="boton-terminar">Terminar</button>
         </div>
@@ -541,6 +629,13 @@
         <p class="nota">Las marcas y locales aparecen solo como ejemplo en este prototipo de clase: no colaboran con RecoRun ni ofrecen estas promociones.</p>
       </div>
 
+      <!-- 7. Recompensas grupales: tira a todo el ancho, separada de las categorías -->
+      <button class="tira-grupal" type="button" data-ir="grupales">
+        <span class="tira-emoji" aria-hidden="true">🤝</span>
+        <span><strong>7. Recompensas grupales</strong><small>Canjea con un amigo juntando vuestros tokens</small></span>
+        <svg class="flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+
       <!-- 3. Imagen -->
       <div class="bloque">
         <figure class="destacado-producto">
@@ -551,6 +646,21 @@
             <span>Gratis por 10 tokens · Toma Café</span>
           </figcaption>
         </figure>
+      </div>
+    </section>
+
+    <!-- Canjes › recompensas grupales -->
+    <section class="pantalla" id="grupales" data-pestana="tienda" aria-labelledby="t-grupales" hidden>
+      <div class="hero">
+        <button class="volver" type="button" data-ir="tienda">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Canjes
+        </button>
+        <h2 id="t-grupales" tabindex="-1">Recompensas grupales</h2>
+        <p>Juntad vuestros tokens y disfrutad el plan juntos</p>
+      </div>
+      <div class="bloque">
+        <ul class="lista" id="lista-grupales"></ul>
+        <p class="nota">Las marcas y locales aparecen solo como ejemplo en este prototipo de clase: no colaboran con RecoRun ni ofrecen estas promociones.</p>
       </div>
     </section>
 
@@ -614,6 +724,7 @@
         <h2 id="t-evolucion" tabindex="-1">Evolución Personal</h2>
         <p>Mira tu evolución en el tiempo</p>
         <button class="boton" type="button" data-bajar="t-grafico">Ver historial</button>
+        <button class="boton boton-claro boton-segundo" type="button" data-bajar="t-listado">Ver rankings</button>
       </div>
 
       <!-- 2. Tarjetas / listado -->
@@ -632,18 +743,8 @@
           <table class="solo-lector" id="grafico-tabla"></table>
         </div>
       </div>
-    </section>
 
-    <!-- ============ Pantalla 3 — Rankings ============ -->
-    <section class="pantalla" id="rankings" data-pestana="rankings" aria-labelledby="t-rankings" hidden>
-      <!-- 1. Hero -->
-      <div class="hero">
-        <h2 id="t-rankings" tabindex="-1">Rankings</h2>
-        <p>Mira el progreso de los demás</p>
-        <button class="boton" type="button" data-bajar="t-listado">Ver rankings</button>
-      </div>
-
-      <!-- 2. Tarjetas / listado -->
+      <!-- Rankings (antes en su propia pestaña) -->
       <div class="bloque">
         <h3 id="t-listado" tabindex="-1">Listado de rankings</h3>
         <div class="rankings">
@@ -653,11 +754,12 @@
               <caption>Kilómetros esta semana</caption>
               <thead><tr><th scope="col">Pos.</th><th scope="col">Corredor/a</th><th scope="col">Km</th></tr></thead>
               <tbody>
-                <tr><td>1</td><td>Lucía M.</td><td>62</td></tr>
-                <tr><td>2</td><td>Javier R.</td><td>58</td></tr>
-                <tr><td>3</td><td>Carmen S.</td><td>51</td></tr>
+                <tr><td><span aria-hidden="true">🥇</span> 1</td><td>Lucía M.</td><td>62</td></tr>
+                <tr><td><span aria-hidden="true">🥈</span> 2</td><td>Javier R.</td><td>58</td></tr>
+                <tr><td><span aria-hidden="true">🥉</span> 3</td><td>Carmen S.</td><td>51</td></tr>
               </tbody>
             </table>
+            <button class="boton boton-pequeno ver-ranking" type="button" data-ranking="madrid">Ver ranking completo</button>
           </article>
           <article class="tarjeta">
             <h4>2. Ranking grupo de amigos</h4>
@@ -665,11 +767,12 @@
               <caption>Kilómetros esta semana</caption>
               <thead><tr><th scope="col">Pos.</th><th scope="col">Corredor/a</th><th scope="col">Km</th></tr></thead>
               <tbody>
-                <tr><td>1</td><td>Marta</td><td>34</td></tr>
-                <tr><td>2</td><td><strong>Tú</strong></td><td>28</td></tr>
-                <tr><td>3</td><td>Pablo</td><td>21</td></tr>
+                <tr><td><span aria-hidden="true">🥇</span> 1</td><td>Marta</td><td>34</td></tr>
+                <tr><td><span aria-hidden="true">🥈</span> 2</td><td><strong>Tú</strong></td><td>28</td></tr>
+                <tr><td><span aria-hidden="true">🥉</span> 3</td><td>Pablo</td><td>21</td></tr>
               </tbody>
             </table>
+            <button class="boton boton-pequeno ver-ranking" type="button" data-ranking="amigos">Ver ranking completo</button>
           </article>
           <article class="tarjeta">
             <h4>3. Ranking por categorías</h4>
@@ -677,19 +780,95 @@
               <caption>Líder de cada categoría esta semana</caption>
               <thead><tr><th scope="col">Categoría</th><th scope="col">Líder</th><th scope="col">Km</th></tr></thead>
               <tbody>
-                <tr><td>Principiante</td><td>Andrea L.</td><td>18</td></tr>
-                <tr><td>Intermedio</td><td>Diego P.</td><td>39</td></tr>
-                <tr><td>Avanzado</td><td>Sara G.</td><td>71</td></tr>
+                <tr><td>Principiante</td><td><span aria-hidden="true">🥇</span> Andrea L.</td><td>18</td></tr>
+                <tr><td>Intermedio</td><td><span aria-hidden="true">🥇</span> Diego P.</td><td>39</td></tr>
+                <tr><td>Avanzado</td><td><span aria-hidden="true">🥇</span> Sara G.</td><td>71</td></tr>
               </tbody>
             </table>
+            <button class="boton boton-pequeno ver-ranking" type="button" data-ranking="categorias">Ver ranking completo</button>
           </article>
         </div>
       </div>
     </section>
+
+    <!-- Evolución y rankings › ranking completo -->
+    <section class="pantalla" id="ranking" data-pestana="evolucion" aria-labelledby="t-ranking" hidden>
+      <div class="hero">
+        <button class="volver" type="button" data-ir="evolucion">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Rankings
+        </button>
+        <h2 id="t-ranking" tabindex="-1"></h2>
+        <p>Kilómetros esta semana</p>
+      </div>
+      <div class="bloque" id="ranking-completo"></div>
+    </section>
+
+    <!-- ============ Pantalla 5 — Mi perfil ============ -->
+    <section class="pantalla" id="perfil" data-pestana="perfil" aria-labelledby="t-perfil" hidden>
+      <div class="hero">
+        <h2 id="t-perfil" tabindex="-1">Mi perfil</h2>
+        <div class="perfil-cabeza">
+          <span class="avatar" aria-hidden="true">TÚ</span>
+          <p><strong>Tú</strong><span>Corredor/a en Madrid</span></p>
+        </div>
+        <dl class="metricas">
+          <div><dt>Km esta semana</dt><dd>28</dd></div>
+          <div><dt>Canjes</dt><dd id="perfil-canjes"></dd></div>
+          <div><dt>Tokens</dt><dd id="perfil-tokens">14</dd></div>
+        </dl>
+        <button class="boton boton-segundo" type="button" data-ir="rutas">Tus rutas</button>
+      </div>
+
+      <div class="bloque">
+        <h3>Tu comunidad</h3>
+        <div class="periodos periodos-dos" role="group" aria-label="Ver seguidores o seguidos" id="pestanas-gente"></div>
+        <ul class="lista" id="lista-gente"></ul>
+      </div>
+
+      <div class="bloque">
+        <h3>Tus canjes</h3>
+        <ul class="lista" id="mis-canjes"></ul>
+      </div>
+    </section>
+
+    <!-- Mi perfil › Tus rutas -->
+    <section class="pantalla" id="rutas" data-pestana="perfil" aria-labelledby="t-rutas" hidden>
+      <div class="hero">
+        <button class="volver" type="button" data-ir="perfil">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Mi perfil
+        </button>
+        <h2 id="t-rutas" tabindex="-1">Tus rutas</h2>
+        <p>Lo que has corrido en tus últimas salidas</p>
+      </div>
+      <div class="bloque">
+        <div class="mapa" id="mapa-rutas" role="region" aria-label="Mapa con la línea de tus últimas carreras"></div>
+        <ul class="lista lista-rutas" id="lista-rutas"></ul>
+        <p class="nota">Rutas de ejemplo de este prototipo.</p>
+      </div>
+    </section>
+
     <footer class="pie">
       <a href="panel.html">Panel del equipo</a>
     </footer>
   </main>
+
+  <!-- Ayuda (solo en Mi perfil): preguntas frecuentes con respuestas fijas, sin servicios externos -->
+  <div class="chat" id="chat" hidden>
+    <div class="chat-panel" id="chat-panel" role="dialog" aria-labelledby="chat-titulo" hidden>
+      <div class="chat-cabeza">
+        <strong id="chat-titulo">Ayuda RecoRun</strong>
+        <button type="button" id="chat-cerrar" aria-label="Cerrar la ayuda">✕</button>
+      </div>
+      <div class="chat-mensajes" id="chat-mensajes" aria-live="polite"></div>
+      <div class="chat-sugerencias" id="chat-sugerencias"></div>
+      <form class="chat-form" id="chat-form">
+        <label class="solo-lector" for="chat-texto">Escribe tu pregunta</label>
+        <input id="chat-texto" type="text" autocomplete="off" placeholder="Escribe tu pregunta">
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+    <button class="chat-boton" type="button" id="chat-boton" aria-expanded="false" aria-controls="chat-panel" aria-label="Abrir la ayuda: preguntas frecuentes">💬</button>
+  </div>
 
   <nav class="barra" aria-label="Pantallas de la app">
     <button type="button" data-ir="inicio" aria-current="page">
@@ -702,10 +881,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3L3 6v15l6-3 6 3 6-3V3l-6 3z"/><path d="M9 3v15M15 6v15"/></svg>Mapa
     </button>
     <button type="button" data-ir="evolucion">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Evolución
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Evolución y rankings
     </button>
-    <button type="button" data-ir="rankings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21V11H3v10zM15 21V4h-5v17zM21 21v-7h-5v7z"/></svg>Rankings
+    <button type="button" data-ir="perfil">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Mi perfil
     </button>
   </nav>
 </div>
@@ -964,6 +1143,9 @@
     var titulo = document.querySelector('#' + id + ' h2');
     if (titulo) titulo.focus();
     if (id === 'mapa') prepararMapa();
+    if (id === 'grupales') pintarGrupales();
+    if (id === 'rutas') prepararRutas();
+    document.getElementById('chat').hidden = id !== 'perfil';
     if (id !== 'sesion' && sesion.activa) pausar();
     guardarEstado(id);
   }
@@ -973,14 +1155,15 @@
   // aunque el navegador se salte entradas de su historial o el gesto se detecte dos veces.
   var restaurando = false;
   var categoriaActual = null;
+  var rankingActual = null;
   var visitadas = [{ pantalla: 'inicio', categoria: null, comercio: null }];
   var ultimaVuelta = 0;
 
   function guardarEstado(id) {
     if (restaurando) return;
-    var estado = { pantalla: id, categoria: categoriaActual, comercio: comercioActual ? comercioActual.id : null };
+    var estado = { pantalla: id, categoria: categoriaActual, comercio: comercioActual ? comercioActual.id : null, ranking: rankingActual };
     var actual = visitadas[visitadas.length - 1];
-    if (actual.pantalla === estado.pantalla && actual.categoria === estado.categoria && actual.comercio === estado.comercio) return;
+    if (actual.pantalla === estado.pantalla && actual.categoria === estado.categoria && actual.comercio === estado.comercio && actual.ranking === estado.ranking) return;
     visitadas.push(estado);
     history.pushState({ recorun: visitadas.length }, '');
   }
@@ -992,6 +1175,7 @@
     restaurando = true;
     if (estado.pantalla === 'categoria' && estado.categoria) abrirCategoria(estado.categoria);
     else if (estado.pantalla === 'comercio' && estado.comercio) abrirComercio(estado.comercio);
+    else if (estado.pantalla === 'ranking' && estado.ranking) abrirRanking(estado.ranking);
     else mostrar(estado.pantalla);
     restaurando = false;
   }
@@ -1007,7 +1191,7 @@
   document.addEventListener('touchstart', function (e) {
     toque = null;
     // El mapa y los filtros se arrastran en horizontal: ahí no se usa el gesto.
-    if (e.touches.length !== 1 || e.target.closest('#mapa-real, #filtros-mapa, input, textarea, select')) return;
+    if (e.touches.length !== 1 || e.target.closest('#mapa-real, #mapa-rutas, #filtros-mapa, input, textarea, select')) return;
     var t = e.touches[0];
     // En el navegador, el borde izquierdo ya tiene su propio gesto de volver.
     var instalada = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
@@ -1032,6 +1216,7 @@
     if (b.dataset.ir) mostrar(b.dataset.ir);
     if (b.dataset.categoria) abrirCategoria(b.dataset.categoria);
     if (b.dataset.comercio) abrirComercio(b.dataset.comercio);
+    if (b.dataset.ranking) abrirRanking(b.dataset.ranking);
     if (b.dataset.bajar) {
       var destino = document.getElementById(b.dataset.bajar);
       destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1291,6 +1476,255 @@
   });
   dibujarGrafico('dias');
 
+  // ---------- Rankings completos (nombres ficticios) ----------
+  var RANKINGS = {
+    madrid: { titulo: 'Ranking comunidad de Madrid', listas: [['', [['Lucía M.', 62], ['Javier R.', 58], ['Carmen S.', 51], ['Álvaro T.', 49], ['Nerea G.', 47], ['Hugo F.', 45], ['Irene C.', 43], ['Sergio B.', 41], ['Paula D.', 40], ['Rubén V.', 38], ['Elena P.', 37], ['Marcos J.', 35], ['Claudia R.', 34], ['Iván H.', 33], ['Laura N.', 31]]]] },
+    amigos: { titulo: 'Ranking grupo de amigos', listas: [['', [['Marta', 34], ['Tú', 28], ['Pablo', 21], ['Lucas', 19], ['Sofía', 17], ['Dani', 12], ['Bea', 9], ['Jorge', 6]]]] },
+    categorias: { titulo: 'Ranking por categorías', listas: [
+      ['Principiante', [['Andrea L.', 18], ['Tomás R.', 16], ['Noelia S.', 15], ['Óscar M.', 13], ['Alba G.', 11]]],
+      ['Intermedio', [['Diego P.', 39], ['Rocío F.', 36], ['Adrián L.', 34], ['Cristina V.', 31], ['Raúl N.', 29]]],
+      ['Avanzado', [['Sara G.', 71], ['Mario E.', 68], ['Lorena T.', 64], ['Pedro A.', 60], ['Inés B.', 57]]]
+    ] }
+  };
+  var MEDALLAS = ['🥇', '🥈', '🥉'];
+
+  function abrirRanking(clave) {
+    rankingActual = clave;
+    var r = RANKINGS[clave];
+    document.getElementById('t-ranking').textContent = r.titulo;
+    document.getElementById('ranking-completo').innerHTML = r.listas.map(function (l) {
+      return (l[0] ? '<h3>' + l[0] + '</h3>' : '') +
+        '<div class="tarjeta"><table><thead><tr><th scope="col">Pos.</th><th scope="col">Corredor/a</th><th scope="col">Km</th></tr></thead><tbody>' +
+        l[1].map(function (f, i) {
+          var tu = f[0] === 'Tú';
+          return '<tr' + (tu ? ' class="fila-tu"' : '') + '><td>' + (i < 3 ? '<span aria-hidden="true">' + MEDALLAS[i] + '</span> ' : '') + (i + 1) + '</td><td>' + (tu ? '<strong>Tú</strong>' : f[0]) + '</td><td>' + f[1] + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }).join('');
+    mostrar('ranking');
+  }
+
+  // ---------- Recompensas grupales: se canjean entre dos o más juntando los tokens ----------
+  var GRUPALES = [
+    ['2 cafés con leche', '☕', 'Toma Café', 2, 16, 100],
+    ['Desayuno para 2', '🥐', 'La Bicicleta', 2, 20, 50],
+    ['Menú para 2', '🥗', 'Honest Greens', 2, 30, 25],
+    ['2 hamburguesas con patatas', '🍔', 'Goiko', 2, 30, 30],
+    ['Entrada doble de escalada', '🧗', 'Sputnik Climbing', 2, 16, 100],
+    ['Clase de yoga para 2', '🧘', 'Barquillo Yoga', 2, 16, 50],
+    ['Fitboxing en pareja', '🥊', 'Brooklyn Fitboxing Arganzuela', 2, 10, 100],
+    ['Masaje de descarga para 2', '💆', 'Fisiorosales', 2, 40, 20],
+    ['Dorsales para 4 en la carrera de 10 km', '🏅', "Rock 'n' Roll Running Series Madrid", 4, 60, 25]
+  ];
+
+  function textoReparto(g, amigo) {
+    var parte = g[4] / g[3];
+    return 'Tú pones ' + parte + ' tokens y ' + (g[3] > 2 ? 'cada amigo/a ' : amigo + ' ') + 'pone ' + parte + '. Mostrad este QR en ' + g[2] + '.';
+  }
+  function pintarGrupales() {
+    var opciones = SEGUIDOS.map(function (id) { return '<option value="' + GENTE[id].nombre + '">' + GENTE[id].nombre + '</option>'; }).join('');
+    document.getElementById('lista-grupales').innerHTML = GRUPALES.map(function (g, i) {
+      var idAviso = 'aviso-grupal-' + i;
+      return '<li class="tarjeta producto">' +
+        '<div class="producto-cabeza"><span class="producto-foto" aria-hidden="true">' + g[1] + '</span>' +
+        '<div><h4>' + g[0] + '</h4><p class="reparto">' + g[2] + ' · para ' + g[3] + ' personas</p>' + ofertaHtml(g[4], g[5]) +
+        '<p class="reparto">' + (g[4] / g[3]) + ' tokens cada uno</p></div></div>' +
+        '<button class="boton boton-pequeno" type="button" data-canje-grupal="' + i + '" aria-controls="' + idAviso + '" aria-expanded="false">Canjear con amigos</button>' +
+        '<div class="aviso aviso-grupal" id="' + idAviso + '" role="status" hidden>' +
+          '<div class="qr" role="img" aria-label="Código QR de ejemplo, no funcional"></div>' +
+          '<div><label for="amigo-' + i + '">¿Con quién lo canjeas?</label><select id="amigo-' + i + '" data-grupal="' + i + '">' + opciones + '</select>' +
+          '<p id="reparto-' + i + '">' + textoReparto(g, SEGUIDOS.length ? GENTE[SEGUIDOS[0]].nombre : 'tu amigo/a') + '</p></div>' +
+        '</div></li>';
+    }).join('');
+  }
+  document.getElementById('lista-grupales').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-canje-grupal]');
+    if (!b) return;
+    document.getElementById(b.getAttribute('aria-controls')).hidden = false;
+    b.setAttribute('aria-expanded', 'true');
+  });
+  document.getElementById('lista-grupales').addEventListener('change', function (e) {
+    var i = e.target.dataset.grupal;
+    if (i === undefined) return;
+    document.getElementById('reparto-' + i).textContent = textoReparto(GRUPALES[i], e.target.value);
+  });
+
+  // ---------- Mi perfil: seguidores, seguidos y canjes (datos ficticios del prototipo) ----------
+  var GENTE = {
+    marta: { nombre: 'Marta', km: 34, canjes: [['Café con leche', 'Toma Café'], ['Calcetines Nike Spark', 'Nike']] },
+    pablo: { nombre: 'Pablo', km: 21, canjes: [['Hamburguesa Kevin Bacon', 'Goiko Princesa']] },
+    lucas: { nombre: 'Lucas', km: 19, canjes: [['Entrada de un día', 'Boulder Madrid'], ['Flat white', "Friend's Coffee"]] },
+    sofia: { nombre: 'Sofía', km: 17, canjes: [['Clase de yoga', 'Barquillo Yoga']] },
+    bea: { nombre: 'Bea', km: 9, canjes: [] },
+    dani: { nombre: 'Dani', km: 12, canjes: [['Café de filtro', 'Tim Hortons Santo Domingo']] },
+    jorge: { nombre: 'Jorge', km: 6, canjes: [] },
+    lucia: { nombre: 'Lucía M.', km: 62, canjes: [['Zapatillas Nike Pegasus', 'Nike'], ['Masaje de descarga', 'Fisiorosales'], ['Matcha latte', 'Amae Café']] }
+  };
+  var SEGUIDORES = ['marta', 'pablo', 'lucas', 'sofia', 'bea', 'lucia'];
+  var SEGUIDOS = ['marta', 'pablo', 'dani', 'jorge', 'lucia'];
+  var MIS_CANJES = [
+    ['Café con leche', '☕', 'Toma Café', 10],
+    ['Calcetines Nike Spark', '🧦', 'Nike', 5],
+    ['Entrada de un día', '🧗', 'Boulder Madrid', 8]
+  ];
+  var verGente = 'seguidores';
+
+  function iniciales(nombre) { return nombre.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ ]/g, '').split(' ').map(function (p) { return p[0]; }).join('').slice(0, 2).toUpperCase(); }
+
+  function pintarGente() {
+    var pestanasGente = document.getElementById('pestanas-gente');
+    pestanasGente.innerHTML =
+      '<button type="button" data-gente="seguidores" aria-pressed="' + (verGente === 'seguidores') + '">Seguidores (' + SEGUIDORES.length + ')</button>' +
+      '<button type="button" data-gente="seguidos" aria-pressed="' + (verGente === 'seguidos') + '">Seguidos (' + SEGUIDOS.length + ')</button>';
+    var lista = document.getElementById('lista-gente');
+    lista.innerHTML = '';
+    (verGente === 'seguidores' ? SEGUIDORES : SEGUIDOS).forEach(function (id) {
+      var g = GENTE[id];
+      var sigo = SEGUIDOS.indexOf(id) !== -1;
+      var li = document.createElement('li');
+      li.innerHTML = '<details class="persona"><summary>' +
+        '<span class="avatar avatar-pequeno" aria-hidden="true">' + iniciales(g.nombre) + '</span>' +
+        '<span><strong>' + g.nombre + '</strong><small>' + g.km + ' km esta semana · ' + g.canjes.length + (g.canjes.length === 1 ? ' canje' : ' canjes') + '</small></span>' + FLECHA +
+        '</summary><div class="persona-detalle">' +
+        (g.canjes.length ? '<ul>' + g.canjes.map(function (c) { return '<li>' + c[0] + ' · ' + c[1] + '</li>'; }).join('') + '</ul>' : '<p class="nota">Aún no ha canjeado nada.</p>') +
+        '<button class="boton boton-pequeno" type="button" data-seguir="' + id + '" aria-pressed="' + sigo + '">' + (sigo ? 'Siguiendo' : 'Seguir') + '</button>' +
+        '</div></details>';
+      lista.appendChild(li);
+    });
+  }
+  document.getElementById('pestanas-gente').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-gente]');
+    if (!b) return;
+    verGente = b.dataset.gente;
+    pintarGente();
+  });
+  document.getElementById('lista-gente').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-seguir]');
+    if (!b) return;
+    var i = SEGUIDOS.indexOf(b.dataset.seguir);
+    if (i === -1) SEGUIDOS.push(b.dataset.seguir); else SEGUIDOS.splice(i, 1);
+    var sigo = i === -1;
+    b.textContent = sigo ? 'Siguiendo' : 'Seguir';
+    b.setAttribute('aria-pressed', sigo);
+    document.querySelector('[data-gente="seguidos"]').textContent = 'Seguidos (' + SEGUIDOS.length + ')';
+  });
+  document.getElementById('mis-canjes').innerHTML = MIS_CANJES.map(function (c) {
+    return '<li class="tarjeta canje"><span class="producto-foto" aria-hidden="true">' + c[1] + '</span>' +
+      '<span><strong>' + c[0] + '</strong><small>' + c[2] + ' · ' + c[3] + ' tokens</small></span></li>';
+  }).join('');
+  document.getElementById('perfil-canjes').textContent = MIS_CANJES.length;
+  pintarGente();
+
+  // ---------- Tus rutas: líneas de las últimas carreras en el mapa (rutas de ejemplo) ----------
+  var RUTAS = [
+    { nombre: 'Vuelta al Retiro', cuando: 'Hace 2 días', color: '#2E7D32', puntos: [[40.4196, -3.6878], [40.4212, -3.6820], [40.4205, -3.6770], [40.4150, -3.6762], [40.4100, -3.6762], [40.4078, -3.6810], [40.4085, -3.6900], [40.4140, -3.6905], [40.4196, -3.6878]] },
+    { nombre: 'Madrid Río', cuando: 'Hace 5 días', color: '#E85D04', puntos: [[40.4176, -3.7226], [40.4146, -3.7213], [40.4085, -3.7193], [40.4027, -3.7166], [40.3990, -3.7130], [40.3955, -3.7060], [40.3922, -3.6975]] },
+    { nombre: 'Parque del Oeste', cuando: 'Hace 1 semana', color: '#1F6FEB', puntos: [[40.4240, -3.7178], [40.4281, -3.7210], [40.4325, -3.7225], [40.4340, -3.7190], [40.4295, -3.7160], [40.4250, -3.7160], [40.4240, -3.7178]] }
+  ];
+  var mapaRutas = null;
+  var lineasRutas = [];
+
+  // Distancia real de cada línea (fórmula del haversine), en km
+  function kmRuta(puntos) {
+    var total = 0;
+    for (var i = 1; i < puntos.length; i++) {
+      var a = puntos[i - 1], b = puntos[i], rad = Math.PI / 180;
+      var dLat = (b[0] - a[0]) * rad, dLng = (b[1] - a[1]) * rad;
+      var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      total += 2 * 6371 * Math.asin(Math.sqrt(h));
+    }
+    return total;
+  }
+
+  document.getElementById('lista-rutas').innerHTML = RUTAS.map(function (r, i) {
+    return '<li><button class="fila" type="button" data-ruta="' + i + '">' +
+      '<span class="color-ruta" style="background:' + r.color + '" aria-hidden="true"></span>' +
+      '<span><strong>' + r.nombre + '</strong><small>' + r.cuando + ' · ' + decimal(kmRuta(r.puntos), 1) + ' km</small></span>' + FLECHA + '</button></li>';
+  }).join('');
+
+  function prepararRutas() {
+    var caja = document.getElementById('mapa-rutas');
+    if (!window.L) {
+      caja.innerHTML = '<p class="mapa-error">No se ha podido cargar el mapa. Revisa tu conexión.</p>';
+      return;
+    }
+    if (!mapaRutas) {
+      mapaRutas = L.map(caja, { scrollWheelZoom: false });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(mapaRutas);
+      lineasRutas = RUTAS.map(function (r) {
+        return L.polyline(r.puntos, { color: r.color, weight: 5, opacity: .9 }).bindTooltip(r.nombre).addTo(mapaRutas);
+      });
+      mapaRutas.fitBounds(L.featureGroup(lineasRutas).getBounds(), { padding: [20, 20] });
+    }
+    setTimeout(function () { mapaRutas.invalidateSize(); }, 0);
+  }
+  document.getElementById('lista-rutas').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ruta]');
+    if (!b || !mapaRutas) return;
+    var linea = lineasRutas[b.dataset.ruta];
+    linea.bringToFront();
+    mapaRutas.fitBounds(linea.getBounds(), { padding: [20, 20] });
+    linea.openTooltip();
+  });
+
+  // ---------- Ayuda: preguntas frecuentes con respuestas fijas ----------
+  var PREGUNTAS = [
+    ['¿Cómo gano tokens?', ['token', 'ganar', 'gano', 'consigo', 'kilometro', 'corr'], 'Cada kilómetro que corras suma 1 token. En Inicio pulsa «Empezar a correr» y después «Empezar»; al terminar la sesión se suman a tu saldo.'],
+    ['¿Cómo canjeo una recompensa?', ['canje', 'qr', 'descuento', 'producto'], 'Ve a Canjes, elige una categoría, un comercio y un producto, y pulsa «Canjear». Enseña el QR en el local.'],
+    ['¿Qué son las recompensas grupales?', ['grupal', 'amig', 'junt', 'pareja', 'grupo'], 'Son planes para hacer con amigos (cafés, comidas, escalada…). Juntáis vuestros tokens y cada uno pone su parte. Están en Canjes, en «7. Recompensas grupales».'],
+    ['¿Cómo sigo a alguien?', ['seguir', 'sigo', 'seguidor', 'seguido', 'perfil'], 'En Mi perfil, abre a una persona de tu comunidad y pulsa «Seguir». Verás sus kilómetros y sus canjes.'],
+    ['¿Dónde veo mis rutas?', ['ruta', 'mapa', 'recorrido', 'linea'], 'En Mi perfil, pulsa «Tus rutas»: verás en el mapa la línea de tus últimas carreras.'],
+    ['¿Cómo funcionan los rankings?', ['ranking', 'clasificacion', 'puesto', 'medalla'], 'En «Evolución y rankings» ves los kilómetros de la semana. Pulsa «Ver ranking completo» para ver toda la lista; los tres primeros llevan medalla.']
+  ];
+  var chat = document.getElementById('chat');
+  var chatPanel = document.getElementById('chat-panel');
+  var chatBoton = document.getElementById('chat-boton');
+  var chatMensajes = document.getElementById('chat-mensajes');
+
+  function normalizar(t) { return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  function mensaje(texto, quien) {
+    var p = document.createElement('p');
+    p.className = quien;
+    p.textContent = texto;
+    chatMensajes.appendChild(p);
+    chatMensajes.scrollTop = chatMensajes.scrollHeight;
+  }
+  // Elige la respuesta cuyas palabras clave aparecen más veces en la pregunta
+  function responder(pregunta, indice) {
+    mensaje(pregunta, 'yo');
+    var t = normalizar(pregunta);
+    var encontrada = indice !== undefined ? PREGUNTAS[indice] : null;
+    var mejor = 0;
+    if (!encontrada) PREGUNTAS.forEach(function (q) {
+      var aciertos = q[1].filter(function (clave) { return t.indexOf(clave) !== -1; }).length;
+      if (aciertos && aciertos >= mejor) { mejor = aciertos; encontrada = q; }
+    });
+    mensaje(encontrada ? encontrada[2] : 'Aún no sé responder a eso. Prueba con una de las preguntas de abajo.', 'bot');
+  }
+  document.getElementById('chat-sugerencias').innerHTML = PREGUNTAS.map(function (q, i) {
+    return '<button type="button" data-pregunta="' + i + '">' + q[0] + '</button>';
+  }).join('');
+  document.getElementById('chat-sugerencias').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-pregunta]');
+    if (b) responder(PREGUNTAS[b.dataset.pregunta][0], b.dataset.pregunta);
+  });
+  document.getElementById('chat-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var campo = document.getElementById('chat-texto');
+    if (campo.value.trim()) responder(campo.value.trim());
+    campo.value = '';
+  });
+  function abrirChat(abrir) {
+    chatPanel.hidden = !abrir;
+    chatBoton.setAttribute('aria-expanded', abrir);
+    if (abrir && !chatMensajes.children.length) mensaje('¡Hola! Soy la ayuda de RecoRun. Elige una pregunta o escríbela.', 'bot');
+    if (abrir) document.getElementById('chat-texto').focus();
+  }
+  chatBoton.addEventListener('click', function () { abrirChat(chatPanel.hidden); });
+  document.getElementById('chat-cerrar').addEventListener('click', function () { abrirChat(false); chatBoton.focus(); });
+
   // ---------- Sesión de running (distancia simulada a ritmo de carrera) ----------
   var SEGUNDOS_POR_KM = 330; // 5:30 min/km
   var sesion = { segundos: 0, km: 0, activa: false, temporizador: null };
@@ -1335,10 +1769,17 @@
     sesion.segundos = 0;
     sesion.km = 0;
     pintarSesion();
-    document.getElementById('controles').hidden = false;
+    // El tiempo no empieza solo: hay que pulsar «Empezar» en la pantalla de la sesión.
+    document.getElementById('estado-sesion').textContent = 'Preparado/a para salir';
+    document.getElementById('boton-iniciar').hidden = false;
+    document.getElementById('controles').hidden = true;
     document.getElementById('resumen').hidden = true;
     document.getElementById('bloque-espera').hidden = true;
     mostrar('sesion');
+  });
+  document.getElementById('boton-iniciar').addEventListener('click', function () {
+    document.getElementById('boton-iniciar').hidden = true;
+    document.getElementById('controles').hidden = false;
     reanudar();
   });
   document.getElementById('boton-pausa').addEventListener('click', function () {
@@ -1350,6 +1791,7 @@
     var ganados = Math.floor(sesion.km);
     saldo += ganados;
     document.querySelector('.saldo strong').textContent = saldo;
+    document.getElementById('perfil-tokens').textContent = saldo;
     document.getElementById('estado-sesion').textContent = 'Terminada';
     document.getElementById('controles').hidden = true;
     document.getElementById('resumen-texto').textContent =
