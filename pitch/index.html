@@ -322,12 +322,12 @@
 
 <script>
   // ---------- Datos de la evidencia ----------
-  // Rellenad aquí el % de cada hipótesis y su umbral (null = dato pendiente: no inventamos cifras).
+  // % de cada hipótesis y su umbral. Sin cifra (null) se muestra el resultado en vez de una barra: no inventamos datos.
   var EVIDENCIA = {
     n: 12,
     fuente: 'Encuesta del equipo',
     hipotesis: [
-      { id: 'H1', texto: 'Nuestro cliente son corredores habituales', valor: null, umbral: 35, veredicto: 'No concluyente' },
+      { id: 'H1', texto: 'Nuestro cliente son corredores habituales', valor: null, umbral: 35, veredicto: 'No concluyente', detalle: 'Supera el 35 % con n = 4' },
       { id: 'H2', texto: 'Les convence ganar recompensas canjeables', valor: null, umbral: null, veredicto: 'No concluyente' },
       { id: 'H3', texto: 'Llegaremos por tiendas y locales asociados', valor: null, umbral: null, veredicto: 'No concluyente' }
     ]
@@ -347,7 +347,8 @@
       var x = x0 + 30 + i * (ancho + hueco);
       if (d.valor === null) {
         h += '<rect x="' + x + '" y="' + y(100) + '" width="' + ancho + '" height="' + alto + '" fill="none" stroke="#4A5240" stroke-width="2" stroke-dasharray="10 8" rx="10"/>' +
-          '<text x="' + (x + ancho / 2) + '" y="' + y(55) + '" text-anchor="middle" font-size="19" font-weight="800" fill="#4A5240">[DATO PENDIENTE]</text>';
+          '<text x="' + (x + ancho / 2) + '" y="' + y(62) + '" text-anchor="middle" font-size="22" font-weight="900" fill="#2F5A0B">' + d.veredicto.toUpperCase() + '</text>' +
+          (d.detalle ? '<text x="' + (x + ancho / 2) + '" y="' + y(52) + '" text-anchor="middle" font-size="18" fill="#4A5240">' + d.detalle + '</text>' : '');
       } else {
         h += '<rect x="' + x + '" y="' + y(d.valor) + '" width="' + ancho + '" height="' + (y0 - y(d.valor)) + '" fill="#C6F432" stroke="#1A1F14" stroke-width="2" rx="10"/>' +
           '<text x="' + (x + ancho / 2) + '" y="' + (y(d.valor) - 14) + '" text-anchor="middle" font-size="34" font-weight="900" fill="#1A1F14">' + d.valor + ' %</text>';
@@ -355,8 +356,6 @@
       if (d.umbral !== null) {
         h += '<line x1="' + (x - 14) + '" x2="' + (x + ancho + 14) + '" y1="' + y(d.umbral) + '" y2="' + y(d.umbral) + '" stroke="#0E1508" stroke-width="4" stroke-dasharray="14 8"/>' +
           '<text x="' + (x + ancho + 10) + '" y="' + (y(d.umbral) - 10) + '" text-anchor="end" font-size="20" font-weight="800" fill="#0E1508">Umbral ' + d.umbral + ' %</text>';
-      } else {
-        h += '<text x="' + (x + ancho / 2) + '" y="' + y(90) + '" text-anchor="middle" font-size="18" fill="#4A5240">Umbral pendiente</text>';
       }
       h += '<text x="' + (x + ancho / 2) + '" y="' + (y0 + 40) + '" text-anchor="middle" font-size="28" font-weight="900" fill="#1A1F14">' + d.id + '</text>';
     });
