@@ -21,7 +21,6 @@
     --tarjeta: #FFFFFF;
     --borde: #D9E3C4;
     --gris: #4A5240;
-    --pendiente: #8A3B00;
     --radio: 16px;
   }
   * { box-sizing: border-box; }
@@ -138,31 +137,6 @@
     padding: 16px;
   }
 
-  /* Huecos de imagen */
-  .imagen {
-    margin: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-    min-height: 170px; padding: 16px;
-    background: repeating-linear-gradient(45deg, var(--lima-suave) 0 12px, #F3FCD6 12px 24px);
-    border: 2px dashed var(--verde); border-radius: var(--radio);
-    text-align: center;
-  }
-  .imagen svg { width: 56px; height: 56px; }
-  .imagen figcaption { font-weight: 700; }
-
-  .pendiente {
-    display: inline-block;
-    font-size: .8rem; font-weight: 700; color: var(--pendiente);
-    background: #FFF1E3; border: 1px solid #F2C9A5; border-radius: 6px;
-    padding: 0 6px; overflow-wrap: anywhere;
-  }
-  .revisar {
-    display: inline-block;
-    font-size: .75rem; font-weight: 700; color: #5B2A86;
-    background: #F3EBFB; border: 1px solid #D9C4EE; border-radius: 6px;
-    padding: 0 6px;
-  }
-  .hero .pendiente, .hero .revisar { font-size: .75rem; }
   .nota { margin: 8px 0 0; font-size: .85rem; color: var(--gris); }
 
   .pasos { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
@@ -217,12 +191,31 @@
     background: repeating-linear-gradient(45deg, var(--lima-suave) 0 8px, #F3FCD6 8px 16px);
     border: 2px dashed var(--verde); color: var(--verde);
   }
-  .producto-foto svg { width: 24px; height: 24px; }
+  .producto-foto { font-size: 30px; line-height: 1; border-style: solid; border-width: 1px; border-color: var(--borde); background: var(--lima-suave); }
+
+  .destacado-producto {
+    margin: 0; display: grid; grid-template-columns: 84px 1fr; gap: 14px; align-items: center;
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); padding: 16px;
+  }
+  .emoji-grande {
+    width: 84px; height: 84px; border-radius: 20px;
+    display: grid; place-items: center; font-size: 48px; line-height: 1;
+    background: var(--lima-suave);
+  }
+  .destacado-producto figcaption { display: grid; gap: 2px; }
+  .destacado-producto small { font-size: .8rem; font-weight: 700; text-transform: uppercase; color: var(--verde); }
+  .destacado-producto strong { font-size: 1.15rem; line-height: 1.2; }
+  .destacado-producto figcaption > span { font-size: .9rem; color: var(--gris); }
+  .progreso {
+    display: block; height: 10px; margin-top: 6px; border-radius: 999px;
+    background: var(--fondo); border: 1px solid var(--borde); overflow: hidden;
+  }
+  .progreso span { display: block; height: 100%; background: var(--lima); border-right: 2px solid var(--tinta); }
+  .destacado-producto figcaption > .progreso-texto { font-size: .85rem; font-weight: 700; color: var(--tinta); }
   .producto h4 { margin: 0; font-size: 1rem; }
   .producto p { margin: 0; font-size: .9rem; color: var(--gris); }
   .producto .boton { justify-self: start; }
   .producto .precio { margin-top: 2px; color: var(--tinta); font-size: .95rem; }
-  .producto .precio s { color: var(--gris); font-size: .85rem; }
   .etiqueta-oferta {
     display: inline-block; padding: 0 8px; border-radius: 999px;
     background: var(--noche); color: var(--lima);
@@ -389,7 +382,7 @@
 <div class="movil">
   <header class="cabecera">
     <h1 class="marca"><img src="icono.svg" alt="" width="36" height="36"><span>Reco<span class="run">Run</span></span></h1>
-    <p class="saldo">Tus tokens <strong>[DATO PENDIENTE]</strong></p>
+    <p class="saldo">Tus tokens <strong>14</strong></p>
   </header>
 
   <main id="contenido">
@@ -405,10 +398,15 @@
 
       <!-- 2. Imagen -->
       <div class="bloque">
-        <figure class="imagen" role="img" aria-label="Hueco para la imagen del producto de la próxima recompensa y los tokens necesarios para conseguirla. Pendiente de definir.">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#2F5A0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-          <figcaption>Producto de próxima recompensa + tokens necesarios para conseguirla</figcaption>
-          <span class="pendiente">Producto: [DATO PENDIENTE] · Tokens: [DATO PENDIENTE]</span>
+        <figure class="destacado-producto">
+          <span class="emoji-grande" aria-hidden="true">👟</span>
+          <figcaption>
+            <small>Tu próxima recompensa</small>
+            <strong>Zapatillas de running</strong>
+            <span>25 % de descuento por 20 tokens · Tienda deportiva B</span>
+            <span class="progreso" role="progressbar" aria-label="Tokens conseguidos" aria-valuemin="0" aria-valuemax="20" aria-valuenow="14"><span style="width:70%"></span></span>
+            <span class="progreso-texto">Tienes 14 de 20 tokens: ¡te faltan 6!</span>
+          </figcaption>
         </figure>
       </div>
 
@@ -426,7 +424,7 @@
       <!-- Lista de espera (medidor del curso) -->
       <div class="bloque">
         <div class="tarjeta espera">
-          <h3 id="t-espera">Apúntate a la lista de espera <span class="revisar">[REVISAR]</span></h3>
+          <h3 id="t-espera">Apúntate a la lista de espera</h3>
           <form id="lista-espera" aria-labelledby="t-espera" novalidate>
             <fieldset>
               <legend>¿Corres de forma habitual?</legend>
@@ -460,7 +458,7 @@
         <button class="boton" type="button" id="boton-canjear" aria-controls="aviso-canje" aria-expanded="false">Canjear</button>
         <div class="aviso" id="aviso-canje" role="status" hidden>
           <div class="qr" role="img" aria-label="Código QR de ejemplo, no funcional"></div>
-          <p>Canje simulado: en la app verías aquí tu QR para mostrar en tienda. <span class="revisar">[REVISAR]</span></p>
+          <p>Muestra este QR en la tienda para canjear tus tokens.</p>
         </div>
       </div>
 
@@ -478,10 +476,13 @@
 
       <!-- 3. Imagen -->
       <div class="bloque">
-        <figure class="imagen" role="img" aria-label="Hueco para la imagen del producto más solicitado. Pendiente de definir.">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#2F5A0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>
-          <figcaption>Producto más solicitado</figcaption>
-          <span class="pendiente">[DATO PENDIENTE]</span>
+        <figure class="destacado-producto">
+          <span class="emoji-grande" aria-hidden="true">☕</span>
+          <figcaption>
+            <small>Producto más solicitado</small>
+            <strong>Café con leche</strong>
+            <span>Gratis por 10 tokens · Cafetería A</span>
+          </figcaption>
         </figure>
       </div>
     </section>
@@ -493,11 +494,10 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Canjes
         </button>
         <h2 id="t-categoria" tabindex="-1"></h2>
-        <p>Elige un comercio para ver sus productos <span class="revisar">[REVISAR]</span></p>
+        <p>Elige un comercio para ver sus productos</p>
       </div>
       <div class="bloque">
         <ul class="lista" id="lista-comercios"></ul>
-        <p class="nota">Comercios de ejemplo para el prototipo <span class="revisar">[REVISAR]</span></p>
       </div>
     </section>
 
@@ -508,20 +508,19 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span id="volver-categoria-texto"></span>
         </button>
         <h2 id="t-comercio" tabindex="-1"></h2>
-        <p>Productos que puedes conseguir con tus tokens <span class="revisar">[REVISAR]</span></p>
+        <p>Productos que puedes conseguir con tus tokens</p>
         <button class="boton boton-pequeno" type="button" id="ver-en-mapa">Ver en el mapa</button>
       </div>
       <div class="bloque">
         <ul class="lista" id="lista-productos"></ul>
-        <p class="nota">Productos, precios y descuentos de ejemplo <span class="revisar">[REVISAR]</span></p>
       </div>
     </section>
 
     <!-- ============ Mapa ============ -->
     <section class="pantalla" id="mapa" data-pestana="mapa" aria-labelledby="t-mapa" hidden>
       <div class="hero">
-        <h2 id="t-mapa" tabindex="-1">Mapa <span class="revisar">[REVISAR]</span></h2>
-        <p>Encuentra comercios cerca de ti para canjear tus tokens <span class="revisar">[REVISAR]</span></p>
+        <h2 id="t-mapa" tabindex="-1">Mapa</h2>
+        <p>Encuentra comercios cerca de ti para canjear tus tokens</p>
         <button class="boton" type="button" id="boton-ubicacion">Mostrar mi ubicación</button>
         <p class="estado-ubicacion" id="estado-ubicacion" role="status" style="color:#E8EEDD"></p>
       </div>
@@ -544,7 +543,6 @@
           <div class="yo-etiqueta" aria-hidden="true">Tú</div>
           <figcaption id="mapa-pie" class="solo-lector">Mapa ilustrativo con tu posición en el centro y comercios de ejemplo alrededor.</figcaption>
         </figure>
-        <p class="nota">Mapa ilustrativo, no real <span class="revisar">[REVISAR]</span></p>
       </div>
       <div class="bloque">
         <h3>Comercios cerca de ti</h3>
@@ -575,7 +573,6 @@
             <title id="grafico-titulo">Kilómetros corridos</title>
           </svg>
           <table class="solo-lector" id="grafico-tabla"></table>
-          <p class="nota">Datos de ejemplo, no reales · <span class="pendiente">[DATO PENDIENTE]</span></p>
         </div>
       </div>
     </section>
@@ -596,35 +593,38 @@
           <article class="tarjeta">
             <h4>1. Ranking comunidad de Madrid</h4>
             <table>
-              <caption>Nombres ficticios · Puntos: <span class="pendiente">[DATO PENDIENTE]</span></caption>
-              <thead><tr><th scope="col">Pos.</th><th scope="col">Corredor/a</th><th scope="col">Puntos</th></tr></thead>
+              <caption>Kilómetros esta semana</caption>
+              <thead><tr><th scope="col">Pos.</th><th scope="col">Corredor/a</th><th scope="col">Km</th></tr></thead>
               <tbody>
-                <tr><td>1</td><td>Corredora A</td><td>—</td></tr>
-                <tr><td>2</td><td>Corredor B</td><td>—</td></tr>
-                <tr><td>3</td><td>Corredora C</td><td>—</td></tr>
+                <tr><td>1</td><td>Lucía M.</td><td>62</td></tr>
+                <tr><td>2</td><td>Javier R.</td><td>58</td></tr>
+                <tr><td>3</td><td>Carmen S.</td><td>51</td></tr>
               </tbody>
             </table>
           </article>
           <article class="tarjeta">
             <h4>2. Ranking grupo de amigos</h4>
             <table>
-              <caption>Nombres ficticios · Puntos: <span class="pendiente">[DATO PENDIENTE]</span></caption>
-              <thead><tr><th scope="col">Pos.</th><th scope="col">Corredor/a</th><th scope="col">Puntos</th></tr></thead>
+              <caption>Kilómetros esta semana</caption>
+              <thead><tr><th scope="col">Pos.</th><th scope="col">Corredor/a</th><th scope="col">Km</th></tr></thead>
               <tbody>
-                <tr><td>1</td><td>Amiga D</td><td>—</td></tr>
-                <tr><td>2</td><td>Tú</td><td>—</td></tr>
-                <tr><td>3</td><td>Amigo E</td><td>—</td></tr>
+                <tr><td>1</td><td>Marta</td><td>34</td></tr>
+                <tr><td>2</td><td><strong>Tú</strong></td><td>28</td></tr>
+                <tr><td>3</td><td>Pablo</td><td>21</td></tr>
               </tbody>
             </table>
           </article>
           <article class="tarjeta">
             <h4>3. Ranking por categorías</h4>
-            <ul class="categorias" aria-label="Categorías">
-              <li>Principiante</li>
-              <li>Intermedio</li>
-              <li>Avanzado</li>
-            </ul>
-            <p class="nota">Clasificación por categoría: <span class="pendiente">[DATO PENDIENTE]</span></p>
+            <table>
+              <caption>Líder de cada categoría esta semana</caption>
+              <thead><tr><th scope="col">Categoría</th><th scope="col">Líder</th><th scope="col">Km</th></tr></thead>
+              <tbody>
+                <tr><td>Principiante</td><td>Andrea L.</td><td>18</td></tr>
+                <tr><td>Intermedio</td><td>Diego P.</td><td>39</td></tr>
+                <tr><td>Avanzado</td><td>Sara G.</td><td>71</td></tr>
+              </tbody>
+            </table>
           </article>
         </div>
       </div>
@@ -654,7 +654,7 @@
 </div>
 
 <script>
-  // ---------- Datos de ejemplo (comercios y productos ficticios) ----------
+  // ---------- Comercios y productos ----------
   var ICONOS = {
     deporte: '<path d="M3 17l5-1 3-5 4 2 3 4h3v2H3z"/><path d="M8 16l-1-4"/>',
     cafe: '<path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h2a2 2 0 0 1 0 4h-2"/><path d="M8 2v3M12 2v3"/>',
@@ -675,27 +675,22 @@
     exper: 'Experiencias deportivas'
   };
   // x / y: posición en el mapa ilustrativo (en %)
-  // Productos: [nombre, precio en tokens, descuento en % (100 = gratis)]. Valores de ejemplo inventados.
+  // Productos: [nombre, emoji, tokens que se presentan, descuento en % que dan (100 = gratis)]
   var COMERCIOS = [
-    { id: 'dep-a', cat: 'deporte', nombre: 'Tienda deportiva A', x: 24, y: 30, productos: [['Calcetines técnicos de running', 120, 25], ['Gorra transpirable', 180, 0], ['Botella de agua reutilizable', 90, 50]] },
-    { id: 'dep-b', cat: 'deporte', nombre: 'Tienda deportiva B', x: 70, y: 16, productos: [['Cinta para la cabeza', 60, 0], ['Cinturón portamóvil', 150, 30], ['Camiseta técnica', 250, 25]] },
-    { id: 'caf-a', cat: 'cafe', nombre: 'Cafetería A', x: 38, y: 64, productos: [['Café con leche', 30, 100], ['Zumo natural', 45, 0], ['Tostada con tomate', 40, 50]] },
-    { id: 'caf-b', cat: 'cafe', nombre: 'Cafetería B', x: 80, y: 70, productos: [['Batido de frutas', 55, 20], ['Café solo', 25, 100], ['Bebida isotónica', 35, 0]] },
-    { id: 'fis-a', cat: 'fisio', nombre: 'Centro de fisioterapia A', x: 12, y: 46, productos: [['Masaje de descarga', 400, 25], ['Sesión de estiramientos', 250, 0], ['Vendaje neuromuscular', 150, 40]] },
-    { id: 'res-a', cat: 'resto', nombre: 'Restaurante A', x: 60, y: 42, productos: [['Menú post-carrera', 200, 15], ['Ensalada completa', 120, 0], ['Plato de pasta', 140, 30]] },
-    { id: 'res-b', cat: 'resto', nombre: 'Restaurante B', x: 30, y: 86, productos: [['Bowl de arroz y pollo', 150, 0], ['Tortilla de patatas', 90, 20], ['Postre de yogur', 50, 100]] },
-    { id: 'exp-a', cat: 'exper', nombre: 'Club de carrera A', x: 88, y: 44, productos: [['Clase de técnica de carrera', 300, 50], ['Salida en grupo guiada', 180, 25], ['Inscripción a una carrera popular', 500, 25]] }
+    { id: 'dep-a', cat: 'deporte', nombre: 'Tienda deportiva A', x: 24, y: 30, productos: [['Calcetines técnicos de running', '🧦', 5, 25], ['Gorra transpirable', '🧢', 10, 30], ['Botella de agua reutilizable', '💧', 8, 50]] },
+    { id: 'dep-b', cat: 'deporte', nombre: 'Tienda deportiva B', x: 70, y: 16, productos: [['Zapatillas de running', '👟', 20, 25], ['Cinturón portamóvil', '📱', 6, 30], ['Camiseta técnica', '🎽', 12, 25]] },
+    { id: 'caf-a', cat: 'cafe', nombre: 'Cafetería A', x: 38, y: 64, productos: [['Café con leche', '☕', 10, 100], ['Zumo natural', '🍊', 6, 50], ['Tostada con tomate', '🍞', 5, 25]] },
+    { id: 'caf-b', cat: 'cafe', nombre: 'Cafetería B', x: 80, y: 70, productos: [['Batido de frutas', '🥤', 8, 30], ['Café solo', '☕', 8, 100], ['Bebida isotónica', '🧃', 5, 50]] },
+    { id: 'fis-a', cat: 'fisio', nombre: 'Centro de fisioterapia A', x: 12, y: 46, productos: [['Masaje de descarga', '💆', 15, 25], ['Sesión de estiramientos', '🧘', 10, 30], ['Vendaje neuromuscular', '🩹', 6, 50]] },
+    { id: 'res-a', cat: 'resto', nombre: 'Restaurante A', x: 60, y: 42, productos: [['Menú post-carrera', '🍽️', 12, 20], ['Ensalada completa', '🥗', 8, 25], ['Plato de pasta', '🍝', 8, 30]] },
+    { id: 'res-b', cat: 'resto', nombre: 'Restaurante B', x: 30, y: 86, productos: [['Bowl de arroz y pollo', '🍚', 10, 25], ['Tortilla de patatas', '🥔', 6, 20], ['Postre de yogur', '🍨', 10, 100]] },
+    { id: 'exp-a', cat: 'exper', nombre: 'Club de carrera A', x: 88, y: 44, productos: [['Clase de técnica de carrera', '🏃', 15, 50], ['Salida en grupo guiada', '🗺️', 10, 25], ['Inscripción a una carrera popular', '🏅', 25, 25]] }
   ];
 
-  function precioHtml(precio, descuento) {
-    if (descuento >= 100) {
-      return '<p class="precio"><span class="etiqueta-oferta">Gratis</span> <s>' + precio + ' tokens</s></p>';
-    }
-    if (descuento > 0) {
-      var final = Math.round(precio * (100 - descuento) / 100);
-      return '<p class="precio"><strong>' + final + ' tokens</strong> <s>' + precio + '</s> <span class="etiqueta-oferta">-' + descuento + '%</span></p>';
-    }
-    return '<p class="precio"><strong>' + precio + ' tokens</strong></p>';
+  // Presentando X tokens, el comercio aplica el descuento en ese producto.
+  function ofertaHtml(tokens, descuento) {
+    var premio = descuento >= 100 ? 'Gratis' : descuento + ' % de descuento';
+    return '<p class="precio"><span class="etiqueta-oferta">' + premio + '</span> por&nbsp;<strong>' + tokens + '&nbsp;tokens</strong></p>';
   }
   function comercioPorId(id) {
     return COMERCIOS.filter(function (c) { return c.id === id; })[0];
@@ -772,13 +767,13 @@
       li.className = 'tarjeta producto';
       li.innerHTML =
         '<div class="producto-cabeza">' +
-          '<span class="producto-foto" role="img" aria-label="Foto del producto pendiente">' + icono(c.cat) + '</span>' +
-          '<div><h4>' + nombre + '</h4>' + precioHtml(p[1], p[2]) + '</div>' +
+          '<span class="producto-foto" aria-hidden="true">' + p[1] + '</span>' +
+          '<div><h4>' + nombre + '</h4>' + ofertaHtml(p[2], p[3]) + '</div>' +
         '</div>' +
         '<button class="boton boton-pequeno" type="button" data-canje="' + idAviso + '" aria-controls="' + idAviso + '" aria-expanded="false">Canjear</button>' +
         '<div class="aviso" id="' + idAviso + '" role="status" hidden>' +
           '<div class="qr" role="img" aria-label="Código QR de ejemplo, no funcional"></div>' +
-          '<p>Canje simulado: muestra este QR en ' + c.nombre + '. <span class="revisar">[REVISAR]</span></p>' +
+          '<p>Muestra este QR en ' + c.nombre + ' para canjear tus tokens.</p>' +
         '</div>';
       lista.appendChild(li);
     });
