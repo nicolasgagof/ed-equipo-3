@@ -466,6 +466,7 @@
     display: grid; place-items: center;
     background: var(--lima); color: var(--tinta-lima); font-weight: 900;
   }
+  .avatar-foto { object-fit: cover; border: 2px solid var(--lima); }
   .avatar-pequeno { width: 40px; height: 40px; font-size: .85rem; background: var(--lima-suave); color: var(--verde); }
   .periodos-dos { grid-template-columns: 1fr 1fr; }
   .hero-perfil { position: relative; }
@@ -851,8 +852,8 @@
         </button>
         <h2 id="t-perfil" tabindex="-1">Mi perfil</h2>
         <div class="perfil-cabeza">
-          <span class="avatar" aria-hidden="true">TÚ</span>
-          <p><strong>Tú</strong><span>Corredor/a en Madrid</span></p>
+          <img class="avatar avatar-foto" src="fotos/perfil.jpg" alt="Foto de perfil de María Amelia" width="56" height="56">
+          <p><strong>María Amelia</strong><span>Corredor/a en Madrid</span></p>
         </div>
         <dl class="metricas">
           <div><dt>Km esta semana</dt><dd>28</dd></div>
