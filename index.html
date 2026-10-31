@@ -234,7 +234,20 @@
       #fff;
     border: 4px solid #fff; outline: 2px solid var(--tinta);
   }
+  button.qr { padding: 0; cursor: zoom-in; }
   .hero .qr { width: 72px; height: 72px; background-size: 18px 18px; border: 4px solid var(--tinta); outline: 0; }
+
+  /* QR a pantalla completa para que el comercio lo escanee */
+  .qr-grande {
+    position: fixed; inset: 0; z-index: 3000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+    padding: 24px; background: #fff; color: var(--tinta); text-align: center;
+  }
+  .qr-grande[hidden] { display: none !important; }
+  .qr-grande svg { width: min(85vw, 60vh, 380px); height: auto; }
+  .qr-grande p { margin: 0; max-width: 340px; font-size: 1.1rem; font-weight: 700; }
+  .qr-grande small { color: var(--gris); }
+  .qr-grande .boton { max-width: 340px; }
 
   /* Mapa real (Leaflet + OpenStreetMap) */
   .mapa {
@@ -637,7 +650,7 @@
         <p>¡Es hora de obtener tu recompensa!</p>
         <button class="boton" type="button" id="boton-canjear" aria-controls="aviso-canje" aria-expanded="false">Canjear</button>
         <div class="aviso" id="aviso-canje" role="status" hidden>
-          <div class="qr" role="img" aria-label="Código QR de ejemplo, no funcional"></div>
+          <button class="qr" type="button" aria-label="Código QR de ejemplo, no funcional. Pulsa para verlo en grande"></button>
           <p>Muestra este QR en la tienda para canjear tus tokens.</p>
         </div>
       </div>
@@ -911,6 +924,14 @@
       <a href="panel.html">Panel del equipo</a>
     </footer>
   </main>
+
+  <!-- QR ampliado para que el comercio lo escanee -->
+  <div class="qr-grande" id="qr-grande" role="dialog" aria-modal="true" aria-labelledby="qr-grande-texto" hidden>
+    <svg id="qr-grande-imagen" viewBox="0 0 29 29" role="img" aria-label="Código QR de ejemplo, no funcional" shape-rendering="crispEdges"></svg>
+    <p id="qr-grande-texto"></p>
+    <small>QR de ejemplo de este prototipo: no es un código real.</small>
+    <button class="boton" type="button" id="qr-cerrar">Cerrar</button>
+  </div>
 
   <!-- Ayuda (solo en Mi perfil): preguntas frecuentes con respuestas fijas, sin servicios externos -->
   <div class="chat" id="chat" hidden>
@@ -1334,7 +1355,7 @@
         '</div>' +
         '<button class="boton boton-pequeno" type="button" data-canje="' + idAviso + '" aria-controls="' + idAviso + '" aria-expanded="false">Canjear</button>' +
         '<div class="aviso" id="' + idAviso + '" role="status" hidden>' +
-          '<div class="qr" role="img" aria-label="Código QR de ejemplo, no funcional"></div>' +
+          '<button class="qr" type="button" aria-label="Código QR de ejemplo, no funcional. Pulsa para verlo en grande"></button>' +
           '<p>Muestra este QR en ' + c.nombre + ' para canjear tus tokens.</p>' +
         '</div>';
       lista.appendChild(li);
@@ -1593,7 +1614,7 @@
         '<p class="reparto">' + (g[4] / g[3]) + ' tokens cada uno</p></div></div>' +
         '<button class="boton boton-pequeno" type="button" data-canje-grupal="' + i + '" aria-controls="' + idAviso + '" aria-expanded="false">Canjear con amigos</button>' +
         '<div class="aviso aviso-grupal" id="' + idAviso + '" role="status" hidden>' +
-          '<div class="qr" role="img" aria-label="Código QR de ejemplo, no funcional"></div>' +
+          '<button class="qr" type="button" aria-label="Código QR de ejemplo, no funcional. Pulsa para verlo en grande"></button>' +
           '<div><label for="amigo-' + i + '">¿Con quién lo canjeas?</label><select id="amigo-' + i + '" data-grupal="' + i + '">' + opciones + '</select>' +
           '<p id="reparto-' + i + '">' + textoReparto(g, SEGUIDOS.length ? GENTE[SEGUIDOS[0]].nombre : 'tu amigo/a') + '</p></div>' +
         '</div></li>';
@@ -1780,6 +1801,45 @@
   document.getElementById('lista-rutas').addEventListener('click', function (e) {
     var b = e.target.closest('[data-ruta]');
     if (b) abrirRuta(Number(b.dataset.ruta));
+  });
+
+  // ---------- QR a pantalla completa: al pulsar un QR se amplía para que el comercio lo escanee ----------
+  var qrGrande = document.getElementById('qr-grande');
+  var qrOrigen = null;
+
+  // Dibuja un QR de ejemplo (tres esquinas y módulos al azar), solo para el prototipo
+  function dibujarQr() {
+    var n = 29, celdas = '';
+    function esquina(x, y) {
+      return '<rect x="' + x + '" y="' + y + '" width="7" height="7"/><rect x="' + (x + 1) + '" y="' + (y + 1) + '" width="5" height="5" fill="#fff"/><rect x="' + (x + 2) + '" y="' + (y + 2) + '" width="3" height="3"/>';
+    }
+    function enEsquina(x, y) { return (x < 9 && y < 9) || (x > n - 10 && y < 9) || (x < 9 && y > n - 10); }
+    for (var y = 1; y < n - 1; y++) {
+      for (var x = 1; x < n - 1; x++) {
+        if (!enEsquina(x, y) && Math.random() < 0.5) celdas += '<rect x="' + x + '" y="' + y + '" width="1" height="1"/>';
+      }
+    }
+    document.getElementById('qr-grande-imagen').innerHTML = '<rect width="29" height="29" fill="#fff"/><g fill="#0E1508">' + celdas + esquina(1, 1) + esquina(n - 8, 1) + esquina(1, n - 8) + '</g>';
+  }
+  function abrirQr(boton) {
+    qrOrigen = boton;
+    var texto = boton.parentNode.querySelector('p');
+    document.getElementById('qr-grande-texto').textContent = texto ? texto.textContent : 'Muestra este QR en la tienda para canjear tus tokens.';
+    dibujarQr();
+    qrGrande.hidden = false;
+    document.getElementById('qr-cerrar').focus();
+  }
+  function cerrarQr() {
+    qrGrande.hidden = true;
+    if (qrOrigen) qrOrigen.focus();
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('button.qr');
+    if (b) abrirQr(b);
+  });
+  document.getElementById('qr-cerrar').addEventListener('click', cerrarQr);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !qrGrande.hidden) cerrarQr();
   });
 
   // ---------- Ayuda: preguntas frecuentes con respuestas fijas ----------
