@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RecoRun · Pitch Demo Day</title>
+<meta name="description" content="Slides del pitch de RecoRun (Demo Day): ganar recompensas por correr.">
+<link rel="icon" type="image/svg+xml" href="img/icono.svg">
+<style>
+  /* Identidad visual de la app RecoRun (mismas variables que index.html) */
+  :root {
+    --lima: #C6F432;
+    --lima-suave: #EAFBB8;
+    --tinta: #1A1F14;
+    --tinta-lima: #111A05;
+    --noche: #0E1508;
+    --verde: #2F5A0B;
+    --fondo: #F6F9EE;
+    --tarjeta: #FFFFFF;
+    --borde: #D9E3C4;
+    --gris: #4A5240;
+    --radio: 16px;
+    --escala: 1;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.4; color: var(--tinta);
+    background: #DDE5CC; overflow: hidden;
+  }
+  :focus-visible { outline: 3px solid var(--verde); outline-offset: 2px; }
+
+  /* Escenario 16:9: las slides miden 1600 × 900 y se escalan a la ventana */
+  .escenario { position: fixed; inset: 0; display: grid; place-items: center; }
+  .slide {
+    position: absolute; left: 50%; top: 50%;
+    width: 1600px; height: 900px;
+    margin: -450px 0 0 -800px;
+    transform: scale(var(--escala));
+    background: var(--fondo);
+    border-radius: 28px; overflow: hidden;
+    box-shadow: 0 20px 50px rgba(14, 21, 8, .35);
+    display: flex; flex-direction: column;
+    padding: 64px 88px 56px;
+  }
+  .slide:not(.activa) { display: none; }
+
+  /* Slides oscuras: como el hero de la app */
+  .oscura { background: var(--noche); color: #fff; }
+
+  .marca {
+    display: flex; align-items: center; gap: 14px;
+    margin: 0 0 auto; font-size: 30px; font-weight: 900; font-style: italic;
+    text-transform: uppercase; letter-spacing: .02em;
+  }
+  .marca .run { color: var(--lima); }
+  .marca img { width: 54px; height: 54px; border-radius: 14px; box-shadow: 0 0 0 1px #2D3A1F; }
+  .fondo-claro .marca { color: var(--tinta); }
+  .fondo-claro .marca .run { color: var(--verde); }
+
+  .etiqueta {
+    display: inline-block; align-self: flex-start;
+    padding: 6px 18px; border-radius: 999px;
+    background: var(--lima); color: var(--tinta-lima);
+    font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+  }
+  .fondo-claro .etiqueta { background: var(--noche); color: var(--lima); }
+
+  /* Título-mensaje: mismo estilo que los titulares de la app */
+  h1.mensaje, h2.mensaje {
+    margin: 20px 0 0;
+    font-size: 84px; line-height: 1.02; font-weight: 900; font-style: italic;
+    text-transform: uppercase; letter-spacing: -.01em;
+  }
+  .oscura .mensaje { color: var(--lima); }
+  .mensaje.medio { font-size: 68px; }
+  .mensaje.pequeno { font-size: 56px; }
+  .bajada { margin: 20px 0 0; font-size: 30px; color: #F1F5EA; max-width: 1100px; }
+  .fondo-claro .bajada { color: var(--gris); }
+  .fuente { margin: 14px 0 0; font-size: 22px; color: #C9D3B8; }
+  .fondo-claro .fuente { color: var(--gris); }
+
+  .dos-columnas { display: grid; grid-template-columns: 1fr auto; gap: 72px; align-items: center; flex: 1; }
+
+  /* Botón de la app (pastilla lima) */
+  .boton {
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+    min-height: 76px; padding: 16px 40px;
+    border: 0; border-radius: 999px;
+    background: var(--lima); color: var(--tinta-lima);
+    font: inherit; font-weight: 800; font-size: 28px; text-transform: uppercase; letter-spacing: .02em;
+    text-decoration: none; cursor: pointer;
+  }
+  .boton:hover { background: #D4FA55; }
+  .boton svg { width: 30px; height: 30px; }
+
+  /* Marco de móvil: el mismo que usa la app en pantallas grandes */
+  .movil {
+    width: 300px; aspect-ratio: 390 / 844;
+    border: 10px solid #151B0F; border-radius: 40px; overflow: hidden;
+    background: var(--noche);
+    box-shadow: 0 20px 50px rgba(14, 21, 8, .35);
+  }
+  .movil img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .movil.grande { width: 340px; }
+
+  /* Recorrido de la demo, paso a paso */
+  .pasos { list-style: none; margin: auto 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; align-items: end; }
+  .pasos li { display: grid; justify-items: center; gap: 14px; }
+  .pasos .movil { width: 236px; border-width: 8px; border-radius: 32px; }
+  .pasos p { margin: 0; font-size: 24px; font-weight: 800; color: #fff; }
+  .pasos p span {
+    display: inline-grid; place-items: center; width: 40px; height: 40px; margin-right: 8px;
+    border-radius: 50%; background: var(--lima); color: var(--tinta-lima); font-weight: 900;
+  }
+  .cabeza-demo { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; }
+
+  /* Tarjetas con icono, como las categorías de Canjes */
+  .tarjetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: auto; }
+  .tarjeta {
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 24px;
+    padding: 32px; display: grid; gap: 14px; justify-items: start;
+  }
+  .oscura .tarjeta { background: #1F2A14; border-color: #2D3A1F; color: #fff; }
+  .icono {
+    width: 84px; height: 84px; border-radius: 50%;
+    display: grid; place-items: center; background: var(--lima-suave); font-size: 44px;
+  }
+  .tarjeta strong { font-size: 32px; line-height: 1.1; }
+  .tarjeta small { font-size: 22px; color: var(--gris); }
+  .oscura .tarjeta small { color: #C9D3B8; }
+
+  /* Modelo de negocio: flujo con flechas */
+  .flujo { display: grid; grid-template-columns: 1fr 64px 1fr 64px 1fr; align-items: center; margin-top: auto; }
+  .flecha { color: var(--verde); font-size: 48px; text-align: center; font-weight: 900; }
+
+  /* Gráfico de evidencia */
+  .grafico-caja { display: grid; grid-template-columns: 1fr 480px; gap: 48px; align-items: end; margin-top: auto; }
+  .grafico { width: 100%; height: auto; display: block; }
+  .grafico text { font-family: inherit; }
+  .veredictos { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  .veredictos li {
+    display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 18px 22px; font-size: 22px;
+  }
+  .veredictos b { font-size: 24px; }
+  .etiqueta-oferta {
+    display: inline-block; padding: 2px 14px; border-radius: 999px;
+    background: var(--noche); color: var(--lima);
+    font-size: 18px; font-weight: 800; text-transform: uppercase; white-space: nowrap;
+  }
+  .nota-datos { margin: 12px 0 0; font-size: 18px; color: var(--gris); }
+
+  /* Petición: QR grande */
+  .qr-caja {
+    background: #fff; border-radius: 32px; padding: 28px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .35);
+  }
+  .qr-caja img { display: block; width: 470px; height: 470px; }
+  .url { margin: 18px 0 0; font-size: 26px; color: #C9D3B8; word-break: break-all; }
+  .lema { margin: 28px 0 0; font-size: 44px; font-weight: 900; font-style: italic; text-transform: uppercase; color: #fff; }
+
+  /* Número de slide y ayuda de teclado */
+  .numero {
+    position: fixed; right: 20px; bottom: 16px; z-index: 10;
+    padding: 6px 14px; border-radius: 999px;
+    background: var(--noche); color: var(--lima); font-weight: 800; font-size: 15px;
+  }
+  .ayuda {
+    position: fixed; left: 20px; bottom: 16px; z-index: 10;
+    margin: 0; font-size: 13px; color: var(--gris);
+  }
+
+  /* Notas del orador (tecla N) */
+  .notas {
+    position: fixed; left: 50%; bottom: 56px; z-index: 20;
+    width: min(900px, calc(100vw - 32px)); max-height: 40vh; overflow-y: auto;
+    transform: translateX(-50%);
+    background: var(--noche); color: #fff; border: 2px solid var(--lima); border-radius: var(--radio);
+    padding: 16px 20px; font-size: 18px; box-shadow: 0 20px 50px rgba(14, 21, 8, .45);
+  }
+  .notas h2 { margin: 0 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--lima); }
+  .notas p { margin: 0; }
+  .notas-fuente { display: none; }
+
+  /* Impresión: una slide por página (Ctrl+P → Guardar como PDF) */
+  @page { size: 1600px 900px; margin: 0; }
+  @media print {
+    html, body { height: auto; overflow: visible; background: #fff; }
+    .escenario { position: static; display: block; }
+    .slide, .slide:not(.activa) {
+      display: flex; position: relative; left: 0; top: 0; margin: 0;
+      transform: none; border-radius: 0; box-shadow: none;
+      break-after: page; page-break-after: always;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .numero, .ayuda, .notas { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<main class="escenario" id="escenario">
+
+  <!-- 1. Gancho -->
+  <section class="slide oscura" aria-label="Slide 1: Gancho">
+    <div class="dos-columnas">
+      <div>
+        <p class="marca"><img src="img/icono.svg" alt="" width="54" height="54"><span>Reco<span class="run">Run</span></span></p>
+        <h1 class="mensaje">A muchos runners les cuesta mantener la constancia y…</h1>
+      </div>
+      <div class="movil grande"><img src="img/inicio.png" alt="Pantalla de inicio de RecoRun: «Recompensas por correr» y el botón «Empezar a correr»"></div>
+    </div>
+    <div class="notas-fuente">Os contamos algo que nos pasó: Porque nos interesa promover la vida healthy. (pausa) ¿A cuántos os ha pasado?</div>
+  </section>
+
+  <!-- 2. Problema con evidencia -->
+  <section class="slide fondo-claro" aria-label="Slide 2: Problema">
+    <span class="etiqueta">El problema</span>
+    <h2 class="mensaje medio">El calor, la pereza y la falta de tiempo por trabajo cortan la constancia</h2>
+    <div class="tarjetas">
+      <div class="tarjeta"><span class="icono" aria-hidden="true">☀️</span><strong>El calor</strong></div>
+      <div class="tarjeta"><span class="icono" aria-hidden="true">😴</span><strong>La pereza</strong></div>
+      <div class="tarjeta"><span class="icono" aria-hidden="true">💼</span><strong>Falta de tiempo por trabajo</strong></div>
+    </div>
+    <p class="fuente">Fuente: entrevistas y encuestas del equipo (E1, P1, P2)</p>
+    <div class="notas-fuente">Lo que nos contaron: El calor, la pereza y la falta de tiempo por trabajo cortan la constancia (E1, P1, P2); Recompensas que no se pueden gastar, no sirven o no se sabe cómo usar. Hoy lo resuelven con aplicaciones de running o clubes de running, y no les basta.</div>
+  </section>
+
+  <!-- 3. Insight -->
+  <section class="slide oscura" aria-label="Slide 3: Insight">
+    <span class="etiqueta">Nuestro insight</span>
+    <h2 class="mensaje" style="margin-top:auto">Lo que frena no es correr, sino empezar: las ganas llegan una vez fuera</h2>
+    <p class="bajada" style="margin-bottom:auto">Antes de salir, el calor, el trabajo o la pereza pesan más.</p>
+    <div class="notas-fuente">Nuestro insight: El esfuerzo que frena no es correr sino empezar: las ganas llegan una vez fuera, pero antes de salir el calor, el trabajo o la pereza pesan más</div>
+  </section>
+
+  <!-- 4. Solución + demo -->
+  <section class="slide oscura" aria-label="Slide 4: Solución y demo">
+    <div class="cabeza-demo">
+      <div>
+        <p class="marca" style="margin:0"><img src="img/icono.svg" alt="" width="54" height="54"><span>Reco<span class="run">Run</span></span></p>
+        <h2 class="mensaje medio">RecoRun · demo en vivo</h2>
+        <p class="bajada" style="margin-top:10px">Cada kilómetro que corres suma 1 token para canjear en comercios.</p>
+      </div>
+      <a class="boton" href="https://nicolasgagof.github.io/ed-equipo-3/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>Demo en vivo
+      </a>
+    </div>
+    <ol class="pasos">
+      <li><div class="movil"><img src="img/preparada.png" alt="Sesión de running preparada, con el botón «Empezar»"></div><p><span>1</span>Empieza</p></li>
+      <li><div class="movil"><img src="img/marcha.png" alt="Sesión en marcha: tiempo, distancia, ritmo y tokens"></div><p><span>2</span>Corre</p></li>
+      <li><div class="movil"><img src="img/resumen.png" alt="Sesión completada: has ganado tokens"></div><p><span>3</span>Gana tokens</p></li>
+      <li><div class="movil"><img src="img/qr.png" alt="QR a pantalla completa para canjear en el comercio"></div><p><span>4</span>Canjea</p></li>
+    </ol>
+    <div class="notas-fuente">RecoRun: Ganar recompensas por correr. El cliente gana recompensas en productos por cada kilometro que corre. Estas recompensas son tokens que se pueden gastar en diferentes tiendas y locales. Os lo enseñamos en directo. (DEMO)</div>
+  </section>
+
+  <!-- 5. Evidencia de validación -->
+  <section class="slide fondo-claro" aria-label="Slide 5: Evidencia">
+    <span class="etiqueta">Validación</span>
+    <h2 class="mensaje medio">Lo que nos dicen los datos</h2>
+    <div class="grafico-caja">
+      <div>
+        <svg class="grafico" id="grafico" viewBox="0 0 900 430" role="img" aria-labelledby="grafico-titulo">
+          <title id="grafico-titulo">Resultado de cada hipótesis frente a su umbral</title>
+        </svg>
+        <p class="nota-datos" id="grafico-pie"></p>
+      </div>
+      <ul class="veredictos" id="veredictos"></ul>
+    </div>
+    <div class="notas-fuente">Encuesta (n = 12, datos de práctica): H1: sobre el papel se supera el 35 %, pero con 4 personas. H2: se entiende y gusta, pero cuesta creer que se pueda canjear de verdad en comercios cercanos. H3: las tiendas no aparecen como canal de descubrimiento en esta muestra. En el test con usuarios vimos 3 problemas de uso; los más graves los hemos corregido en esta versión. H1 · Nuestro cliente son corredores habituales → nc. H2 · Les convence ganar recompensas canjeables por correr → nc. H3 · Llegaremos a ellos por tiendas y locales asociados → nc.</div>
+  </section>
+
+  <!-- 6. Modelo de negocio -->
+  <section class="slide fondo-claro" aria-label="Slide 6: Modelo de negocio">
+    <span class="etiqueta">Modelo de negocio</span>
+    <h2 class="mensaje medio">Comisión por ventas en comercios asociados y promociones de marcas</h2>
+    <div class="flujo">
+      <div class="tarjeta"><span class="icono" aria-hidden="true">🏃</span><strong>El corredor canjea sus tokens</strong><small>Paga lo mismo de siempre</small></div>
+      <div class="flecha" aria-hidden="true">→</div>
+      <div class="tarjeta"><span class="icono" aria-hidden="true">🏪</span><strong>El comercio recibe un cliente</strong><small>Paga una comisión o un fijo por lead</small></div>
+      <div class="flecha" aria-hidden="true">→</div>
+      <div class="tarjeta"><span class="icono" aria-hidden="true">🤝</span><strong>Las marcas patrocinan</strong><small>Alianzas y promociones</small></div>
+    </div>
+    <div class="notas-fuente">Cómo ganamos dinero: Comisión por ventas generadas en comercios asociados. Alianzas comerciales y promociones patrocinadas de marcas; Se le cobra a los comercios un dinero fijo por cada lead que se le deriva. No cambia el precio de lo que el cliente está comprando.</div>
+  </section>
+
+  <!-- 7. Decisión y siguiente experimento -->
+  <section class="slide oscura" aria-label="Slide 7: Decisión">
+    <span class="etiqueta">Decisión</span>
+    <h2 class="mensaje" style="margin-top:auto">Iteramos: no se puede concluir que los habituales descargarían la app</h2>
+    <p class="bajada" style="margin-bottom:auto">Sobre el papel se supera el 35 %, pero con 4 personas. Y el perfil mayoritario es el esporádico, no el habitual.</p>
+    <div class="notas-fuente">Iteramos. No se puede concluir que los habituales descargarían la app. No se puede concluir que la recompensa haga salir más.</div>
+  </section>
+
+  <!-- 8. Petición -->
+  <section class="slide oscura" aria-label="Slide 8: Petición">
+    <div class="dos-columnas">
+      <div>
+        <p class="marca"><img src="img/icono.svg" alt="" width="54" height="54"><span>Reco<span class="run">Run</span></span></p>
+        <h2 class="mensaje">Escanead el QR y probadlo</h2>
+        <p class="lema">Ganar recompensas por correr</p>
+        <p class="url">nicolasgagof.github.io/ed-equipo-3</p>
+      </div>
+      <div class="qr-caja"><img src="img/qr.svg" alt="Código QR a la web de RecoRun: nicolasgagof.github.io/ed-equipo-3" width="470" height="470"></div>
+    </div>
+    <div class="notas-fuente">Probad RecoRun ahora: escanead el QR. Ganar recompensas por correr.</div>
+  </section>
+
+</main>
+
+<p class="ayuda">← → o espacio: navegar · F: pantalla completa · N: notas</p>
+<p class="numero" id="numero" aria-live="polite"></p>
+<aside class="notas" id="notas" hidden>
+  <h2>Notas del orador</h2>
+  <p id="notas-texto"></p>
+</aside>
+
+<script>
+  // ---------- Datos de la evidencia ----------
+  // Rellenad aquí el % de cada hipótesis y su umbral (null = dato pendiente: no inventamos cifras).
+  var EVIDENCIA = {
+    n: 12,
+    fuente: 'Encuesta del equipo',
+    hipotesis: [
+      { id: 'H1', texto: 'Nuestro cliente son corredores habituales', valor: null, umbral: 35, veredicto: 'No concluyente' },
+      { id: 'H2', texto: 'Les convence ganar recompensas canjeables', valor: null, umbral: null, veredicto: 'No concluyente' },
+      { id: 'H3', texto: 'Llegaremos por tiendas y locales asociados', valor: null, umbral: null, veredicto: 'No concluyente' }
+    ]
+  };
+
+  // Barras con el eje desde 0 % y una línea con el umbral de cada hipótesis
+  function dibujarGrafico() {
+    var svg = document.getElementById('grafico');
+    var x0 = 70, y0 = 370, alto = 330, ancho = 220, hueco = 50;
+    var y = function (v) { return y0 - v / 100 * alto; };
+    var h = '';
+    [0, 25, 50, 75, 100].forEach(function (v) {
+      h += '<line x1="' + x0 + '" x2="890" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#D9E3C4" stroke-width="1.5"/>' +
+        '<text x="' + (x0 - 12) + '" y="' + (y(v) + 7) + '" text-anchor="end" font-size="20" fill="#4A5240">' + v + ' %</text>';
+    });
+    EVIDENCIA.hipotesis.forEach(function (d, i) {
+      var x = x0 + 30 + i * (ancho + hueco);
+      if (d.valor === null) {
+        h += '<rect x="' + x + '" y="' + y(100) + '" width="' + ancho + '" height="' + alto + '" fill="none" stroke="#4A5240" stroke-width="2" stroke-dasharray="10 8" rx="10"/>' +
+          '<text x="' + (x + ancho / 2) + '" y="' + y(55) + '" text-anchor="middle" font-size="19" font-weight="800" fill="#4A5240">[DATO PENDIENTE]</text>';
+      } else {
+        h += '<rect x="' + x + '" y="' + y(d.valor) + '" width="' + ancho + '" height="' + (y0 - y(d.valor)) + '" fill="#C6F432" stroke="#1A1F14" stroke-width="2" rx="10"/>' +
+          '<text x="' + (x + ancho / 2) + '" y="' + (y(d.valor) - 14) + '" text-anchor="middle" font-size="34" font-weight="900" fill="#1A1F14">' + d.valor + ' %</text>';
+      }
+      if (d.umbral !== null) {
+        h += '<line x1="' + (x - 14) + '" x2="' + (x + ancho + 14) + '" y1="' + y(d.umbral) + '" y2="' + y(d.umbral) + '" stroke="#0E1508" stroke-width="4" stroke-dasharray="14 8"/>' +
+          '<text x="' + (x + ancho + 10) + '" y="' + (y(d.umbral) - 10) + '" text-anchor="end" font-size="20" font-weight="800" fill="#0E1508">Umbral ' + d.umbral + ' %</text>';
+      } else {
+        h += '<text x="' + (x + ancho / 2) + '" y="' + y(90) + '" text-anchor="middle" font-size="18" fill="#4A5240">Umbral pendiente</text>';
+      }
+      h += '<text x="' + (x + ancho / 2) + '" y="' + (y0 + 40) + '" text-anchor="middle" font-size="28" font-weight="900" fill="#1A1F14">' + d.id + '</text>';
+    });
+    h += '<line x1="' + x0 + '" x2="890" y1="' + y0 + '" y2="' + y0 + '" stroke="#1A1F14" stroke-width="3"/>';
+    svg.insertAdjacentHTML('beforeend', h);
+    document.getElementById('grafico-pie').textContent =
+      'n = ' + EVIDENCIA.n + ' · Fuente: ' + EVIDENCIA.fuente + ' · Datos de práctica de clase, no representativos.';
+    document.getElementById('veredictos').innerHTML = EVIDENCIA.hipotesis.map(function (d) {
+      return '<li><span><b>' + d.id + '</b> · ' + d.texto + '</span><span class="etiqueta-oferta">' + d.veredicto + '</span></li>';
+    }).join('');
+  }
+  dibujarGrafico();
+
+  // ---------- Navegación ----------
+  var slides = document.querySelectorAll('.slide');
+  var actual = 0;
+  var notas = document.getElementById('notas');
+
+  function ajustar() {
+    var e = Math.min(window.innerWidth / 1680, window.innerHeight / 945);
+    document.documentElement.style.setProperty('--escala', e);
+  }
+  function ir(i) {
+    actual = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach(function (s, j) { s.classList.toggle('activa', j === actual); });
+    document.getElementById('numero').textContent = (actual + 1) + ' / ' + slides.length;
+    document.getElementById('notas-texto').textContent = slides[actual].querySelector('.notas-fuente').textContent;
+    if (location.hash !== '#' + (actual + 1)) history.replaceState(null, '', '#' + (actual + 1));
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ') { e.preventDefault(); ir(actual + 1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { e.preventDefault(); ir(actual - 1); }
+    else if (k === 'Home') ir(0);
+    else if (k === 'End') ir(slides.length - 1);
+    else if (k === 'n' || k === 'N') notas.hidden = !notas.hidden;
+    else if (k === 'f' || k === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+  });
+  window.addEventListener('hashchange', function () { ir((parseInt(location.hash.slice(1), 10) || 1) - 1); });
+  window.addEventListener('resize', ajustar);
+  ajustar();
+  ir((parseInt(location.hash.slice(1), 10) || 1) - 1);
+</script>
+</body>
+</html>
