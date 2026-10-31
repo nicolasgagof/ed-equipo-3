@@ -965,7 +965,59 @@
     if (titulo) titulo.focus();
     if (id === 'mapa') prepararMapa();
     if (id !== 'sesion' && sesion.activa) pausar();
+    guardarEstado(id);
   }
+
+  // ---------- Volver atrás: deslizando de izquierda a derecha o con el botón del navegador ----------
+  var restaurando = false;
+  var categoriaActual = null;
+
+  function guardarEstado(id) {
+    if (restaurando) return;
+    var anterior = history.state;
+    var estado = {
+      pantalla: id,
+      categoria: categoriaActual,
+      comercio: comercioActual ? comercioActual.id : null,
+      n: anterior && anterior.n !== undefined ? anterior.n + 1 : 0
+    };
+    if (anterior && anterior.pantalla === id && anterior.categoria === estado.categoria && anterior.comercio === estado.comercio) return;
+    if (estado.n === 0) history.replaceState(estado, '');
+    else history.pushState(estado, '');
+  }
+
+  // Al cargar, la app empieza siempre en Inicio.
+  history.replaceState({ pantalla: 'inicio', categoria: null, comercio: null, n: 0 }, '');
+
+  window.addEventListener('popstate', function (e) {
+    var estado = e.state || { pantalla: 'inicio' };
+    restaurando = true;
+    if (estado.pantalla === 'categoria' && estado.categoria) abrirCategoria(estado.categoria);
+    else if (estado.pantalla === 'comercio' && estado.comercio) abrirComercio(estado.comercio);
+    else mostrar(estado.pantalla);
+    restaurando = false;
+  });
+
+  var toque = null;
+  document.addEventListener('touchstart', function (e) {
+    toque = null;
+    // El mapa y los filtros se arrastran en horizontal: ahí no se usa el gesto.
+    if (e.touches.length !== 1 || e.target.closest('#mapa-real, #filtros-mapa, input, textarea, select')) return;
+    var t = e.touches[0];
+    // En el navegador, el borde izquierdo ya tiene su propio gesto de volver.
+    var instalada = navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+    if (!instalada && t.clientX < 25) return;
+    toque = { x: t.clientX, y: t.clientY, cuando: Date.now() };
+  }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    if (!toque) return;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - toque.x;
+    var dy = Math.abs(t.clientY - toque.y);
+    var rapido = Date.now() - toque.cuando < 800;
+    toque = null;
+    if (dx > 70 && dy < dx / 2 && rapido && history.state && history.state.n > 0) history.back();
+  }, { passive: true });
 
   document.addEventListener('click', function (e) {
     var b = e.target.closest('button');
@@ -990,6 +1042,7 @@
   var comercioActual = null;
 
   function abrirCategoria(cat) {
+    categoriaActual = cat;
     document.getElementById('t-categoria').textContent = CATEGORIAS[cat];
     var lista = document.getElementById('lista-comercios');
     lista.innerHTML = '';
