@@ -236,11 +236,18 @@
   }
   .mapa .leaflet-control-attribution { font-size: 10px; }
   .pin-mapa { background: none; border: 0; }
-  .pin-mapa svg { width: 34px; height: 42px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
+  .pin-mapa svg { width: 28px; height: 35px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
   .pin-mapa span {
-    position: absolute; top: 6px; left: 0; width: 34px;
-    text-align: center; font-weight: 900; font-size: .8rem; color: var(--tinta-lima);
+    position: absolute; top: 5px; left: 0; width: 28px;
+    text-align: center; font-weight: 900; font-size: .68rem; color: var(--tinta-lima);
   }
+  .filtros { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 2px; scrollbar-width: none; }
+  .filtros button {
+    flex: none; min-height: 36px; padding: 6px 12px; border-radius: 999px;
+    border: 1px solid var(--borde); background: var(--tarjeta); color: var(--tinta);
+    font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+  }
+  .filtros button[aria-pressed="true"] { background: var(--noche); color: var(--lima); border-color: var(--noche); }
   .pin-mapa.destacado svg { transform: scale(1.25); transform-origin: 50% 100%; }
   .pin-mapa.destacado path { fill: #fff; }
   .mapa-error { display: grid; place-items: center; height: 100%; padding: 16px; text-align: center; color: var(--gris); }
@@ -577,6 +584,7 @@
         <p class="estado-ubicacion" id="estado-ubicacion" role="status" style="color:#E8EEDD"></p>
       </div>
       <div class="bloque">
+        <div class="filtros" role="group" aria-label="Filtrar comercios por categoría" id="filtros-mapa"></div>
         <div class="mapa" id="mapa-real" role="region" aria-label="Mapa de Madrid con los comercios asociados"></div>
         <p class="nota">Las marcas y locales aparecen solo como ejemplo en este prototipo de clase: no colaboran con RecoRun ni ofrecen estas promociones.</p>
       </div>
@@ -716,19 +724,59 @@
   // lat / lng: ubicación real en Madrid (OpenStreetMap)
   // Productos: [nombre, emoji, tokens que se presentan, descuento en % que dan (100 = gratis)]
   var COMERCIOS = [
+    // Tiendas deportivas
     { id: 'nike', cat: 'deporte', nombre: 'Nike', direccion: 'Calle de Serrano, 19', lat: 40.42577, lng: -3.68800, productos: [['Zapatillas Nike Pegasus', '👟', 20, 25], ['Camiseta Nike Dri-FIT Miler', '🎽', 12, 30], ['Calcetines Nike Spark', '🧦', 5, 50]] },
     { id: 'adidas', cat: 'deporte', nombre: 'adidas', direccion: 'Gran Vía, 21', lat: 40.41976, lng: -3.70136, productos: [['Zapatillas adidas Adizero Boston', '👟', 20, 20], ['Pantalón corto adidas Own the Run', '🩳', 10, 30], ['Gorra adidas Running AEROREADY', '🧢', 8, 25]] },
     { id: 'puma', cat: 'deporte', nombre: 'Puma', direccion: 'Calle de Fuencarral, 33', lat: 40.42228, lng: -3.70095, productos: [['Zapatillas Puma Velocity Nitro', '👟', 18, 25], ['Zapatillas Puma Deviate Nitro', '👟', 25, 15], ['Chaqueta Puma Run Favorite', '🧥', 12, 20]] },
     { id: 'decathlon', cat: 'deporte', nombre: 'Decathlon', direccion: 'Calle de Fuencarral, 45', lat: 40.42339, lng: -3.70100, productos: [['Reloj GPS Kiprun GPS 500', '⌚', 25, 15], ['Zapatillas Kiprun KS900', '👟', 15, 25], ['Cinturón portamóvil Kiprun', '📱', 6, 30]] },
+    { id: 'asics', cat: 'deporte', nombre: 'ASICS', direccion: 'Calle de Alcalá, 44', lat: 40.41858, lng: -3.69593, productos: [['Zapatillas ASICS Gel-Nimbus', '👟', 25, 20], ['Zapatillas ASICS Novablast', '👟', 18, 25], ['Zapatillas ASICS Gel-Kayano', '👟', 25, 15]] },
+    { id: 'newbalance', cat: 'deporte', nombre: 'New Balance', direccion: 'Calle de Augusto Figueroa, 2', lat: 40.42294, lng: -3.70042, productos: [['Zapatillas New Balance Fresh Foam X 1080', '👟', 25, 20], ['Zapatillas New Balance FuelCell Rebel', '👟', 18, 25], ['Camiseta New Balance Athletics', '🎽', 8, 30]] },
+    { id: 'bikila', cat: 'deporte', nombre: 'Bikila Running Store', direccion: 'Calle de Martín de los Heros', lat: 40.42931, lng: -3.71792, productos: [['Zapatillas HOKA Clifton', '👟', 22, 20], ['Zapatillas Saucony Endorphin Speed', '👟', 25, 15], ['Zapatillas Brooks Ghost', '👟', 20, 20]] },
+    { id: 'intersport', cat: 'deporte', nombre: 'Intersport', direccion: 'Calle de Abtao (Retiro)', lat: 40.40686, lng: -3.67373, productos: [['Mallas de running', '🩳', 10, 25], ['Cortavientos de running', '🧥', 12, 20], ['Mochila de hidratación', '🎒', 15, 25]] },
+    { id: 'stance', cat: 'deporte', nombre: 'Stance', direccion: 'Calle de los Jardines, 9', lat: 40.41897, lng: -3.70112, productos: [['Calcetines Stance Run', '🧦', 5, 50], ['Pack de 3 calcetines Stance', '🧦', 10, 30], ['Calcetines de compresión Stance', '🧦', 8, 25]] },
+    // Cafeterías
     { id: 'toma', cat: 'cafe', nombre: 'Toma Café', direccion: 'Calle de la Palma, 49', lat: 40.42649, lng: -3.70596, productos: [['Café con leche', '☕', 10, 100], ['Flat white', '☕', 8, 50], ['Cold brew', '🧊', 8, 25]] },
+    { id: 'toma-olavide', cat: 'cafe', nombre: 'Toma Café Olavide', direccion: 'Calle de Santa Feliciana, 5', lat: 40.43305, lng: -3.70025, productos: [['Espresso', '☕', 6, 100], ['Cortado', '☕', 6, 50], ['Galleta casera', '🍪', 5, 25]] },
     { id: 'bicicleta', cat: 'cafe', nombre: 'La Bicicleta', direccion: 'Plaza de San Ildefonso, 9', lat: 40.42378, lng: -3.70225, productos: [['Café solo', '☕', 8, 100], ['Tostada de aguacate', '🥑', 10, 30], ['Zumo de naranja natural', '🍊', 6, 50]] },
     { id: 'federal', cat: 'cafe', nombre: 'Federal Café', direccion: 'Plaza de las Comendadoras, 9', lat: 40.42705, lng: -3.70924, productos: [['Huevos benedictinos', '🍳', 15, 25], ['Smoothie de frutas', '🥤', 8, 30], ['Granola con yogur', '🥣', 8, 25]] },
+    { id: 'syra', cat: 'cafe', nombre: 'Syra Coffee', direccion: 'Calle de Santa Isabel, 15', lat: 40.41080, lng: -3.69813, productos: [['Latte', '☕', 8, 50], ['Iced latte', '🧊', 8, 30], ['Croissant', '🥐', 5, 25]] },
+    { id: 'starbucks', cat: 'cafe', nombre: 'Starbucks', direccion: 'Calle de Fuencarral, 43', lat: 40.42317, lng: -3.70113, productos: [['Caramel Macchiato', '☕', 10, 25], ['Frappuccino', '🥤', 12, 20], ['Muffin de arándanos', '🧁', 6, 50]] },
+    { id: 'timhortons', cat: 'cafe', nombre: 'Tim Hortons', direccion: 'Calle de la Montera, 38', lat: 40.41921, lng: -3.70179, productos: [['Iced Capp', '🧊', 8, 30], ['Café Original Blend', '☕', 6, 100], ['Timbits (10 unidades)', '🍩', 8, 25]] },
+    { id: 'manolo', cat: 'cafe', nombre: 'Manolo Bakes', direccion: 'Plaza de Santa Bárbara, 4', lat: 40.42754, lng: -3.69635, productos: [['Caja de manolitos', '🥐', 10, 25], ['Café con leche', '☕', 8, 50], ['Manolitos de chocolate', '🍫', 8, 30]] },
+    { id: 'sangines', cat: 'cafe', nombre: 'Chocolatería San Ginés', direccion: 'Pasadizo de San Ginés, 5', lat: 40.41677, lng: -3.70680, productos: [['Chocolate con churros', '🍫', 10, 25], ['Ración de porras', '🥖', 8, 30], ['Café con leche', '☕', 6, 50]] },
+    // Fisioterapia
     { id: 'fisio', cat: 'fisio', nombre: 'Fisioterapia Argüelles', direccion: 'Calle de Rodríguez San Pedro, 46', lat: 40.43186, lng: -3.71306, productos: [['Masaje de descarga', '💆', 15, 25], ['Sesión de fisioterapia deportiva', '🦵', 20, 20], ['Vendaje neuromuscular', '🩹', 6, 50]] },
+    { id: 'debod', cat: 'fisio', nombre: 'Fisioterapia Debod', direccion: 'Calle de Evaristo San Miguel, 19', lat: 40.42578, lng: -3.71647, productos: [['Masaje deportivo', '💆', 15, 25], ['Punción seca', '📍', 15, 20], ['Estiramientos asistidos', '🧘', 10, 30]] },
+    { id: 'gaztambide', cat: 'fisio', nombre: 'Fisioterapia Gaztambide', direccion: 'Calle de Gaztambide', lat: 40.43704, lng: -3.71527, productos: [['Sesión de fisioterapia', '🦵', 18, 20], ['Masaje de descarga', '💆', 15, 25], ['Vendaje neuromuscular', '🩹', 6, 50]] },
+    { id: 'fixus', cat: 'fisio', nombre: 'Fixus', direccion: 'Calle de Cea Bermúdez, 46', lat: 40.43924, lng: -3.71194, productos: [['Valoración de la pisada', '👣', 12, 30], ['Masaje deportivo', '💆', 15, 25], ['Readaptación de lesiones', '🦵', 20, 15]] },
+    { id: 'fisioavanza', cat: 'fisio', nombre: 'Fisioavanza Fisioterapia & Pilates', direccion: 'Calle de la Batalla del Salado, 21', lat: 40.40182, lng: -3.69593, productos: [['Clase de pilates', '🧘', 10, 30], ['Sesión de fisioterapia', '🦵', 18, 20], ['Masaje de descarga', '💆', 15, 25]] },
+    { id: 'kinect', cat: 'fisio', nombre: 'Kinect', direccion: 'Calle de Boix y Morer, 4', lat: 40.43926, lng: -3.70639, productos: [['Sesión de fisioterapia deportiva', '🦵', 20, 20], ['Estiramientos asistidos', '🧘', 10, 30], ['Vendaje neuromuscular', '🩹', 6, 50]] },
+    { id: 'tecnica', cat: 'fisio', nombre: 'Técnica Fisioterapia', direccion: 'Calle de Boix y Morer, 22', lat: 40.44120, lng: -3.70627, productos: [['Masaje de descarga', '💆', 15, 25], ['Punción seca', '📍', 15, 20], ['Valoración de la pisada', '👣', 12, 30]] },
+    { id: 'curarte', cat: 'fisio', nombre: 'Centro de fisioterapia Curarte', direccion: 'Paseo del Rey, 2', lat: 40.42060, lng: -3.71797, productos: [['Sesión de fisioterapia', '🦵', 18, 20], ['Masaje deportivo', '💆', 15, 25], ['Clase de estiramientos', '🧘', 8, 30]] },
+    // Restaurantes
     { id: 'honest', cat: 'resto', nombre: 'Honest Greens', direccion: 'Calle de Fuencarral, 95', lat: 40.42703, lng: -3.70170, productos: [['Plato de pollo con verduras de temporada', '🥗', 12, 25], ['Bowl de salmón', '🐟', 15, 20], ['Limonada natural', '🍋', 5, 100]] },
     { id: 'goiko', cat: 'resto', nombre: 'Goiko', direccion: 'Calle del Pez, 36', lat: 40.42428, lng: -3.70655, productos: [['Hamburguesa Kevin Bacon', '🍔', 15, 20], ['Patatas fritas', '🍟', 6, 50], ['Ensalada César', '🥗', 10, 25]] },
+    { id: 'luxalad', cat: 'resto', nombre: 'Luxalad', direccion: 'Malasaña', lat: 40.42545, lng: -3.70725, productos: [['Ensalada a tu gusto', '🥗', 10, 25], ['Wrap de pollo', '🌯', 10, 20], ['Agua con gas', '💧', 4, 100]] },
+    { id: 'bacoa', cat: 'resto', nombre: 'Bacoa', direccion: 'Carrera de San Jerónimo, 3', lat: 40.41675, lng: -3.70168, productos: [['Hamburguesa clásica', '🍔', 14, 20], ['Patatas fritas', '🍟', 6, 50], ['Hamburguesa vegetal', '🌱', 14, 25]] },
+    { id: 'hundred', cat: 'resto', nombre: 'Hundred Burgers', direccion: 'Plaza de Pedro Zerolo, 1', lat: 40.42103, lng: -3.69983, productos: [['Hamburguesa con queso', '🍔', 14, 20], ['Ensalada de la casa', '🥗', 10, 25], ['Refresco', '🥤', 4, 100]] },
+    { id: 'madmad', cat: 'resto', nombre: 'Mad Mad Vegan', direccion: 'Calle de Lavapiés, 16', lat: 40.41112, lng: -3.70288, productos: [['Hamburguesa vegana', '🌱', 14, 20], ['Sándwich vegano', '🥪', 10, 25], ['Patatas especiadas', '🍟', 6, 50]] },
+    { id: 'ovejanegra', cat: 'resto', nombre: 'La Oveja Negra · Taberna Vegana', direccion: 'Calle de Buenavista, 42', lat: 40.40931, lng: -3.69988, productos: [['Menú del día vegano', '🍽️', 15, 20], ['Hamburguesa vegana', '🌱', 12, 25], ['Postre casero', '🍰', 6, 50]] },
+    { id: 'steakburger', cat: 'resto', nombre: 'Steak Burger', direccion: 'Calle de Fuencarral, 73', lat: 40.42487, lng: -3.70085, productos: [['Hamburguesa de ternera', '🍔', 14, 20], ['Ensalada', '🥗', 10, 25], ['Batido', '🥤', 6, 30]] },
+    // Experiencias deportivas
     { id: 'rnr', cat: 'exper', nombre: "Rock 'n' Roll Running Series Madrid", direccion: 'Meta en el Parque del Retiro', lat: 40.41495, lng: -3.68328, productos: [['Inscripción al maratón', '🏅', 30, 25], ['Inscripción al medio maratón', '🏃', 20, 25], ['Inscripción a la carrera de 10 km', '👟', 12, 30]] },
+    { id: 'sansilvestre', cat: 'exper', nombre: 'San Silvestre Vallecana', direccion: 'Meta en el Estadio de Vallecas', lat: 40.39176, lng: -3.65874, productos: [['Inscripción a la carrera popular (10 km)', '🏃', 12, 30], ['Camiseta oficial', '🎽', 8, 25], ['Inscripción a la carrera infantil', '🧒', 6, 50]] },
+    { id: 'sputnik', cat: 'exper', nombre: 'Sputnik Climbing', direccion: 'Calle de Vallehermoso, 87', lat: 40.43949, lng: -3.70873, productos: [['Entrada de día', '🧗', 10, 30], ['Clase de iniciación a la escalada', '🧗', 15, 25], ['Bono de 10 entradas', '🎟️', 30, 15]] },
+    { id: 'sputnik-legazpi', cat: 'exper', nombre: 'Sputnik Legazpi', direccion: 'Calle del Hierro, 33', lat: 40.38898, lng: -3.68917, productos: [['Entrada de día', '🧗', 10, 30], ['Alquiler de pies de gato', '👟', 4, 100], ['Bono de 10 entradas', '🎟️', 30, 15]] },
+    { id: 'arkose', cat: 'exper', nombre: 'Arkose Cuatro Caminos', direccion: 'Calle Leñeros, 4', lat: 40.45267, lng: -3.70756, productos: [['Entrada de bloque', '🧗', 10, 30], ['Clase de yoga', '🧘', 10, 25], ['Brunch en el restaurante', '🍳', 12, 20]] },
+    { id: 'boulderzone', cat: 'exper', nombre: 'Boulder Zone Retiro', direccion: 'Calle Azcona, 44', lat: 40.43451, lng: -3.66874, productos: [['Entrada de día', '🧗', 10, 30], ['Curso de iniciación', '🧗', 20, 20], ['Alquiler de material', '🎒', 4, 100]] },
+    { id: 'uadibloc', cat: 'exper', nombre: 'Uadibloc', direccion: 'Calle de San Hermenegildo, 25', lat: 40.42823, lng: -3.70911, productos: [['Entrada de bloque', '🧗', 10, 30], ['Clase de técnica', '🧗', 15, 25], ['Bono de 5 entradas', '🎟️', 20, 20]] },
+    { id: 'urbanmonkey', cat: 'exper', nombre: 'Urban Monkey', direccion: 'Calle de Tarragona, 8', lat: 40.40162, lng: -3.69759, productos: [['Entrada de día', '🧗', 10, 30], ['Clase de iniciación', '🧗', 15, 25], ['Alquiler de pies de gato', '👟', 4, 100]] },
+    // Suplementos deportivos
     { id: 'nutrideon', cat: 'supl', nombre: 'Nutrideon', direccion: 'Avenida de Filipinas, 40', lat: 40.44094, lng: -3.70730, productos: [['Proteína Myprotein Impact Whey', '💪', 20, 25], ['Creatina Creapure', '⚡', 12, 30], ['Barritas de proteína Myprotein', '🍫', 6, 50]] },
-    { id: 'bronce', cat: 'supl', nombre: 'Nutrición Bronce', direccion: 'Madrid (Arganzuela)', lat: 40.40229, lng: -3.69827, productos: [['Geles energéticos 226ERS High Energy', '🧪', 6, 30], ['Bebida isotónica Isostar', '🥤', 5, 50], ['Sales minerales 226ERS', '🧂', 5, 25]] }
+    { id: 'bronce', cat: 'supl', nombre: 'Nutrición Bronce', direccion: 'Arganzuela', lat: 40.40229, lng: -3.69827, productos: [['Geles energéticos 226ERS High Energy', '🧪', 6, 30], ['Bebida isotónica Isostar', '🥤', 5, 50], ['Sales minerales 226ERS', '🧂', 5, 25]] },
+    { id: 'naturhouse', cat: 'supl', nombre: 'NaturHouse', direccion: 'Calle de Ferraz, 94', lat: 40.43072, lng: -3.72160, productos: [['Consulta de asesoramiento nutricional', '🥦', 15, 25], ['Barritas de proteína', '🍫', 6, 30], ['Infusión digestiva', '🍵', 5, 50]] },
+    { id: 'herbolario', cat: 'supl', nombre: 'El Herbolario', direccion: 'Calle de José del Hierro, 39', lat: 40.44030, lng: -3.64420, productos: [['Magnesio', '💊', 6, 30], ['Proteína vegetal', '🌱', 15, 20], ['Colágeno con magnesio', '💪', 10, 25]] },
+    { id: 'decathlon-nutri', cat: 'supl', nombre: 'Decathlon (nutrición)', direccion: 'Calle de la Princesa, 63', lat: 40.43122, lng: -3.71694, productos: [['Proteína Whey Domyos', '💪', 15, 25], ['Gel energético Kiprun', '🧪', 4, 50], ['Bebida isotónica Kiprun', '🥤', 5, 30]] }
   ];
 
   // Presentando X tokens, el comercio aplica el descuento en ese producto.
@@ -856,9 +904,9 @@
     return L.divIcon({
       className: 'pin-mapa' + (destacado ? ' destacado' : ''),
       html: PIN + '<span aria-hidden="true">' + numero + '</span>',
-      iconSize: [34, 42],
-      iconAnchor: [17, 42],
-      tooltipAnchor: [0, -38]
+      iconSize: [28, 35],
+      iconAnchor: [14, 35],
+      tooltipAnchor: [0, -32]
     });
   }
 
@@ -888,15 +936,49 @@
 
   COMERCIOS.forEach(function (c, i) {
     var li = document.createElement('li');
+    li.dataset.cat = c.cat;
     li.innerHTML = '<button class="fila" type="button" data-comercio="' + c.id + '">' +
       '<span class="numero" aria-hidden="true">' + (i + 1) + '</span>' +
       '<span><strong>' + c.nombre + '</strong><small>' + CATEGORIAS[c.cat] + ' · ' + c.direccion + '</small></span>' + FLECHA + '</button>';
     listaMapa.appendChild(li);
   });
 
+  // Filtros del mapa: todos o una categoría
+  var filtrosMapa = document.getElementById('filtros-mapa');
+  [['todos', 'Todos']].concat(Object.keys(CATEGORIAS).map(function (k) { return [k, CATEGORIAS[k]]; })).forEach(function (f, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.filtro = f[0];
+    b.textContent = f[1];
+    b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+    filtrosMapa.appendChild(b);
+  });
+  filtrosMapa.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-filtro]');
+    if (!b) return;
+    filtrarMapa(b.dataset.filtro);
+  });
+  function filtrarMapa(cat) {
+    filtrosMapa.querySelectorAll('button').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.filtro === cat ? 'true' : 'false');
+    });
+    listaMapa.querySelectorAll('li').forEach(function (li) {
+      li.hidden = cat !== 'todos' && li.dataset.cat !== cat;
+    });
+    if (!mapa) return;
+    var visibles = [];
+    COMERCIOS.forEach(function (c) {
+      var m = marcadores[c.id].marcador;
+      if (cat === 'todos' || c.cat === cat) { m.addTo(mapa); visibles.push([c.lat, c.lng]); }
+      else m.remove();
+    });
+    if (visibles.length) mapa.fitBounds(visibles, { padding: [30, 40], maxZoom: 16 });
+  }
+
   document.getElementById('ver-en-mapa').addEventListener('click', function () {
     mostrar('mapa');
     if (!mapa || !comercioActual) return;
+    filtrarMapa('todos');
     Object.keys(marcadores).forEach(function (id) {
       marcadores[id].marcador.setIcon(iconoPin(marcadores[id].numero, id === comercioActual.id));
     });
