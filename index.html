@@ -969,33 +969,38 @@
   }
 
   // ---------- Volver atrás: deslizando de izquierda a derecha o con el botón del navegador ----------
+  // La app guarda su propia lista de pantallas visitadas: cada gesto vuelve exactamente una atrás,
+  // aunque el navegador se salte entradas de su historial o el gesto se detecte dos veces.
   var restaurando = false;
   var categoriaActual = null;
+  var visitadas = [{ pantalla: 'inicio', categoria: null, comercio: null }];
+  var ultimaVuelta = 0;
 
   function guardarEstado(id) {
     if (restaurando) return;
-    var anterior = history.state;
-    var estado = {
-      pantalla: id,
-      categoria: categoriaActual,
-      comercio: comercioActual ? comercioActual.id : null,
-      n: anterior && anterior.n !== undefined ? anterior.n + 1 : 0
-    };
-    if (anterior && anterior.pantalla === id && anterior.categoria === estado.categoria && anterior.comercio === estado.comercio) return;
-    if (estado.n === 0) history.replaceState(estado, '');
-    else history.pushState(estado, '');
+    var estado = { pantalla: id, categoria: categoriaActual, comercio: comercioActual ? comercioActual.id : null };
+    var actual = visitadas[visitadas.length - 1];
+    if (actual.pantalla === estado.pantalla && actual.categoria === estado.categoria && actual.comercio === estado.comercio) return;
+    visitadas.push(estado);
+    history.pushState({ recorun: visitadas.length }, '');
   }
 
-  // Al cargar, la app empieza siempre en Inicio.
-  history.replaceState({ pantalla: 'inicio', categoria: null, comercio: null, n: 0 }, '');
-
-  window.addEventListener('popstate', function (e) {
-    var estado = e.state || { pantalla: 'inicio' };
+  function volverAtras() {
+    if (visitadas.length < 2) return;
+    visitadas.pop();
+    var estado = visitadas[visitadas.length - 1];
     restaurando = true;
     if (estado.pantalla === 'categoria' && estado.categoria) abrirCategoria(estado.categoria);
     else if (estado.pantalla === 'comercio' && estado.comercio) abrirComercio(estado.comercio);
     else mostrar(estado.pantalla);
     restaurando = false;
+  }
+
+  window.addEventListener('popstate', function () {
+    // Si el mismo gesto llega dos veces (el del navegador y el nuestro), solo se vuelve una.
+    if (Date.now() - ultimaVuelta < 400) return;
+    ultimaVuelta = Date.now();
+    volverAtras();
   });
 
   var toque = null;
@@ -1016,7 +1021,7 @@
     var dy = Math.abs(t.clientY - toque.y);
     var rapido = Date.now() - toque.cuando < 800;
     toque = null;
-    if (dx > 70 && dy < dx / 2 && rapido && history.state && history.state.n > 0) history.back();
+    if (dx > 70 && dy < dx / 2 && rapido && visitadas.length > 1 && Date.now() - ultimaVuelta > 400) history.back();
   }, { passive: true });
 
   document.addEventListener('click', function (e) {
