@@ -136,23 +136,15 @@
   .flujo { display: grid; grid-template-columns: 1fr 64px 1fr 64px 1fr; align-items: center; margin-top: auto; }
   .flecha { color: var(--verde); font-size: 48px; text-align: center; font-weight: 900; }
 
-  /* Gráfico de evidencia */
-  .grafico-caja { display: grid; grid-template-columns: 1fr 480px; gap: 48px; align-items: end; margin-top: auto; }
-  .grafico { width: 100%; height: auto; display: block; }
-  .grafico text { font-family: inherit; }
-  .veredictos { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
-  .veredictos li {
-    display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;
-    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio);
-    padding: 18px 22px; font-size: 22px;
-  }
-  .veredictos b { font-size: 24px; }
+  /* Evidencia: una tarjeta por hipótesis */
+  .hipotesis { list-style: none; margin: auto 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .hipotesis .tarjeta { align-content: start; }
   .etiqueta-oferta {
     display: inline-block; padding: 2px 14px; border-radius: 999px;
     background: var(--noche); color: var(--lima);
     font-size: 18px; font-weight: 800; text-transform: uppercase; white-space: nowrap;
   }
-  .nota-datos { margin: 12px 0 0; font-size: 18px; color: var(--gris); }
+  .nota-datos { margin: 18px 0 0; font-size: 18px; color: var(--gris); }
 
   /* Petición: QR grande */
   .qr-caja {
@@ -263,15 +255,24 @@
   <section class="slide fondo-claro" aria-label="Slide 5: Evidencia">
     <span class="etiqueta">Validación</span>
     <h2 class="mensaje medio">Lo que nos dicen los datos</h2>
-    <div class="grafico-caja">
-      <div>
-        <svg class="grafico" id="grafico" viewBox="0 0 900 430" role="img" aria-labelledby="grafico-titulo">
-          <title id="grafico-titulo">Resultado de cada hipótesis frente a su umbral</title>
-        </svg>
-        <p class="nota-datos" id="grafico-pie"></p>
-      </div>
-      <ul class="veredictos" id="veredictos"></ul>
-    </div>
+    <ul class="hipotesis">
+      <li class="tarjeta">
+        <span class="etiqueta-oferta">No concluyente</span>
+        <strong>H1 · Nuestro cliente son corredores habituales</strong>
+        <small>Sobre el papel supera el umbral del 35 %, pero con 4 personas</small>
+      </li>
+      <li class="tarjeta">
+        <span class="etiqueta-oferta">No concluyente</span>
+        <strong>H2 · Les convence ganar recompensas canjeables</strong>
+        <small>Se entiende y gusta, pero cuesta creer que se pueda canjear de verdad</small>
+      </li>
+      <li class="tarjeta">
+        <span class="etiqueta-oferta">No concluyente</span>
+        <strong>H3 · Llegaremos por tiendas y locales asociados</strong>
+        <small>Las tiendas no aparecen como canal de descubrimiento</small>
+      </li>
+    </ul>
+    <p class="nota-datos">n = 12 · Fuente: encuesta del equipo · Datos de práctica de clase, no representativos.</p>
     <div class="notas-fuente">Encuesta (n = 12, datos de práctica): H1: sobre el papel se supera el 35 %, pero con 4 personas. H2: se entiende y gusta, pero cuesta creer que se pueda canjear de verdad en comercios cercanos. H3: las tiendas no aparecen como canal de descubrimiento en esta muestra. En el test con usuarios vimos 3 problemas de uso; los más graves los hemos corregido en esta versión. H1 · Nuestro cliente son corredores habituales → nc. H2 · Les convence ganar recompensas canjeables por correr → nc. H3 · Llegaremos a ellos por tiendas y locales asociados → nc.</div>
   </section>
 
@@ -321,54 +322,6 @@
 </aside>
 
 <script>
-  // ---------- Datos de la evidencia ----------
-  // % de cada hipótesis y su umbral. Sin cifra (null) se muestra el resultado en vez de una barra: no inventamos datos.
-  var EVIDENCIA = {
-    n: 12,
-    fuente: 'Encuesta del equipo',
-    hipotesis: [
-      { id: 'H1', texto: 'Nuestro cliente son corredores habituales', valor: null, umbral: 35, veredicto: 'No concluyente', detalle: 'Supera el 35 % con n = 4' },
-      { id: 'H2', texto: 'Les convence ganar recompensas canjeables', valor: null, umbral: null, veredicto: 'No concluyente' },
-      { id: 'H3', texto: 'Llegaremos por tiendas y locales asociados', valor: null, umbral: null, veredicto: 'No concluyente' }
-    ]
-  };
-
-  // Barras con el eje desde 0 % y una línea con el umbral de cada hipótesis
-  function dibujarGrafico() {
-    var svg = document.getElementById('grafico');
-    var x0 = 70, y0 = 370, alto = 330, ancho = 220, hueco = 50;
-    var y = function (v) { return y0 - v / 100 * alto; };
-    var h = '';
-    [0, 25, 50, 75, 100].forEach(function (v) {
-      h += '<line x1="' + x0 + '" x2="890" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#D9E3C4" stroke-width="1.5"/>' +
-        '<text x="' + (x0 - 12) + '" y="' + (y(v) + 7) + '" text-anchor="end" font-size="20" fill="#4A5240">' + v + ' %</text>';
-    });
-    EVIDENCIA.hipotesis.forEach(function (d, i) {
-      var x = x0 + 30 + i * (ancho + hueco);
-      if (d.valor === null) {
-        h += '<rect x="' + x + '" y="' + y(100) + '" width="' + ancho + '" height="' + alto + '" fill="none" stroke="#4A5240" stroke-width="2" stroke-dasharray="10 8" rx="10"/>' +
-          '<text x="' + (x + ancho / 2) + '" y="' + y(62) + '" text-anchor="middle" font-size="22" font-weight="900" fill="#2F5A0B">' + d.veredicto.toUpperCase() + '</text>' +
-          (d.detalle ? '<text x="' + (x + ancho / 2) + '" y="' + y(52) + '" text-anchor="middle" font-size="18" fill="#4A5240">' + d.detalle + '</text>' : '');
-      } else {
-        h += '<rect x="' + x + '" y="' + y(d.valor) + '" width="' + ancho + '" height="' + (y0 - y(d.valor)) + '" fill="#C6F432" stroke="#1A1F14" stroke-width="2" rx="10"/>' +
-          '<text x="' + (x + ancho / 2) + '" y="' + (y(d.valor) - 14) + '" text-anchor="middle" font-size="34" font-weight="900" fill="#1A1F14">' + d.valor + ' %</text>';
-      }
-      if (d.umbral !== null) {
-        h += '<line x1="' + (x - 14) + '" x2="' + (x + ancho + 14) + '" y1="' + y(d.umbral) + '" y2="' + y(d.umbral) + '" stroke="#0E1508" stroke-width="4" stroke-dasharray="14 8"/>' +
-          '<text x="' + (x + ancho + 10) + '" y="' + (y(d.umbral) - 10) + '" text-anchor="end" font-size="20" font-weight="800" fill="#0E1508">Umbral ' + d.umbral + ' %</text>';
-      }
-      h += '<text x="' + (x + ancho / 2) + '" y="' + (y0 + 40) + '" text-anchor="middle" font-size="28" font-weight="900" fill="#1A1F14">' + d.id + '</text>';
-    });
-    h += '<line x1="' + x0 + '" x2="890" y1="' + y0 + '" y2="' + y0 + '" stroke="#1A1F14" stroke-width="3"/>';
-    svg.insertAdjacentHTML('beforeend', h);
-    document.getElementById('grafico-pie').textContent =
-      'n = ' + EVIDENCIA.n + ' · Fuente: ' + EVIDENCIA.fuente + ' · Datos de práctica de clase, no representativos.';
-    document.getElementById('veredictos').innerHTML = EVIDENCIA.hipotesis.map(function (d) {
-      return '<li><span><b>' + d.id + '</b> · ' + d.texto + '</span><span class="etiqueta-oferta">' + d.veredicto + '</span></li>';
-    }).join('');
-  }
-  dibujarGrafico();
-
   // ---------- Navegación ----------
   var slides = document.querySelectorAll('.slide');
   var actual = 0;
